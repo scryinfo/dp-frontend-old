@@ -1,11 +1,5 @@
 .login-container {
-  height: 100%;
-  padding-left: 40px;
-  padding-right: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-sizing: border-box;
+ 
 }
 
 .login-text {

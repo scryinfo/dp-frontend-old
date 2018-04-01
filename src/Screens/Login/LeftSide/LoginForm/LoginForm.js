@@ -129,6 +129,7 @@ class LoginForm extends React.Component {
         },
         () => {
           this.timer = setTimeout(() => {
+            this.props.history.push('/vault');
             this.setState({
               loading: false,
             });
@@ -279,6 +280,7 @@ class LoginForm extends React.Component {
     const { classes, theme } = this.props;
     const { value } = this.state;
     console.log(value);
+    console.log(this.props);
     return (
       <MainContext.Consumer>
         {context => (

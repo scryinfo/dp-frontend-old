@@ -60,12 +60,12 @@ export default class AddVault extends Component {
                 backgroundColor="#4AA4E0"
                 onClick={() => this.handleNewVault(context)}
               /> */}
-              <Button variant="raised" color="primary">
+              <Button variant="raised" color="primary" fullWidth>
                 Create one
               </Button>
               <div className="add-vault-or">or</div>
               {/* <RaisedButton label="IMPORT EXISTING" fullWidth labelColor="#ffffff" backgroundColor="#4AA4E0" /> */}
-              <Button variant="raised" color="primary">
+              <Button variant="raised" color="primary" fullWidth>
                 Import existing
               </Button>
             </div>
