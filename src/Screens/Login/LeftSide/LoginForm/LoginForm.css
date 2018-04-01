@@ -1,0 +1,7 @@
+.login-text {
+  color: white;
+}
+
+.login-text > a {
+  cursor: pointer;
+}

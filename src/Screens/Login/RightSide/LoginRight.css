@@ -1,0 +1,42 @@
+.login-right-container {
+  width: 100%;
+  height: 100vh;
+  background-image: url('../../../assets/images/background.png');
+  background-size: cover;
+  position: relative;
+}
+
+.login-right-logo-main-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 50px;
+  margin-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.login-right-logo-container {
+
+}
+
+.login-right-logo {
+  height: 95px;
+}
+
+.login-right-logo-title {
+  padding-top: 5px;
+  font-family: 'ComicSansMS', sans-serif;
+  font-size: 38px;
+  color: white;
+}
+
+.login-right-logo-subtitle {
+  font-size: 20px;
+  color: #4AA4E0;
+  font-family: 'Roboto', sans-serif;
+  padding-top: 10px;
+}
