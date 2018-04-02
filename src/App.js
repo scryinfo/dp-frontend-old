@@ -11,7 +11,7 @@ export default class App extends Component {
   render() {
     return (
       <div className="main-container">
-        <MainProvider>
+        <MainProvider history={this.props.currentHistory}>
           <LeftPanel />
           <ContentScreen />
         </MainProvider>

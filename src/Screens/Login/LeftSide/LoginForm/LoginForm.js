@@ -35,7 +35,7 @@ const styles = theme => ({
   },
   label: {
     color: '#4AA4E0',
-    fontSize: '14px',
+    // fontSize: '14px',
   },
   labelContainer: {
     padding: 0,
@@ -65,6 +65,9 @@ const styles = theme => ({
     left: '50%',
     marginTop: -12,
     marginLeft: -12,
+  },
+  buttonDisabled: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1) !important',
   },
 });
 
@@ -122,48 +125,62 @@ class LoginForm extends React.Component {
   }
 
   loaderSpin() {
-    if (!this.state.loading) {
-      this.setState(
-        {
-          loading: true,
-        },
-        () => {
-          this.timer = setTimeout(() => {
-            this.props.history.push('/vault');
-            this.setState({
-              loading: false,
-            });
-          }, 2000);
-        }
-      );
-    }
+    return new Promise((resolve, reject) => {
+      if (!this.state.loading) {
+        this.setState(
+          {
+            loading: true,
+          },
+          () => {
+            this.timer = setTimeout(() => {
+              this.setState({
+                loading: false,
+              });
+              resolve('next');
+            }, 2000);
+          }
+        );
+      }
+    });
   }
 
-  handleLogin(context, type) {
-    this.loaderSpin();
+  async handleLogin(context, type) {
+    await this.loaderSpin();
     const { username, password, confirmPassword } = this.state;
     if (!username) {
       this.setState({ usernameError: 'This field is required' });
     }
     if (!password) {
       this.setState({ passwordError: 'This field is required' });
-    }
-    if (!confirmPassword) {
-      this.setState({ confirmPasswordError: 'This field is required' });
       return;
     }
-    console.log(type);
-    console.log(type === 'login');
+    if (type === 'register') {
+      if (!confirmPassword) {
+        this.setState({ confirmPasswordError: 'This field is required' });
+        return;
+      }
+      if (password !== confirmPassword) {
+        this.setState({ confirmPasswordError: 'Passwords do not match', passwordError: 'Passwords do not match' });
+        return;
+      }
+    }
+
     if (type === 'login') {
+      console.log('ayyayayay');
       login(username, password)
         .then(response => {
-          context.setCurrentUser(username, password);
+          console.log(response);
+          const { name, account } = response.data;
+          // if (response)
+          context.setCurrentUser(username, password, account);
+          // this.props.history.push('/explore');
         })
-        .catch(e => console.log(e));
+        .catch(e => console.log(e.response));
       return;
     }
     // context.setCurrentUser(username, password);
     context.updateState({ username, password, currentPage: 'add vault', action: 'register' });
+    this.props.history.push('/vault');
   }
 
   renderForm = (context, type) => {
@@ -181,7 +198,6 @@ class LoginForm extends React.Component {
       return (
         <form style={styles.formStyle}>
           <TextField
-            id="username"
             name="username"
             label="Username"
             fullWidth
@@ -206,7 +222,6 @@ class LoginForm extends React.Component {
           />
           <br />
           <TextField
-            id="password"
             name="password"
             label="Password"
             type="password"
@@ -232,7 +247,6 @@ class LoginForm extends React.Component {
           />
           {type === 'register' ? (
             <TextField
-              id="confirm password"
               name="confirmPassword"
               type="password"
               label="Confirm password"
@@ -266,6 +280,9 @@ class LoginForm extends React.Component {
               style={{ marginTop: '30px' }}
               onClick={() => this.handleLogin(context, type)}
               disabled={loading}
+              classes={{
+                disabled: classes.buttonDisabled,
+              }}
             >
               {type === 'register' ? 'Register' : 'Login'}
             </Button>
@@ -279,8 +296,6 @@ class LoginForm extends React.Component {
   render() {
     const { classes, theme } = this.props;
     const { value } = this.state;
-    console.log(value);
-    console.log(this.props);
     return (
       <MainContext.Consumer>
         {context => (

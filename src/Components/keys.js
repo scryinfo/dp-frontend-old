@@ -22,7 +22,8 @@ export const loadVault = (vaultJs, password) => {
   });
 };
 
-export const createVault = (password, mnemonic) => new Promise((resolve, reject) => {
+export const createVault = (password, mnemonic) =>
+  new Promise((resolve, reject) => {
     keystore.createVault(
       {
         seedPhrase: mnemonic,

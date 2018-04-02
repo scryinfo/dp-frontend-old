@@ -50,18 +50,6 @@ export default class LeftPanel extends Component {
     };
   }
 
-  getCurrentPage = context => {
-    switch (context.state.currentPage) {
-      case 'login':
-        return <LoginLeftSide />;
-      case 'register':
-        return <LoginLeftSide />;
-      case 'add vault':
-        return <LoginLeftSide />;
-      default:
-        return <Menu />;
-    }
-  };
   render() {
     return (
       <StyledAnimatedSwitch

@@ -10,7 +10,7 @@ export class MainProvider extends Component {
     super(props);
 
     this.state = {
-      username: 'alex miller',
+      username: null,
       address: null,
       balance: {
         tokens: 1424,
@@ -22,16 +22,24 @@ export class MainProvider extends Component {
     this.updateState = this.updateState.bind(this);
   }
 
-  async setCurrentUser(username, password) {
+  componentWillMount() {
+    if (!this.props.username) {
+      // this.props.history.push('/login');
+    }
+  }
+
+  async setCurrentUser(username, password, address) {
     console.log(`setting account ${username}`);
-      const address = await getAccount(username, password);
-      if (!address) {
-        this.setState({ username, currentPage: 'add vault', password, action: 'login' });
+      const getAddress = await getAccount(username, password);
+      if (!getAddress) {
+        this.setState({ username, vault: true, address, currentPage: 'add vault', password, action: 'login' });
+        this.props.history.push('/vault');
         return;
       }
       this.setState({
-        account: address, username, currentPage: 'explore', password,
+        address: getAddress, username, currentPage: 'explore', password, vault: true,
       });
+      this.props.history.push('/explore');
   }
 
   updateState(newState) {
