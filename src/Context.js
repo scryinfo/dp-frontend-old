@@ -38,6 +38,7 @@ export class MainProvider extends Component {
         console.log(profile);
         this.setState({
           username: profile.name,
+          address: profile.account,
         });
       } catch (err) {
         Auth.logout();
@@ -59,8 +60,12 @@ export class MainProvider extends Component {
       });
       this.props.history.push('/explore');
       setTimeout(async () => {
-        const balance = await _getBalance(getAddress);
-        console.log(balance);
+        const response = await _getBalance(getAddress);
+        this.setState({ balance: {
+          tokens: response.data.balance,
+          eth: response.data.eth
+        } })
+        console.log(response);
       }, 3000)
   }
 

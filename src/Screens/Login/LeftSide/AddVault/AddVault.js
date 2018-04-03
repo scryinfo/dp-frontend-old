@@ -15,6 +15,8 @@ import { register } from '../../../../Components/requests';
 
 import { MainContext } from '../../../../Context';
 
+import AuthService from '../../../../Auth/AuthService';
+
 const styles = theme => ({
   buttonProgress: {
     // color: green[500],
@@ -37,6 +39,7 @@ class AddVault extends Component {
       passwordWindowOpen: false,
     };
     this.handleClickOpen = this.handleClickOpen.bind(this);
+    this.Auth = new AuthService();
   }
 
   async handleNewVault(context) {
@@ -47,9 +50,9 @@ class AddVault extends Component {
       try {
         const createdVault = await newVault(username, password);
         const { address, mnemonic } = createdVault;
-        register(username, password, address)
+        this.Auth.register(username, password, address)
           .then(response => {
-            console.log('response', response, response.data.name, username);
+            // console.log('response', response, response.data.name, username);
             console.log('inside');
             context.updateState({ currentPage: 'explore' });
             this.props.history.push('/');
