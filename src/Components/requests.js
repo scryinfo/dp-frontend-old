@@ -2,6 +2,10 @@ import axios from 'axios';
 import { HOST } from './Remote';
 import { openChannel, buyerAuthorization, verifierAuthorization, closeChannel } from './signer';
 
+axios.create({
+  withCredentials: true,
+});
+
 // Get tokens
 export async function _addTokens(account, amount) {
   return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`);
@@ -9,7 +13,7 @@ export async function _addTokens(account, amount) {
 
 // Get balance
 export async function _getBalance(account) {
-  return axios.get(`${HOST}/balance?account=${account}`);
+  return axios.get(`${HOST}/balance?account=${account}`, { withCredentials: true });
 }
 
 export async function getPassword(username) {
@@ -93,9 +97,17 @@ export async function _getVerifiers() {
 }
 
 export const login = (username, password) =>
-  axios.post(`${HOST}/login`, {
-    username,
-    password,
+  // axios.post(`${HOST}/login`, {
+  //   username,
+  //   password,
+  // });
+  fetch(`${HOST}/login`, {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
   });
 
 export const register = (username, password, account) =>

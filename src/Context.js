@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 
 import { getAccount } from './Components/keyRequests';
 
+import { _getBalance } from './Components/requests';
+
 export const MainContext = React.createContext();
 
 export class MainProvider extends Component {
@@ -40,6 +42,10 @@ export class MainProvider extends Component {
         address: getAddress, username, currentPage: 'explore', password, vault: true,
       });
       this.props.history.push('/explore');
+      setTimeout(async () => {
+        const balance = await _getBalance(getAddress);
+        console.log(balance);
+      }, 3000)
   }
 
   updateState(newState) {

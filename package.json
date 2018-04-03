@@ -9,6 +9,7 @@
     "material-ui": "^1.0.0-beta.39",
     "pify": "^3.0.0",
     "react": "^16.3.0",
+    "react-cookie": "^2.1.4",
     "react-dom": "^16.3.0",
     "react-router-dom": "^4.2.2",
     "react-router-transition": "^1.2.1",

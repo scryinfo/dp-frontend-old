@@ -168,9 +168,10 @@ class LoginForm extends React.Component {
     if (type === 'login') {
       console.log('ayyayayay');
       login(username, password)
+        .then(res => res.json())
         .then(response => {
           console.log(response);
-          const { name, account } = response.data;
+          const { name, account } = response;
           // if (response)
           context.setCurrentUser(username, password, account);
           // this.props.history.push('/explore');
