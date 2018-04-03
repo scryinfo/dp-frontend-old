@@ -6,6 +6,7 @@ import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
 import { CircularProgress } from 'material-ui/Progress';
+import AuthService from '../../../../Auth/AuthService';
 
 import { MainContext } from '../../../../Context';
 
@@ -85,6 +86,13 @@ class LoginForm extends React.Component {
     };
     this.handleInput = this.handleInput.bind(this);
     this.resetState = this.resetState.bind(this);
+    this.Auth = new AuthService();
+  }
+
+  componentWillMount() {
+    if (this.Auth.loggedIn()) {
+      this.props.history.replace('/');
+    }
   }
 
   resetState() {
@@ -152,12 +160,10 @@ class LoginForm extends React.Component {
     }
     if (!password) {
       this.setState({ passwordError: 'This field is required' });
-      return;
     }
     if (type === 'register') {
       if (!confirmPassword) {
         this.setState({ confirmPasswordError: 'This field is required' });
-        return;
       }
       if (password !== confirmPassword) {
         this.setState({ confirmPasswordError: 'Passwords do not match', passwordError: 'Passwords do not match' });
@@ -167,14 +173,11 @@ class LoginForm extends React.Component {
 
     if (type === 'login') {
       console.log('ayyayayay');
-      login(username, password)
-        .then(res => res.json())
+      this.Auth.login(this.state.username, this.state.password)
         .then(response => {
           console.log(response);
           const { name, account } = response;
-          // if (response)
           context.setCurrentUser(username, password, account);
-          // this.props.history.push('/explore');
         })
         .catch(e => console.log(e.response));
       return;

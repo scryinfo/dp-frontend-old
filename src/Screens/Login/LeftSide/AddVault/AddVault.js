@@ -9,7 +9,7 @@ import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } 
 
 import './AddVault.css';
 
-import { newVault } from '../../../../Components/keyRequests';
+import { newVault, importVault } from '../../../../Components/keyRequests';
 
 import { register } from '../../../../Components/requests';
 
@@ -63,6 +63,27 @@ class AddVault extends Component {
     }
   }
 
+  async handleImportVault(context) {
+    console.log('importing');
+    this.setState({ loading: true, isMnemonicWindowOpen: false });
+    if (context) {
+      console.log('context');
+      const { username, password } = context.state;
+      const { mnemonic } = this.state;
+      console.log(username, password, mnemonic);
+      try {
+        const importedVault = await importVault(username, password, mnemonic);
+        console.log(importedVault);
+        const { address } = importedVault;
+        context.updateState({ address });
+        this.props.history.push('/explore');
+        console.log(address, mnemonic);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
+
   handleClickOpen = () => {
     this.setState({ isMnemonicWindowOpen: true });
   };
@@ -87,7 +108,7 @@ class AddVault extends Component {
     });
   }
 
-  renderMnemonicWindow = () => (
+  renderMnemonicWindow = context => (
     <Dialog
       disableBackdropClick
       disableEscapeKeyDown
@@ -102,11 +123,14 @@ class AddVault extends Component {
         </DialogContentText>
         <TextField
           id="mnemonic"
+          name="mnemonic"
           label="Enter here"
           // placeholder="Placeholder"
           autoFocus
           multiline
           fullWidth
+          value={this.state.mnemonic}
+          onChange={event => this.setState({ mnemonic: event.target.value })}
           // className={classes.textField}
           margin="normal"
         />
@@ -115,7 +139,7 @@ class AddVault extends Component {
         <Button onClick={() => this.setState({ isMnemonicWindowOpen: false })} color="primary">
           Cancel
         </Button>
-        <Button onClick={this.handleClose} color="primary">
+        <Button onClick={() => this.handleImportVault(context)} color="primary">
           Import
         </Button>
       </DialogActions>
@@ -177,7 +201,7 @@ class AddVault extends Component {
                 {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
               </div>
             </div>
-            {this.renderMnemonicWindow()}
+            {this.renderMnemonicWindow(context)}
           </div>
         )}
       </MainContext.Consumer>

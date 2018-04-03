@@ -15,6 +15,10 @@ import { logout } from '../../../Components/requests';
 import './Menu.css';
 import Logo from '../../../assets/images/logo.png';
 
+import AuthService from '../../../Auth/AuthService';
+
+const Auth = new AuthService();
+
 const styles = theme => ({
   root: {
     width: '100%',
@@ -81,7 +85,7 @@ const styles = theme => ({
   },
 });
 
-class AddVault extends Component {
+class Menu extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -99,9 +103,11 @@ class AddVault extends Component {
   };
 
   handleLogout = async context => {
+    console.log(this.props);
     try {
-      await logout();
+      await Auth.logout();
       context.updateState({ username: '', password: '', mnemonics: '', address: '' });
+      this.props.history.push('/login');
     } catch (e) {
       console.log(e);
     }
@@ -286,7 +292,7 @@ class AddVault extends Component {
                 >
                   {context.state.username}
                 </li>
-                <Button classes={{ root: classes.buttonRoot }} onClick={this.handleLogout}>
+                <Button classes={{ root: classes.buttonRoot }} onClick={() => this.handleLogout(context)}>
                   Logout
                 </Button>
               </div>
@@ -298,7 +304,7 @@ class AddVault extends Component {
   }
 }
 
-export default withStyles(styles)(AddVault);
+export default withStyles(styles)(Menu);
 
 // const styles = {
 //   menuButtonLeft: {

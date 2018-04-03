@@ -1,11 +1,15 @@
 /* eslint-disable */
 import React, { Component } from 'react';
 
+import AuthService from './Auth/AuthService';
+
 import { getAccount } from './Components/keyRequests';
 
 import { _getBalance } from './Components/requests';
 
 export const MainContext = React.createContext();
+
+const Auth = new AuthService();
 
 export class MainProvider extends Component {
   constructor(props) {
@@ -25,8 +29,20 @@ export class MainProvider extends Component {
   }
 
   componentWillMount() {
-    if (!this.props.username) {
-      // this.props.history.push('/login');
+    if (!Auth.loggedIn()) {
+      console.log('not logged in');
+      this.props.history.replace('/login');
+    } else {
+      try {
+        const profile = Auth.getProfile();
+        console.log(profile);
+        this.setState({
+          username: profile.name,
+        });
+      } catch (err) {
+        Auth.logout();
+        this.props.history.replace('/login');
+      }
     }
   }
 

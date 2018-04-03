@@ -78,8 +78,8 @@ export default class Login extends Component {
           transform: `translate3d(${styles.offset}%, 0, 0)`,
         })}
       >
-        <Route path="/login" render={props => <LoginForm {...props} />} />
-        <Route path="/vault" render={props => <AddVault {...props} />} />
+        <Route path="/login" render={props => <LoginForm {...props} history={this.props.history} />} />
+        <Route path="/vault" render={props => <AddVault {...props} history={this.props.history} />} />
         {/* <MainContext.Consumer>{context => this.getCurrentPage(context)}</MainContext.Consumer> */}
       </StyledAnimatedSwitch>
     );

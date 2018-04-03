@@ -4,22 +4,6 @@ import { HOST } from './Remote';
 const Mnemonic = require('bitcore-mnemonic');
 const { loadVault, createVault, getKey, createAddress } = require('./keys');
 
-// const newAccount = async (username, account, password) => {
-//   const url = `${HOST}/trader`;
-//   const data = {
-//     account,
-//     username,
-//     password,
-//   };
-//   return axios({
-//     method: 'POST',
-//     url,
-//     data,
-//   })
-//     .then(response => response.data.balance)
-//     .catch(err => console.log(err));
-// };
-
 export const getAccount = async (username, password) => {
   let vault;
   try {

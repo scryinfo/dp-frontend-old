@@ -38,9 +38,7 @@ ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Router>
       <Route
-        render={({ location, history, match }) => (
-          <App currentLocation={location} match={match} currentHistory={history} />
-        )}
+        render={({ location, history, match }) => <App currentLocation={location} match={match} history={history} />}
       />
     </Router>
   </MuiThemeProvider>,

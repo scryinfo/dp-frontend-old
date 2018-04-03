@@ -2,10 +2,6 @@ import axios from 'axios';
 import { HOST } from './Remote';
 import { openChannel, buyerAuthorization, verifierAuthorization, closeChannel } from './signer';
 
-axios.create({
-  withCredentials: true,
-});
-
 // Get tokens
 export async function _addTokens(account, amount) {
   return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`);
@@ -13,7 +9,9 @@ export async function _addTokens(account, amount) {
 
 // Get balance
 export async function _getBalance(account) {
-  return axios.get(`${HOST}/balance?account=${account}`, { withCredentials: true });
+  return axios.get(`${HOST}/balance?account=${account}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 export async function getPassword(username) {
