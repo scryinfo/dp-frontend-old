@@ -8,9 +8,9 @@ import TextField from 'material-ui/TextField';
 import { CircularProgress } from 'material-ui/Progress';
 import AuthService from '../../../../Auth/AuthService';
 
-import { MainContext } from '../../../../Context';
-
 import { login } from '../../../../Components/requests';
+
+import { MainContext } from '../../../../Context';
 
 import './LoginForm.css';
 
@@ -83,6 +83,8 @@ class LoginForm extends React.Component {
       usernameError: '',
       passwordError: '',
       confirmPasswordError: '',
+      errorMessage: '',
+      type: 'login',
     };
     this.handleInput = this.handleInput.bind(this);
     this.resetState = this.resetState.bind(this);
@@ -103,10 +105,18 @@ class LoginForm extends React.Component {
       usernameError: '',
       passwordError: '',
       confirmPasswordError: '',
+      errorMessage: '',
     });
   }
 
   handleChange = (event, value) => {
+    console.log(value);
+    if (value === 0) {
+      this.setState({ type: 'login' });
+    }
+    if (value === 2) {
+      this.setState({ type: 'register' });
+    }
     this.setState({ value });
     this.resetState();
   };
@@ -117,7 +127,7 @@ class LoginForm extends React.Component {
 
   handleInput(event) {
     console.log(event.target.name);
-    this.setState({ usernameError: '', passwordError: '' });
+    this.setState({ usernameError: '', passwordError: '', confirmPasswordError: '', errorMessage: '' });
     switch (event.target.name) {
       case 'username':
         this.setState({ username: event.target.value });
@@ -152,42 +162,77 @@ class LoginForm extends React.Component {
     });
   }
 
-  async handleLogin(context, type) {
+  async checkForErrors() {
+    const { type } = this.state;
     await this.loaderSpin();
+    console.log(type);
     const { username, password, confirmPassword } = this.state;
     if (!username) {
       this.setState({ usernameError: 'This field is required' });
     }
+    console.log('first line');
     if (!password) {
       this.setState({ passwordError: 'This field is required' });
     }
+    console.log('second line');
     if (type === 'register') {
       if (!confirmPassword) {
         this.setState({ confirmPasswordError: 'This field is required' });
       }
+      console.log('third line');
       if (password !== confirmPassword) {
         this.setState({ confirmPasswordError: 'Passwords do not match', passwordError: 'Passwords do not match' });
         return;
       }
     }
-
-    if (type === 'login') {
-      console.log('ayyayayay');
-      this.Auth.login(this.state.username, this.state.password)
-        .then(response => {
-          console.log(response);
-          const { name, account } = response;
-          context.setCurrentUser(username, password, account);
-        })
-        .catch(e => console.log(e.response));
-      return;
-    }
-    // context.setCurrentUser(username, password);
-    context.updateState({ username, password, currentPage: 'add vault', action: 'register' });
-    this.props.history.push('/vault');
+    console.log('last');
+    type === 'login' ? this.handleLogin() : this.handleRegister();
   }
 
-  renderForm = (context, type) => {
+  async handleLogin() {
+    const { username, password } = this.state;
+    console.log('login happening');
+    try {
+      const response = await login(username, password);
+      const { account, token } = response.data;
+      this.Auth.setToken(token);
+      this.context.setCurrentUser(username, password, account);
+      console.log(response);
+    } catch (e) {
+      if (e.response) {
+        const { message } = e.response.data;
+        console.log(message);
+        this.setState({ errorMessage: message });
+      }
+      console.log(e);
+    }
+  }
+
+  async handleRegister() {
+    const { username, password } = this.state;
+    console.log('register happening');
+    try {
+      const response = await login(username, password);
+      const { account, token } = response.data;
+      this.Auth.setToken(token);
+      this.context.setCurrentUser(username, password, account);
+      console.log(response);
+    } catch (e) {
+      if (e.response) {
+        const { message } = e.response.data;
+        if (message === 'user does not exist') {
+          this.context.updateState({ username, password, currentPage: 'add vault', action: 'register' });
+          this.props.history.push('/vault');
+          return;
+        }
+        this.setState({ errorMessage: message });
+        console.log(message);
+      }
+      console.log(e);
+    }
+  }
+
+  renderForm = () => {
     const {
       username,
       password,
@@ -196,9 +241,11 @@ class LoginForm extends React.Component {
       confirmPassword,
       confirmPasswordError,
       loading,
+      errorMessage,
+      type,
     } = this.state;
     const { classes } = this.props;
-    if (context) {
+    if (this.context) {
       return (
         <form style={styles.formStyle}>
           <TextField
@@ -282,7 +329,7 @@ class LoginForm extends React.Component {
               color="primary"
               fullWidth
               style={{ marginTop: '30px' }}
-              onClick={() => this.handleLogin(context, type)}
+              onClick={() => this.checkForErrors()}
               disabled={loading}
               classes={{
                 disabled: classes.buttonDisabled,
@@ -291,6 +338,9 @@ class LoginForm extends React.Component {
               {type === 'register' ? 'Register' : 'Login'}
             </Button>
             {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+          </div>
+          <div style={{ paddingTop: '20px', lineHeight: '30px', color: 'red', textAlign: 'center' }}>
+            {errorMessage}
           </div>
         </form>
       );
@@ -302,55 +352,58 @@ class LoginForm extends React.Component {
     const { value } = this.state;
     return (
       <MainContext.Consumer>
-        {context => (
-          <div className={classes.root}>
-            <Tabs
-              value={this.state.value}
-              onChange={this.handleChange}
-              indicatorColor="transparent"
-              textColor="inherit"
-              classes={{ root: classes.tabsRoot }}
-            >
-              <Tab
-                label="Login"
-                disableRipple
-                classes={{
-                  root: classes.tabRoot,
-                  label: value === 0 ? classes.label : null,
-                  labelContainer: classes.labelContainer,
-                }}
-              />
-              <Tab
-                label="/"
-                disableRipple
-                disabled
-                classes={{
-                  root: classes.tabRoot,
-                  // label: value === 0 ? classes.label : null,
-                  labelContainer: classes.labelContainerMiddle,
-                }}
-              />
-              <Tab
-                label="Register"
-                disableRipple
-                classes={{
-                  root: classes.tabRoot,
-                  label: value === 2 ? classes.label : null,
-                  labelContainer: classes.labelContainer,
-                }}
-              />
-            </Tabs>
-            <SwipeableViews
-              axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-              index={this.state.value}
-              onChangeIndex={this.handleChangeIndex}
-            >
-              <TabContainer dir={theme.direction}>{this.renderForm(context, 'login')}</TabContainer>
-              <TabContainer />
-              <TabContainer dir={theme.direction}>{this.renderForm(context, 'register')}</TabContainer>
-            </SwipeableViews>
-          </div>
-        )}
+        {context => {
+          this.context = context;
+          return (
+            <div className={classes.root}>
+              <Tabs
+                value={this.state.value}
+                onChange={this.handleChange}
+                indicatorColor="transparent"
+                textColor="inherit"
+                classes={{ root: classes.tabsRoot }}
+              >
+                <Tab
+                  label="Login"
+                  disableRipple
+                  classes={{
+                    root: classes.tabRoot,
+                    label: value === 0 ? classes.label : null,
+                    labelContainer: classes.labelContainer,
+                  }}
+                />
+                <Tab
+                  label="/"
+                  disableRipple
+                  disabled
+                  classes={{
+                    root: classes.tabRoot,
+                    // label: value === 0 ? classes.label : null,
+                    labelContainer: classes.labelContainerMiddle,
+                  }}
+                />
+                <Tab
+                  label="Register"
+                  disableRipple
+                  classes={{
+                    root: classes.tabRoot,
+                    label: value === 2 ? classes.label : null,
+                    labelContainer: classes.labelContainer,
+                  }}
+                />
+              </Tabs>
+              <SwipeableViews
+                axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+                index={this.state.value}
+                onChangeIndex={this.handleChangeIndex}
+              >
+                <TabContainer dir={theme.direction}>{this.renderForm('login')}</TabContainer>
+                <TabContainer />
+                <TabContainer dir={theme.direction}>{this.renderForm('register')}</TabContainer>
+              </SwipeableViews>
+            </div>
+          );
+        }}
       </MainContext.Consumer>
     );
   }

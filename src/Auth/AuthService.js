@@ -5,35 +5,7 @@ import { HOST } from '../Components/Remote';
 export default class AuthService {
   constructor() {
     this.fetch = this.fetch.bind(this);
-    this.login = this.login.bind(this);
     this.getProfile = this.getProfile.bind(this);
-  }
-
-  login(username, password) {
-    return this.fetch(`${HOST}/login`, {
-      method: 'POST',
-      body: JSON.stringify({
-        username,
-        password,
-      }),
-    }).then(res => {
-      this.setToken(res.token);
-      return Promise.resolve(res);
-    });
-  }
-
-  register(username, password, account) {
-    return this.fetch(`${HOST}/signup`, {
-      method: 'POST',
-      body: JSON.stringify({
-        username,
-        password,
-        account,
-      }),
-    }).then(res => {
-      this.setToken(res.token);
-      return Promise.resolve(res);
-    });
   }
 
   loggedIn() {
@@ -80,20 +52,27 @@ export default class AuthService {
       headers.Authorization = this.getToken();
     }
 
-    return fetch(url, {
-      headers,
-      ...options,
-    })
-      .then(this._checkStatus)
-      .then(response => response.json());
+    return (
+      fetch(url, {
+        headers,
+        ...options,
+      })
+        // .then(this._checkStatus)
+        .then(response => response.json())
+    );
   }
 
-  _checkStatus = response => {
+  _checkStatus = async response => {
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
-    const error = new Error(response.statusText);
-    error.response = response;
-    throw error;
+    const error = new Error(response);
+    try {
+      const errMessage = await response.json();
+      error.response = errMessage;
+      throw error;
+    } catch (e) {
+      throw error;
+    }
   };
 }

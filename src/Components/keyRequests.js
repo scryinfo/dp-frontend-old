@@ -1,6 +1,3 @@
-import axios from 'axios';
-import { HOST } from './Remote';
-
 const Mnemonic = require('bitcore-mnemonic');
 const { loadVault, createVault, getKey, createAddress } = require('./keys');
 

@@ -93,6 +93,13 @@ class Menu extends Component {
     };
   }
 
+  componentDidMount() {
+    console.log(this.context);
+    if (this.context) {
+      this.context.updateBalance();
+    }
+  }
+
   getActiveStyle = (type, context, classes, nested) => {
     if (type && context.state) {
       if (type === context.state.currentPage) {
@@ -142,163 +149,167 @@ class Menu extends Component {
     const { loading } = this.state;
     return (
       <MainContext.Consumer>
-        {context => (
-          <Fragment>
-            <div className="menu-container">
-              <div className="menu-logo-container">
-                <span>SCRY.INFO</span>
-                <img src={Logo} alt="" className="menu-logo" />
-              </div>
-              {/* Balance section */}
-              <div className="menu-balance-container">
-                <div className="menu-balance">
-                  <div className="menu-balance-tokens">
-                    <div className="menu-balance-numbers">{context.state.balance.tokens}</div>
-                    <div className="menu-balance-text">TOKENS</div>
+        {context => {
+          console.log(context);
+          this.context = context;
+          return (
+            <Fragment>
+              <div className="menu-container">
+                <div className="menu-logo-container">
+                  <span>SCRY.INFO</span>
+                  <img src={Logo} alt="" className="menu-logo" />
+                </div>
+                {/* Balance section */}
+                <div className="menu-balance-container">
+                  <div className="menu-balance">
+                    <div className="menu-balance-tokens">
+                      <div className="menu-balance-numbers">{context.state.balance.tokens}</div>
+                      <div className="menu-balance-text">TOKENS</div>
+                    </div>
+                    <div className="menu-balance-eth">
+                      <div className="menu-balance-numbers">{context.state.balance.eth}</div>
+                      <div className="menu-balance-text">ETH</div>
+                    </div>
                   </div>
-                  <div className="menu-balance-eth">
-                    <div className="menu-balance-numbers">{context.state.balance.eth}</div>
-                    <div className="menu-balance-text">ETH</div>
+                  <div className="menu-balance-add">
+                    <TextField
+                      id="username"
+                      name="username"
+                      fullWidth
+                      placeholder="Get more tokens"
+                      // required={!!usernameError}
+                      // error={!!usernameError}
+                      className={classes.textField}
+                      value={this.state.tokensToAdd}
+                      onChange={this.handleInput}
+                      style={{
+                        height: '34px',
+                        border: '1px solid #4AA4E0',
+                        borderRightColor: 'transparent',
+                        borderRadius: '3px 0 0 3px',
+                      }}
+                      InputLabelProps={{
+                        classes: {
+                          root: classes.inputLabel,
+                          shrink: classes.inputShrink,
+                        },
+                      }}
+                      InputProps={{
+                        disableUnderline: true,
+                        classes: {
+                          input: classes.inputText,
+                        },
+                      }}
+                    />
+                    <div style={{ position: 'relative' }}>
+                      <Button
+                        variant="raised"
+                        color="primary"
+                        classes={{ root: classes.balanceButtonRoot }}
+                        onClick={() => this.loaderSpin()}
+                        disabled={loading}
+                      >
+                        Add
+                      </Button>
+                      {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+                    </div>
                   </div>
                 </div>
-                <div className="menu-balance-add">
-                  <TextField
-                    id="username"
-                    name="username"
-                    fullWidth
-                    placeholder="Get more tokens"
-                    // required={!!usernameError}
-                    // error={!!usernameError}
-                    className={classes.textField}
-                    value={this.state.tokensToAdd}
-                    onChange={this.handleInput}
-                    style={{
-                      height: '34px',
-                      border: '1px solid #4AA4E0',
-                      borderRightColor: 'transparent',
-                      borderRadius: '3px 0 0 3px',
-                    }}
-                    InputLabelProps={{
-                      classes: {
-                        root: classes.inputLabel,
-                        shrink: classes.inputShrink,
-                      },
-                    }}
-                    InputProps={{
-                      disableUnderline: true,
-                      classes: {
-                        input: classes.inputText,
-                      },
-                    }}
-                  />
-                  <div style={{ position: 'relative' }}>
-                    <Button
-                      variant="raised"
-                      color="primary"
-                      classes={{ root: classes.balanceButtonRoot }}
-                      onClick={() => this.loaderSpin()}
-                      disabled={loading}
+
+                {/* List items */}
+                <div className={classes.root}>
+                  <List component="nav">
+                    <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('explore', context, classes) }}
+                      onClick={() => context.updateState({ currentPage: 'explore' })}
                     >
-                      Add
-                    </Button>
-                    {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
-                  </div>
+                      <ListItemText primary="Explore" classes={{ primary: classes.listText }} />
+                    </ListItem>
+                    <ListItem button onClick={this.handleClick} classes={{ root: classes.listContainer }}>
+                      <ListItemText primary="My Items" classes={{ primary: classes.listText }} />
+                      {/* {this.state.open ? <ExpandLess /> : <ExpandMore />} */}
+                    </ListItem>
+                    <Collapse in={this.state.open} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding>
+                        <ListItem
+                          button
+                          classes={{ root: this.getActiveStyle('in progress', context, classes, 'nested') }}
+                          className={classes.nested}
+                          onClick={() => context.updateState({ currentPage: 'in progress' })}
+                        >
+                          <ListItemText primary="In Progress" classes={{ primary: classes.listText }} />
+                        </ListItem>
+                      </List>
+                      <List component="div" disablePadding>
+                        <ListItem
+                          button
+                          classes={{ root: this.getActiveStyle('purchased', context, classes, 'nested') }}
+                          className={classes.nested}
+                          onClick={() => context.updateState({ currentPage: 'purchased' })}
+                        >
+                          <ListItemText primary="Purchased" classes={{ primary: classes.listText }} />
+                        </ListItem>
+                      </List>
+                      <List component="div" disablePadding>
+                        <ListItem
+                          button
+                          classes={{ root: this.getActiveStyle('sold', context, classes, 'nested') }}
+                          className={classes.nested}
+                          onClick={() => context.updateState({ currentPage: 'sold' })}
+                        >
+                          <ListItemText primary="Sold" classes={{ primary: classes.listText }} />
+                        </ListItem>
+                      </List>
+                      <List component="div" disablePadding>
+                        <ListItem
+                          button
+                          classes={{ root: this.getActiveStyle('verified', context, classes, 'nested') }}
+                          className={classes.nested}
+                          onClick={() => context.updateState({ currentPage: 'verified' })}
+                        >
+                          <ListItemText primary="Verified" classes={{ primary: classes.listText }} />
+                        </ListItem>
+                      </List>
+                    </Collapse>
+                    <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('sell', context, classes) }}
+                      onClick={() => context.updateState({ currentPage: 'sell' })}
+                    >
+                      <ListItemText primary="Sell" classes={{ primary: classes.listText }} />
+                    </ListItem>
+                    <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('verify', context, classes) }}
+                      onClick={() => context.updateState({ currentPage: 'verify' })}
+                    >
+                      <ListItemText primary="Verify" classes={{ primary: classes.listText }} />
+                    </ListItem>
+                  </List>
+                </div>
+
+                {/* Bottom buttons */}
+                <div className="menu-buttons">
+                  <Button classes={{ root: classes.buttonRoot }}>Settings</Button>
+                  <li
+                    style={{
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      fontSize: 16,
+                      fontWeight: 500,
+                      listStyle: 'none',
+                    }}
+                  >
+                    {context.state.username}
+                  </li>
+                  <Button classes={{ root: classes.buttonRoot }} onClick={() => this.handleLogout(context)}>
+                    Logout
+                  </Button>
                 </div>
               </div>
-
-              {/* List items */}
-              <div className={classes.root}>
-                <List component="nav">
-                  <ListItem
-                    button
-                    classes={{ root: this.getActiveStyle('explore', context, classes) }}
-                    onClick={() => context.updateState({ currentPage: 'explore' })}
-                  >
-                    <ListItemText primary="Explore" classes={{ primary: classes.listText }} />
-                  </ListItem>
-                  <ListItem button onClick={this.handleClick} classes={{ root: classes.listContainer }}>
-                    <ListItemText primary="My Items" classes={{ primary: classes.listText }} />
-                    {/* {this.state.open ? <ExpandLess /> : <ExpandMore />} */}
-                  </ListItem>
-                  <Collapse in={this.state.open} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                      <ListItem
-                        button
-                        classes={{ root: this.getActiveStyle('in progress', context, classes, 'nested') }}
-                        className={classes.nested}
-                        onClick={() => context.updateState({ currentPage: 'in progress' })}
-                      >
-                        <ListItemText primary="In Progress" classes={{ primary: classes.listText }} />
-                      </ListItem>
-                    </List>
-                    <List component="div" disablePadding>
-                      <ListItem
-                        button
-                        classes={{ root: this.getActiveStyle('purchased', context, classes, 'nested') }}
-                        className={classes.nested}
-                        onClick={() => context.updateState({ currentPage: 'purchased' })}
-                      >
-                        <ListItemText primary="Purchased" classes={{ primary: classes.listText }} />
-                      </ListItem>
-                    </List>
-                    <List component="div" disablePadding>
-                      <ListItem
-                        button
-                        classes={{ root: this.getActiveStyle('sold', context, classes, 'nested') }}
-                        className={classes.nested}
-                        onClick={() => context.updateState({ currentPage: 'sold' })}
-                      >
-                        <ListItemText primary="Sold" classes={{ primary: classes.listText }} />
-                      </ListItem>
-                    </List>
-                    <List component="div" disablePadding>
-                      <ListItem
-                        button
-                        classes={{ root: this.getActiveStyle('verified', context, classes, 'nested') }}
-                        className={classes.nested}
-                        onClick={() => context.updateState({ currentPage: 'verified' })}
-                      >
-                        <ListItemText primary="Verified" classes={{ primary: classes.listText }} />
-                      </ListItem>
-                    </List>
-                  </Collapse>
-                  <ListItem
-                    button
-                    classes={{ root: this.getActiveStyle('sell', context, classes) }}
-                    onClick={() => context.updateState({ currentPage: 'sell' })}
-                  >
-                    <ListItemText primary="Sell" classes={{ primary: classes.listText }} />
-                  </ListItem>
-                  <ListItem
-                    button
-                    classes={{ root: this.getActiveStyle('verify', context, classes) }}
-                    onClick={() => context.updateState({ currentPage: 'verify' })}
-                  >
-                    <ListItemText primary="Verify" classes={{ primary: classes.listText }} />
-                  </ListItem>
-                </List>
-              </div>
-
-              {/* Bottom buttons */}
-              <div className="menu-buttons">
-                <Button classes={{ root: classes.buttonRoot }}>Settings</Button>
-                <li
-                  style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: 16,
-                    fontWeight: 500,
-                    listStyle: 'none',
-                  }}
-                >
-                  {context.state.username}
-                </li>
-                <Button classes={{ root: classes.buttonRoot }} onClick={() => this.handleLogout(context)}>
-                  Logout
-                </Button>
-              </div>
-            </div>
-          </Fragment>
-        )}
+            </Fragment>
+          );
+        }}
       </MainContext.Consumer>
     );
   }

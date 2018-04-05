@@ -95,17 +95,9 @@ export async function _getVerifiers() {
 }
 
 export const login = (username, password) =>
-  // axios.post(`${HOST}/login`, {
-  //   username,
-  //   password,
-  // });
-  fetch(`${HOST}/login`, {
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-    body: JSON.stringify({ username, password }),
+  axios.post(`${HOST}/login`, {
+    username,
+    password,
   });
 
 export const register = (username, password, account) =>

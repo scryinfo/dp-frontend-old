@@ -19,27 +19,35 @@ export class MainProvider extends Component {
       username: null,
       address: null,
       balance: {
-        tokens: 1424,
-        eth: 12,
+        tokens: 0,
+        eth: 0,
       },
       currentPage: 'login',
     };
     this.setCurrentUser = this.setCurrentUser.bind(this);
     this.updateState = this.updateState.bind(this);
+    this.updateBalance = this.updateBalance.bind(this)
   }
 
   componentWillMount() {
+    console.log('mounted');
     if (!Auth.loggedIn()) {
       console.log('not logged in');
       this.props.history.replace('/login');
     } else {
       try {
         const profile = Auth.getProfile();
-        console.log(profile);
+        if (!localStorage.getItem(profile.name)) {
+          console.log('nope');
+          // throw new Error();
+          this.props.history.push('/vault');
+          // return;
+        }
         this.setState({
           username: profile.name,
           address: profile.account,
         });
+        
       } catch (err) {
         Auth.logout();
         this.props.history.replace('/login');
@@ -59,14 +67,19 @@ export class MainProvider extends Component {
         address: getAddress, username, currentPage: 'explore', password, vault: true,
       });
       this.props.history.push('/explore');
-      setTimeout(async () => {
-        const response = await _getBalance(getAddress);
-        this.setState({ balance: {
+  }
+
+  async updateBalance() {
+    // setTimeout(async () => {
+      const response = await _getBalance(this.state.address);
+      this.setState({
+        balance: {
           tokens: response.data.balance,
-          eth: response.data.eth
-        } })
-        console.log(response);
-      }, 3000)
+          eth: response.data.eth,
+        }
+      })
+
+    // }, 3000)
   }
 
   updateState(newState) {
@@ -80,6 +93,7 @@ export class MainProvider extends Component {
           state: this.state,
           setCurrentUser: this.setCurrentUser,
           updateState: this.updateState,
+          updateBalance: this.updateBalance,
         }}
       >
         {this.props.children}
