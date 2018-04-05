@@ -50,18 +50,6 @@ export default class LeftPanel extends Component {
     };
   }
 
-  getCurrentPage = context => {
-    switch (context.state.currentPage) {
-      case 'login':
-        return <LoginLeftSide />;
-      case 'register':
-        return <LoginLeftSide />;
-      case 'add vault':
-        return <LoginLeftSide />;
-      default:
-        return <Menu />;
-    }
-  };
   render() {
     return (
       <StyledAnimatedSwitch
@@ -71,9 +59,9 @@ export default class LeftPanel extends Component {
           // opacity: styles,
         })}
       >
-        <Route path="/login" render={props => <LoginLeftSide {...props} />} />
-        <Route path="/vault" render={props => <LoginLeftSide {...props} />} />
-        <Route path="/" render={props => <Menu {...props} />} />
+        <Route path="/login" render={props => <LoginLeftSide {...props} history={this.props.history} />} />
+        <Route path="/vault" render={props => <LoginLeftSide {...props} history={this.props.history} />} />
+        <Route path="/" render={props => <Menu {...props} history={this.props.history} />} />
       </StyledAnimatedSwitch>
     );
   }

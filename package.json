@@ -4,17 +4,21 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
+    "axios-cookiejar-support": "^0.3.4",
     "bitcore-mnemonic": "^1.5.0",
     "eth-lightwallet": "^3.0.1",
+    "jwt-decode": "^2.2.0",
     "material-ui": "^1.0.0-beta.39",
     "pify": "^3.0.0",
     "react": "^16.3.0",
+    "react-cookie": "^2.1.4",
     "react-dom": "^16.3.0",
     "react-router-dom": "^4.2.2",
     "react-router-transition": "^1.2.1",
     "react-scripts": "1.1.1",
     "react-swipeable-views": "^0.12.13",
     "styled-components": "^3.2.5",
+    "tough-cookie": "^2.3.4",
     "web3-utils": "^1.0.0-beta.33"
   },
   "devDependencies": {

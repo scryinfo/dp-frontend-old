@@ -4,12 +4,17 @@ import { openChannel, buyerAuthorization, verifierAuthorization, closeChannel } 
 
 // Get tokens
 export async function _addTokens(account, amount) {
-  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`);
+  console.log(account, amount);
+  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 // Get balance
 export async function _getBalance(account) {
-  return axios.get(`${HOST}/balance?account=${account}`);
+  return axios.get(`${HOST}/balance?account=${account}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 export async function getPassword(username) {

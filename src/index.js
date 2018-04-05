@@ -11,7 +11,8 @@ const theme = createMuiTheme({
     MuiInput: {
       underline: {
         '&:hover:not($disabled):before': {
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backgroundColor: 'a5a9ac',
+          // backgroundColor: 'rgba(255, 255, 255, 0.7)',
           height: 1,
         },
       },
@@ -38,9 +39,7 @@ ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <Router>
       <Route
-        render={({ location, history, match }) => (
-          <App currentLocation={location} match={match} currentHistory={history} />
-        )}
+        render={({ location, history, match }) => <App currentLocation={location} match={match} history={history} />}
       />
     </Router>
   </MuiThemeProvider>,

@@ -22,7 +22,28 @@ export const loadVault = (vaultJs, password) => {
   });
 };
 
-export const createVault = (password, mnemonic) => new Promise((resolve, reject) => {
+export const getMnemonic = (vaultJs, password) => {
+  if (vaultJs === null) {
+    throw new Error('Vault not found for user');
+  }
+  const vault = keystore.deserialize(vaultJs);
+  // make sure vault password is correct
+  return new Promise((resolve, reject) => {
+    // symmetric vault key from password, only valid within callback
+    vault.keyFromPassword(password, (err, key) => {
+      if (err) {
+        reject(err);
+      }
+      if (!vault.isDerivedKeyCorrect(key)) {
+        reject(new Error('bad password'));
+      }
+      resolve(vault.getSeed(key));
+    });
+  });
+};
+
+export const createVault = (password, mnemonic) =>
+  new Promise((resolve, reject) => {
     keystore.createVault(
       {
         seedPhrase: mnemonic,
