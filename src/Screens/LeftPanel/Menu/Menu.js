@@ -7,6 +7,14 @@ import Collapse from 'material-ui/transitions/Collapse';
 // import FlatButton from 'material-ui/FlatButton';
 import Button from 'material-ui/Button';
 import { CircularProgress } from 'material-ui/Progress';
+import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
+import MenuPopup, { MenuItem } from 'material-ui/Menu';
+import Slide from 'material-ui/transitions/Slide';
+import Popover from 'material-ui/Popover';
+
+import { getAccount } from '../../../Components/keyRequests';
+
+import { getMnemonic } from '../../../Components/keys';
 
 import { MainContext } from '../../../Context';
 
@@ -83,6 +91,9 @@ const styles = theme => ({
     marginTop: -12,
     marginLeft: -12,
   },
+  // popoverRoot: {
+  //   bottom: '100px',
+  // },
 });
 
 class Menu extends Component {
@@ -90,10 +101,25 @@ class Menu extends Component {
     super(props);
     this.state = {
       open: true,
+      anchorEl: null,
+      isPasswordWindowOpen: false,
+      isMnemonicWindowOpen: false,
     };
     this.handleInput = this.handleInput.bind(this);
     this.getTokens = this.getTokens.bind(this);
+    this.handleOpenSettings = this.handleOpenSettings.bind(this);
+    this.handleCloseSettings = this.handleCloseSettings.bind(this);
   }
+
+  handleOpenSettings = event => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleCloseSettings = () => {
+    console.log('close called');
+    this.setState({ anchorEl: null });
+    console.log(this.state.anchorEl);
+  };
 
   componentDidMount() {
     console.log(this.context);
@@ -163,9 +189,116 @@ class Menu extends Component {
     });
   }
 
+  async getMnemonic() {
+    this.setState({ isPasswordWindowOpen: false });
+    try {
+      const vault = await localStorage.getItem(this.context.state.username);
+      const mnemonic = await getMnemonic(vault, this.state.password);
+      this.setState({ mnemonic, isMnemonicWindowOpen: true });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  renderPasswordWindow = () => (
+    <Dialog
+      disableBackdropClick
+      disableEscapeKeyDown
+      open={this.state.isPasswordWindowOpen}
+      onClose={() => this.setState({ isPasswordWindowOpen: false })}
+      aria-labelledby="form-dialog-title"
+    >
+      <DialogTitle id="form-dialog-title">Enter your password</DialogTitle>
+      <DialogContent>
+        <DialogContentText style={{ width: '600px' }}>
+          {/* To import your existing vault please confirm your password */}
+        </DialogContentText>
+        {/* <TextField
+          id="password"
+          name="password"
+          type="password"
+          label="Enter your password here"
+          // placeholder="Placeholder"
+          // autoFocus
+          multiline
+          fullWidth
+          value={this.state.password}
+          onChange={event => this.setState({ password: event.target.value })}
+          // className={classes.textField}
+          margin="normal"
+          // style={{ width: '600px' }}
+        /> */}
+        <TextField
+          name="password"
+          label="Password"
+          type="password"
+          fullWidth
+          // required={!!passwordError}
+          // error={!!passwordError}
+          // className={classes.textField}
+          value={this.state.password}
+          // onChange={this.handleInput}
+          onChange={event => this.setState({ password: event.target.value })}
+          margin="normal"
+          // InputLabelProps={{
+          //   classes: {
+          //     root: classes.inputLabel,
+          //     shrink: classes.inputShrink,
+          //   },
+          // }}
+          // InputProps={{
+          //   classes: {
+          //     input: classes.inputText,
+          //     underline: classes.inputUnderline,
+          //   },
+          // }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => this.setState({ isPasswordWindowOpen: false })} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={() => this.getMnemonic()} color="primary">
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
+  Transition(props) {
+    return <Slide direction="up" {...props} />;
+  }
+
+  renderMnemonicWindow() {
+    return (
+      <Dialog
+        open={this.state.isMnemonicWindowOpen}
+        transition={this.Transition}
+        keepMounted
+        onClose={() => this.setState({ isMnemonicWindowOpen: false })}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle id="alert-dialog-slide-title">Your mnemonic</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">{this.state.mnemonic}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => this.setState({ isMnemonicWindowOpen: false })} color="primary">
+            Close
+          </Button>
+          <Button onClick={this.handleClose} color="primary">
+            Copy
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+
   render() {
     const { classes } = this.props;
-    const { loading, tokensToAdd } = this.state;
+    const { loading, tokensToAdd, anchorEl } = this.state;
+    console.log(anchorEl);
     return (
       <MainContext.Consumer>
         {context => {
@@ -310,7 +443,47 @@ class Menu extends Component {
 
                 {/* Bottom buttons */}
                 <div className="menu-buttons">
-                  <Button classes={{ root: classes.buttonRoot }}>Settings</Button>
+                  <Button
+                    classes={{ root: classes.buttonRoot }}
+                    onClick={this.handleOpenSettings}
+                    aria-owns={anchorEl ? 'settings' : null}
+                  >
+                    Settings
+                  </Button>
+                  <Popover
+                    open={Boolean(anchorEl)}
+                    anchorEl={anchorEl}
+                    // anchorReference={anchorReference}
+                    // anchorPosition={{ top: positionTop }}
+                    onClose={this.handleCloseSettings}
+                    anchorOrigin={{
+                      vertical: 'top',
+                    }}
+                    transformOrigin={{
+                      vertical: 'bottom',
+                    }}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        this.handleCloseSettings();
+                        this.setState({ isPasswordWindowOpen: true });
+                      }}
+                    >
+                      Export vault
+                    </MenuItem>
+                  </Popover>
+                  {/* <MenuPopup
+                    id="settings"
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={this.handleCloseSettings}
+                    // style={{ marginBottom: '40px' }}
+                    // PopoverClasses={classes.popoverRoot}
+                  >
+                    <MenuItem onClick={this.handleCloseSettings}>Export vault</MenuItem>
+                    {/* <MenuItem onClick={this.handleCloseSettings}>My account</MenuItem>
+                    <MenuItem onClick={this.handleCloseSettings}>Logout</MenuItem> */}
+                  {/* </MenuPopup> */}
                   <li
                     style={{
                       color: 'rgba(255, 255, 255, 0.5)',
@@ -326,6 +499,8 @@ class Menu extends Component {
                   </Button>
                 </div>
               </div>
+              {this.renderPasswordWindow()}
+              {this.renderMnemonicWindow()}
             </Fragment>
           );
         }}
@@ -335,94 +510,3 @@ class Menu extends Component {
 }
 
 export default withStyles(styles)(Menu);
-
-// const styles = {
-//   menuButtonLeft: {
-//     color: 'rgba(255, 255, 255, 0.5)',
-//     fontSize: 12,
-//   },
-//   menuButtonRight: {
-//     color: 'rgba(255, 255, 255, 0.5)',
-//     fontSize: 12,
-//     // paddingLeft: '18px',
-//   },
-//   menuUsername: {
-//     color: 'rgba(255, 255, 255, 0.5)',
-//     fontSize: 16,
-//     fontWeight: 500,
-//     listStyle: 'none',
-//   },
-//   nestedListStyle: {
-//     padding: 0,
-//   },
-// };
-
-//   <Fragment>
-//     <List>
-//       <ListItem
-//         primaryText="Explore"
-//         hoverColor="rgba(255, 255, 255, 0.04)"
-//         style={{ color: 'white' }}
-//         onClick={() => context.updateState({ currentPage: 'explore' })}
-//         innerDivStyle={this.getActiveStyle('explore', context)}
-//       />
-//       <ListItem
-//         primaryText="My Items"
-//         initiallyOpen
-//         style={{ color: 'white' }}
-//         primaryTogglesNestedList
-//         hoverColor="rgba(255, 255, 255, 0.04)"
-//         innerDivStyle={this.getActiveStyle('', context)}
-//         nestedListStyle={styles.nestedListStyle}
-//         rightToggle={<div />}
-//         nestedItems={[
-//           <ListItem
-//             primaryText="In Progress"
-//             key="inProgress"
-//             hoverColor="rgba(255, 255, 255, 0.04)"
-//             style={{ color: 'white' }}
-//             onClick={() => context.updateState({ currentPage: 'in progress' })}
-//             innerDivStyle={this.getActiveStyle('in progress', context)}
-//           />,
-//           <ListItem
-//             primaryText="Purchased"
-//             key="purchased"
-//             hoverColor="rgba(255, 255, 255, 0.04)"
-//             style={{ color: 'white' }}
-//             onClick={() => context.updateState({ currentPage: 'purchased' })}
-//             innerDivStyle={this.getActiveStyle('purchased', context)}
-//           />,
-//           <ListItem
-//             primaryText="Sold"
-//             key="sold"
-//             hoverColor="rgba(255, 255, 255, 0.04)"
-//             style={{ color: 'white' }}
-//             onClick={() => context.updateState({ currentPage: 'sold' })}
-//             innerDivStyle={this.getActiveStyle('sold', context)}
-//           />,
-//           <ListItem
-//             primaryText="Verified"
-//             key="verified"
-//             hoverColor="rgba(255, 255, 255, 0.04)"
-//             style={{ color: 'white' }}
-//             onClick={() => context.updateState({ currentPage: 'verified' })}
-//             innerDivStyle={this.getActiveStyle('verified', context)}
-//           />,
-//         ]}
-//       />
-//       <ListItem
-//         primaryText="Sell"
-//         hoverColor="rgba(255, 255, 255, 0.04)"
-//         style={{ color: 'white' }}
-//         onClick={() => context.updateState({ currentPage: 'sell' })}
-//         innerDivStyle={this.getActiveStyle('sell', context)}
-//       />
-//       <ListItem
-//         primaryText="Verify"
-//         hoverColor="rgba(255, 255, 255, 0.04)"
-//         style={{ color: 'white' }}
-//         onClick={() => context.updateState({ currentPage: 'verify' })}
-//         innerDivStyle={this.getActiveStyle('verify', context)}
-//       />
-//     </List>
-//   </Fragment>

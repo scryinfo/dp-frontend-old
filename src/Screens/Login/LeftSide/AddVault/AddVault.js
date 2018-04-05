@@ -205,6 +205,7 @@ class AddVault extends Component {
           // placeholder="Placeholder"
           autoFocus
           multiline
+          type="password"
           fullWidth
           value={this.state.password}
           onChange={event => this.setState({ password: event.target.value })}

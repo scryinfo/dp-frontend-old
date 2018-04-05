@@ -5,6 +5,7 @@ export const getAccount = async (username, password) => {
   let vault;
   try {
     vault = await loadVault(window.localStorage.getItem(username), password);
+    console.log(vault);
   } catch (e) {
     console.log('vault not found', e);
     return null;
