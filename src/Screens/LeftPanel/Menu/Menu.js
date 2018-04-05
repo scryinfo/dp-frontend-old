@@ -10,7 +10,7 @@ import { CircularProgress } from 'material-ui/Progress';
 
 import { MainContext } from '../../../Context';
 
-import { logout } from '../../../Components/requests';
+import { logout, _addTokens } from '../../../Components/requests';
 
 import './Menu.css';
 import Logo from '../../../assets/images/logo.png';
@@ -91,6 +91,8 @@ class Menu extends Component {
     this.state = {
       open: true,
     };
+    this.handleInput = this.handleInput.bind(this);
+    this.getTokens = this.getTokens.bind(this);
   }
 
   componentDidMount() {
@@ -124,6 +126,23 @@ class Menu extends Component {
     this.setState({ open: !this.state.open });
   };
 
+  handleInput(event) {
+    console.log(event.target.value);
+    this.setState({ tokensToAdd: event.target.value });
+    event.preventDefault();
+  }
+
+  async getTokens(event) {
+    // event.preventDefault();
+    try {
+      await _addTokens(this.context.state.address, this.state.tokensToAdd);
+      this.context.updateBalance();
+      this.setState({ tokensToAdd: '' });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   loaderSpin() {
     return new Promise((resolve, reject) => {
       if (!this.state.loading) {
@@ -146,7 +165,7 @@ class Menu extends Component {
 
   render() {
     const { classes } = this.props;
-    const { loading } = this.state;
+    const { loading, tokensToAdd } = this.state;
     return (
       <MainContext.Consumer>
         {context => {
@@ -180,7 +199,7 @@ class Menu extends Component {
                       // required={!!usernameError}
                       // error={!!usernameError}
                       className={classes.textField}
-                      value={this.state.tokensToAdd}
+                      value={tokensToAdd}
                       onChange={this.handleInput}
                       style={{
                         height: '34px',
@@ -206,7 +225,7 @@ class Menu extends Component {
                         variant="raised"
                         color="primary"
                         classes={{ root: classes.balanceButtonRoot }}
-                        onClick={() => this.loaderSpin()}
+                        onClick={() => this.getTokens()}
                         disabled={loading}
                       >
                         Add

@@ -4,7 +4,10 @@ import { openChannel, buyerAuthorization, verifierAuthorization, closeChannel } 
 
 // Get tokens
 export async function _addTokens(account, amount) {
-  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`);
+  console.log(account, amount);
+  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 // Get balance
