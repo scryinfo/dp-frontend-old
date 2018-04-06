@@ -1,0 +1,13 @@
+.item-list-container {
+  margin-top: 30px;
+  margin-right: 60px;
+  /* background: green; */
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card-container {
+  padding: 10px;
+  padding-right: 30px;
+  padding-left: 0;
+}

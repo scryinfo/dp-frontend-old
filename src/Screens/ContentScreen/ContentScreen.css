@@ -1,5 +1,7 @@
 .content-screen-container {
   width: calc(100vw - 350px);
   height: 100vh;
+  background: white;
+  z-index: 1;
 }
 

@@ -84,12 +84,18 @@ export async function _closeTransaction(id, username) {
 // Get list of items
 export async function _getItems(account, type) {
   if (account && type) {
-    return axios.get(`${HOST}/history?${type}=${account}`);
+    return axios.get(`${HOST}/history?${type}=${account}`, {
+      headers: { Authorization: localStorage.getItem('id_token') },
+    });
   }
   if (account) {
-    return axios.get(`${HOST}/listings?owner=${account}`);
+    return axios.get(`${HOST}/listings?owner=${account}`, {
+      headers: { Authorization: localStorage.getItem('id_token') },
+    });
   }
-  return axios.get(`${HOST}/listings`);
+  return axios.get(`${HOST}/listings`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 // Get list of verifiers

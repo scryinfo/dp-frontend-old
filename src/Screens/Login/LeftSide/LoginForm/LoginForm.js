@@ -6,6 +6,9 @@ import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
 import { CircularProgress } from 'material-ui/Progress';
+import Snackbar from 'material-ui/Snackbar';
+import CloseIcon from 'material-ui-icons/Close';
+import IconButton from 'material-ui/IconButton';
 import AuthService from '../../../../Auth/AuthService';
 
 import { login } from '../../../../Components/requests';
@@ -26,6 +29,8 @@ const styles = theme => ({
   root: {
     // backgroundColor: theme.palette.background.paper,
     width: '100%',
+    height: '600px',
+    marginTop: '300px',
   },
   tabsRoot: {
     color: '#ffffff',
@@ -69,6 +74,9 @@ const styles = theme => ({
   },
   buttonDisabled: {
     backgroundColor: 'rgba(255, 255, 255, 0.1) !important',
+  },
+  errorPopup: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
   },
 });
 
@@ -202,7 +210,7 @@ class LoginForm extends React.Component {
       if (e.response) {
         const { message } = e.response.data;
         console.log(message);
-        this.setState({ errorMessage: message });
+        this.setState({ errorMessage: message, errorPopupOpen: true });
       }
       console.log(e);
     }
@@ -225,12 +233,43 @@ class LoginForm extends React.Component {
           this.props.history.push('/vault');
           return;
         }
-        this.setState({ errorMessage: message });
+        if (message === 'bad password') {
+          this.setState({ errorMessage: 'user already exists', errorPopupOpen: true });
+          return;
+        }
+        this.setState({ errorMessage: message, errorPopupOpen: true });
         console.log(message);
       }
       console.log(e);
     }
   }
+
+  renderErrorPopup = () => (
+    <Snackbar
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+      open={this.state.errorPopupOpen}
+      autoHideDuration={6000}
+      onClose={() => this.setState({ errorPopupOpen: false })}
+      SnackbarContentProps={{
+        className: this.props.classes.errorPopup,
+        'aria-describedby': 'message-id',
+      }}
+      message={<span id="message-id">{this.state.errorMessage}</span>}
+      action={[
+        <IconButton
+          key="close"
+          aria-label="Close"
+          color="inherit"
+          onClick={() => this.setState({ errorPopupOpen: false })}
+        >
+          <CloseIcon />
+        </IconButton>,
+      ]}
+    />
+  );
 
   renderForm = () => {
     const {
@@ -247,7 +286,7 @@ class LoginForm extends React.Component {
     const { classes } = this.props;
     if (this.context) {
       return (
-        <form style={styles.formStyle}>
+        <form style={styles.formStyle} className="login-form-container">
           <TextField
             name="username"
             label="Username"
@@ -339,9 +378,9 @@ class LoginForm extends React.Component {
             </Button>
             {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
           </div>
-          <div style={{ paddingTop: '20px', lineHeight: '30px', color: 'red', textAlign: 'center' }}>
+          {/* <div style={{ paddingTop: '20px', lineHeight: '30px', color: 'red', textAlign: 'center' }}>
             {errorMessage}
-          </div>
+          </div> */}
         </form>
       );
     }
@@ -401,6 +440,7 @@ class LoginForm extends React.Component {
                 <TabContainer />
                 <TabContainer dir={theme.direction}>{this.renderForm('register')}</TabContainer>
               </SwipeableViews>
+              {this.renderErrorPopup()}
             </div>
           );
         }}

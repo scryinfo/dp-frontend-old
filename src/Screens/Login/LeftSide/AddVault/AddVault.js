@@ -51,6 +51,8 @@ class AddVault extends Component {
     this.state = {
       isMnemonicWindowOpen: false,
       isPasswordWindowOpen: false,
+      mnemonic: '',
+      password: '',
     };
     this.handleMnemonicOpen = this.handleMnemonicOpen.bind(this);
     this.handlePasswordOpen = this.handlePasswordOpen.bind(this);
