@@ -16,6 +16,7 @@ import VisibilityOff from 'material-ui-icons/VisibilityOff';
 import './ContentContainer.css';
 import { MainContext } from '../../../Context';
 import ItemList from '../ItemList/ItemList';
+import Sell from '../Sell/Sell';
 
 const styles = {
   textField: {
@@ -103,6 +104,10 @@ class ContentContainer extends Component {
               <Route
                 path="/explore"
                 render={props => <ItemList {...props} history={this.props.history} items={context.state.allItems} />}
+              />
+              <Route
+                path="/sell"
+                render={props => <Sell {...props} history={this.props.history} items={context.state.allItems} />}
               />
             </div>
           </div>
