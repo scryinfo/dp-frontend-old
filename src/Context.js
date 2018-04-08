@@ -74,7 +74,7 @@ export class MainProvider extends Component {
       const historyVerifier = await _getItems(address, 'verifier');
       console.log(allItems, myItems, historyBuyer, historySeller, historyVerifier);
       this.setState({ 
-        allItems: allItems.data, myItems: myItems.data, historyBuyer: historyBuyer.data, historySeller: historySeller.data, historyVerifier: historyVerifier.data
+        allItems: allItems.data.sort((a, b) => b.id - a.id), myItems: myItems.data.sort((a, b) => b.id - a.id), historyBuyer: historyBuyer.data, historySeller: historySeller.data, historyVerifier: historyVerifier.data
        })
     } catch (e) {
       console.log(e);
