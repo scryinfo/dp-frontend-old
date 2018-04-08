@@ -103,7 +103,10 @@ class ContentContainer extends Component {
             <div className="list-items">
               <Route
                 path="/explore"
-                render={props => <ItemList {...props} history={this.props.history} items={context.state.allItems} />}
+                render={
+                  props => <div>jskfjsdklfjslk</div>
+                  // <ItemList {...props} history={this.props.history} items={context.state.allItems} />
+                }
               />
               <Route
                 path="/sell"

@@ -1,17 +1,8 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router-dom';
 import { withStyles } from 'material-ui/styles';
 
 import Button from 'material-ui/Button';
-import { CircularProgress } from 'material-ui/Progress';
-import TextField from 'material-ui/TextField';
 
-import IconButton from 'material-ui/IconButton';
-import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-
-import Visibility from 'material-ui-icons/Visibility';
-import Search from 'material-ui-icons/Search';
-import VisibilityOff from 'material-ui-icons/VisibilityOff';
 import Typography from 'material-ui/Typography';
 
 import Card, { CardActions, CardContent } from 'material-ui/Card';
@@ -38,30 +29,30 @@ const styles = {
 };
 
 class ItemList extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       search: '',
       items: [{}, {}, {}, {}, {}, {}],
     };
   }
 
-  renderItem = () => {
+  renderItem = item => {
     const { classes } = this.props;
     return (
-      <div className="card-container">
+      <div className="card-container" key={Math.random()} style={{ width: '300px' }}>
         <Card className={classes.card}>
           <CardContent>
             {/* <Typography className={classes.title} color="textSecondary">
               Text
             </Typography> */}
-            <Typography variant="headline" component="h2">
-              Title here
+            <Typography variant="headline" component="h2" style={{ fontSize: '18px', fontWeight: '500', width: 250, height: '26px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'no-wrap' }}>
+              {item.name || 'Name'}
             </Typography>
             <Typography className={classes.pos} color="textSecondary">
-              seller
+              {(item.owner && item.owner.name) || 'seller'}
             </Typography>
-            <Typography component="p">price</Typography>
+            <Typography component="p">{`${item.price} tokens` || 'price'}</Typography>
           </CardContent>
           <CardActions>
             <Button size="small">See more</Button>
@@ -72,12 +63,17 @@ class ItemList extends Component {
   };
 
   render() {
-    const { search } = this.state;
-    const { classes } = this.props;
+    const { classes, items } = this.props;
+    console.log(items);
     return (
-      <MainContext.Consumer>
-        {context => <div className="item-list-container">{this.state.items.map(item => this.renderItem(item))}</div>}
-      </MainContext.Consumer>
+      // <MainContext.Consumer>
+      //   {context => (
+      <div className="item-list-container">
+        {items.map(item => this.renderItem(item))}
+        {/* fjdkljskldjkldfjkldjkldjflksjfkldsjfkldsjfkldsfkldjflkjlksjflksdjfldksjfklsjfdlksjdklsfjdklsjfdlskjfdskllsdkjkdlsjfkldsjfklsklsdjfskdl */}
+      </div>
+      // )}
+      // </MainContext.Consumer>
     );
   }
 }

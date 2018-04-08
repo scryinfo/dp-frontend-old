@@ -23,7 +23,11 @@ export class MainProvider extends Component {
         eth: 0,
       },
       currentPage: 'explore',
-      allItems: {}
+      allItems: [],
+      myItems: [],
+      historyBuyer: [],
+      historySeller: [],
+      historyVerifier: [],
     };
     this.setCurrentUser = this.setCurrentUser.bind(this);
     this.updateState = this.updateState.bind(this);
@@ -70,7 +74,7 @@ export class MainProvider extends Component {
       const historyVerifier = await _getItems(address, 'verifier');
       console.log(allItems, myItems, historyBuyer, historySeller, historyVerifier);
       this.setState({ 
-        allItems, myItems, historyBuyer, historySeller, historyVerifier
+        allItems: allItems.data, myItems: myItems.data, historyBuyer: historyBuyer.data, historySeller: historySeller.data, historyVerifier: historyVerifier.data
        })
     } catch (e) {
       console.log(e);

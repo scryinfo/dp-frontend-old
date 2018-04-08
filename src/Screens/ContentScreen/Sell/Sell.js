@@ -8,12 +8,17 @@ import Typography from 'material-ui/Typography';
 import Icon from 'material-ui/Icon';
 import AttachFile from 'material-ui-icons/AttachFile';
 import ButtonBase from 'material-ui/ButtonBase';
+import Snackbar from 'material-ui/Snackbar';
+import CloseIcon from 'material-ui-icons/Close';
+import IconButton from 'material-ui/IconButton';
 import TextField from 'material-ui/TextField';
 import { LinearProgress } from 'material-ui/Progress';
 
 import './Sell.css';
 import { MainContext } from '../../../Context';
 import { HOST } from '../../../Components/Remote';
+import ErrorPopup from '../../ErrorPopup';
+import ItemList from '../ItemList/ItemList';
 
 const styles = theme => ({
   stepperRoot: {
@@ -63,12 +68,6 @@ class Sell extends Component {
   handleBack = () => {
     this.setState({
       activeStep: this.state.activeStep - 1,
-    });
-  };
-
-  handleReset = () => {
-    this.setState({
-      activeStep: 0,
     });
   };
 
@@ -161,14 +160,40 @@ class Sell extends Component {
     }
   }
 
+  renderErrorPopup = () => (
+    <Snackbar
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+      open={this.state.errorPopupOpen}
+      autoHideDuration={6000}
+      onClose={() => this.setState({ errorPopupOpen: false })}
+      SnackbarContentProps={{
+        className: this.props.classes.errorPopup,
+        'aria-describedby': 'message-id',
+      }}
+      message={<span id="message-id">{this.state.errorMessage}</span>}
+      action={[
+        <IconButton
+          key="close"
+          aria-label="Close"
+          color="inherit"
+          onClick={() => this.setState({ errorPopupOpen: false })}
+        >
+          <CloseIcon />
+        </IconButton>,
+      ]}
+    />
+  );
+
   async onFileChange(event, server) {
     // event.stopPropagation();
     // event.preventDefault();
     this.setState({ uploadStatus: '', uploadProgress: '', status: '' });
     const { file } = this.state;
-    const fileSize = file.size;
-    const fileName = file.name;
-    this.setState({ fileName, fileSize });
+    const { username, address } = this.context.state;
+    const { itemPrice } = this.state;
 
     // eslint-disable-next-line
     const data = new FormData();
@@ -185,38 +210,37 @@ class Sell extends Component {
       url,
       headers: {
         'content-type': 'multipart/form-data',
-        Authorization: localStorage.getItem('id_token'),
       },
       data,
       onUploadProgress: progress => {
         const status = Math.floor(progress.loaded / progress.total * 100);
         this.setState({ uploadProgress: status, status: `Uploading ${whereToUpload}: ${status}% done` });
+        console.log(progress);
       },
     })
       .then(response => {
         console.log(response);
         const ipfsId = response.headers['ipfs-hash'];
-        console.log(ipfsId);
-        this.setState({ cid: ipfsId });
-        axios
-          .post(
-            `${HOST}/seller/upload?account=${
-              this.context.state.address
-            }&name=${fileName}&CID=${ipfsId}&size=${fileSize}&price=${this.state.itemPrice}&username=${
-              this.context.state.username
-            }`,
-            {
-              headers: {
-                Authorization: localStorage.getItem('id_token'),
-              },
-            }
-          )
-          .then(response => {
-            console.log('uploaded', response);
-            this.setState({ done: true, status: 'Uploaded successfully', uploadProgress: 0, file: 0 });
-            this.getItems();
-            setTimeout(() => this.setState({ status: '' }), 3000);
+        axios({
+          method: 'POST',
+          url: `${HOST}/seller/upload?account=${address}&name=${file.name}&CID=${ipfsId}&size=${
+            file.size
+          }&price=${itemPrice}&username=${username}`,
+          headers: {
+            Authorization: localStorage.getItem('id_token'),
+          },
+        }).then(res => {
+          console.log('uploaded', res);
+          this.setState({
+            done: true,
+            status: 'Uploaded successfully',
+            uploadProgress: 0,
+            file: {},
+            activeStep: this.state.activeStep + 1,
           });
+          this.context.getItems();
+          setTimeout(() => this.setState({ status: '', activeStep: 0 }), 3000);
+        });
       })
       .catch(err => {
         console.log(err.request);
@@ -228,7 +252,7 @@ class Sell extends Component {
         if (!err.request.response) {
           console.log('Please install IPFS');
           this.setState({
-            status: "Seems like you don't have IPFS installed, would you like to upload through Scry.info instead?",
+            status: 'Please install IPFS',
             done: true,
             viaScry: true,
             uploadText: 'Install IPFS',
@@ -268,13 +292,14 @@ class Sell extends Component {
           this.context = context;
           return (
             <div className="sell-container">
+              <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               <div className="sell-stepper">
                 <Stepper activeStep={activeStep} orientation="vertical" className={classes.stepperRoot}>
                   {steps.map((label, index) => (
                     <Step key={label}>
                       <StepLabel>{label}</StepLabel>
                       <StepContent>
-                        <Typography>{this.getStepContent(index, classes)}</Typography>
+                        {this.getStepContent(index, classes)}
 
                         {/* <div className={classes.actionsContainer}>
                         <div>
@@ -290,14 +315,14 @@ class Sell extends Component {
                     </Step>
                   ))}
                 </Stepper>
-                {activeStep === steps.length && (
-                  <Paper square elevation={0} className={classes.resetContainer}>
-                    <Typography>All steps completed - you&quot;re finished</Typography>
-                    <Button onClick={this.handleReset} className={classes.button}>
-                      Reset
-                    </Button>
-                  </Paper>
-                )}
+              </div>
+              <div className="recent-items-container">
+                <div className="content-title" style={{ marginTop: '30px' }}>
+                  Recent Files
+                </div>
+                <div>
+                  <ItemList items={this.context.state.myItems} />
+                </div>
               </div>
             </div>
           );
