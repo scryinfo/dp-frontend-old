@@ -104,6 +104,8 @@ class Menu extends Component {
       anchorEl: null,
       isPasswordWindowOpen: false,
       isMnemonicWindowOpen: false,
+      tokensToAdd: '',
+      password: '',
     };
     this.handleInput = this.handleInput.bind(this);
     this.getTokens = this.getTokens.bind(this);
@@ -125,6 +127,7 @@ class Menu extends Component {
     console.log(this.context);
     if (this.context) {
       this.context.updateBalance();
+      this.context.getItems();
     }
   }
 
@@ -295,6 +298,11 @@ class Menu extends Component {
     );
   }
 
+  changeRoute(to) {
+    this.context.updateState({ currentPage: to.currentPage });
+    this.props.history.push(`/${to.currentPage}`);
+  }
+
   render() {
     const { classes } = this.props;
     const { loading, tokensToAdd, anchorEl } = this.state;
@@ -327,6 +335,7 @@ class Menu extends Component {
                     <TextField
                       id="username"
                       name="username"
+                      type="number"
                       fullWidth
                       placeholder="Get more tokens"
                       // required={!!usernameError}
@@ -374,7 +383,7 @@ class Menu extends Component {
                     <ListItem
                       button
                       classes={{ root: this.getActiveStyle('explore', context, classes) }}
-                      onClick={() => context.updateState({ currentPage: 'explore' })}
+                      onClick={() => this.changeRoute({ currentPage: 'explore' })}
                     >
                       <ListItemText primary="Explore" classes={{ primary: classes.listText }} />
                     </ListItem>
@@ -388,7 +397,7 @@ class Menu extends Component {
                           button
                           classes={{ root: this.getActiveStyle('in progress', context, classes, 'nested') }}
                           className={classes.nested}
-                          onClick={() => context.updateState({ currentPage: 'in progress' })}
+                          onClick={() => this.changeRoute({ currentPage: 'in progress' })}
                         >
                           <ListItemText primary="In Progress" classes={{ primary: classes.listText }} />
                         </ListItem>
@@ -398,7 +407,7 @@ class Menu extends Component {
                           button
                           classes={{ root: this.getActiveStyle('purchased', context, classes, 'nested') }}
                           className={classes.nested}
-                          onClick={() => context.updateState({ currentPage: 'purchased' })}
+                          onClick={() => this.changeRoute({ currentPage: 'purchased' })}
                         >
                           <ListItemText primary="Purchased" classes={{ primary: classes.listText }} />
                         </ListItem>
@@ -408,7 +417,7 @@ class Menu extends Component {
                           button
                           classes={{ root: this.getActiveStyle('sold', context, classes, 'nested') }}
                           className={classes.nested}
-                          onClick={() => context.updateState({ currentPage: 'sold' })}
+                          onClick={() => this.changeRoute({ currentPage: 'sold' })}
                         >
                           <ListItemText primary="Sold" classes={{ primary: classes.listText }} />
                         </ListItem>
@@ -418,7 +427,7 @@ class Menu extends Component {
                           button
                           classes={{ root: this.getActiveStyle('verified', context, classes, 'nested') }}
                           className={classes.nested}
-                          onClick={() => context.updateState({ currentPage: 'verified' })}
+                          onClick={() => this.changeRoute({ currentPage: 'verified' })}
                         >
                           <ListItemText primary="Verified" classes={{ primary: classes.listText }} />
                         </ListItem>
@@ -427,14 +436,14 @@ class Menu extends Component {
                     <ListItem
                       button
                       classes={{ root: this.getActiveStyle('sell', context, classes) }}
-                      onClick={() => context.updateState({ currentPage: 'sell' })}
+                      onClick={() => this.changeRoute({ currentPage: 'sell' })}
                     >
                       <ListItemText primary="Sell" classes={{ primary: classes.listText }} />
                     </ListItem>
                     <ListItem
                       button
                       classes={{ root: this.getActiveStyle('verify', context, classes) }}
-                      onClick={() => context.updateState({ currentPage: 'verify' })}
+                      onClick={() => this.changeRoute({ currentPage: 'verify' })}
                     >
                       <ListItemText primary="Verify" classes={{ primary: classes.listText }} />
                     </ListItem>

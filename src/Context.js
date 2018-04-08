@@ -5,7 +5,7 @@ import AuthService from './Auth/AuthService';
 
 import { getAccount } from './Components/keyRequests';
 
-import { _getBalance } from './Components/requests';
+import { _getBalance, _getItems } from './Components/requests';
 
 export const MainContext = React.createContext();
 
@@ -22,17 +22,24 @@ export class MainProvider extends Component {
         tokens: 0,
         eth: 0,
       },
-      currentPage: 'login',
+      currentPage: 'explore',
+      allItems: [],
+      myItems: [],
+      historyBuyer: [],
+      historySeller: [],
+      historyVerifier: [],
     };
     this.setCurrentUser = this.setCurrentUser.bind(this);
     this.updateState = this.updateState.bind(this);
     this.updateBalance = this.updateBalance.bind(this)
+    this.getItems = this.getItems.bind(this)
   }
 
   componentWillMount() {
     console.log('mounted');
     if (!Auth.loggedIn()) {
       console.log('not logged in');
+      this.setState({ currentPage: 'login' });
       this.props.history.replace('/login');
     } else {
       try {
@@ -40,6 +47,7 @@ export class MainProvider extends Component {
         if (!localStorage.getItem(profile.name)) {
           console.log('nope');
           // throw new Error();
+          this.setState({ currentPage: 'add vault' });
           this.props.history.push('/vault');
           // return;
         }
@@ -50,8 +58,26 @@ export class MainProvider extends Component {
         
       } catch (err) {
         Auth.logout();
+        this.setState({ currentPage: 'login' });
         this.props.history.replace('/login');
       }
+    }
+  }
+
+  async getItems() {
+    const { address } = this.state;
+    try {
+      const allItems = await _getItems();
+      const myItems = await _getItems(address);
+      const historyBuyer = await _getItems(address, 'buyer');
+      const historySeller = await _getItems(address, 'seller');
+      const historyVerifier = await _getItems(address, 'verifier');
+      console.log(allItems, myItems, historyBuyer, historySeller, historyVerifier);
+      this.setState({ 
+        allItems: allItems.data.sort((a, b) => b.id - a.id), myItems: myItems.data.sort((a, b) => b.id - a.id), historyBuyer: historyBuyer.data, historySeller: historySeller.data, historyVerifier: historyVerifier.data
+       })
+    } catch (e) {
+      console.log(e);
     }
   }
 
@@ -70,7 +96,6 @@ export class MainProvider extends Component {
   }
 
   async updateBalance() {
-    // setTimeout(async () => {
       const response = await _getBalance(this.state.address);
       this.setState({
         balance: {
@@ -78,8 +103,6 @@ export class MainProvider extends Component {
           eth: response.data.eth,
         }
       })
-
-    // }, 3000)
   }
 
   updateState(newState) {
@@ -94,6 +117,7 @@ export class MainProvider extends Component {
           setCurrentUser: this.setCurrentUser,
           updateState: this.updateState,
           updateBalance: this.updateBalance,
+          getItems: this.getItems,
         }}
       >
         {this.props.children}

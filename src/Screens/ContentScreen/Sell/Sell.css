@@ -1,0 +1,15 @@
+.sell-container {
+  margin-top: 30px;
+  width: 100%;
+  /* margin-right: 60px; */
+}
+
+.sell-stepper {
+  width: 50%;
+}
+
+#file-input {
+  visibility:hidden;
+  width:0;
+  height:0;
+}
