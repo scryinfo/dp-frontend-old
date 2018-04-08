@@ -22,22 +22,26 @@ export async function getPassword(username) {
 }
 
 // Buy an item
-export async function _buyItem(listing, username, buyer, verifier, rewardPercent) {
+export async function _buyItem(listing, username, password, buyer, verifier, rewardPercent) {
   // const listing = await axios.get(`${HOST}/listing/${item}`);
   // convert from %
-  const password = await getPassword(username);
   const reward = Math.floor(listing.price / 100 * rewardPercent);
   const createBlock = await openChannel(listing.price, { username, password }, listing.owner.account, reward, 1);
 
   const buyerAuth = await buyerAuthorization({ username, password }, listing.owner.account, createBlock, listing.price);
 
-  return axios.post(`${HOST}/buyer/purchase`, {
-    listing: listing.id,
-    buyer,
-    verifier,
-    rewards: rewardPercent,
-    createBlock,
-    buyerAuth: buyerAuth.signature,
+  return axios({
+    method: 'post',
+    url: `${HOST}/buyer/purchase`,
+    data: {
+      listing: listing.id,
+      buyer,
+      verifier,
+      rewards: rewardPercent,
+      createBlock,
+      buyerAuth: buyerAuth.signature,
+    },
+    headers: { Authorization: localStorage.getItem('id_token') },
   });
 }
 
@@ -61,22 +65,30 @@ export async function _verifyItem(item, username) {
 }
 
 // Close the pending transaction
-export async function _closeTransaction(id, username) {
-  const password = await getPassword(username);
-  const { data } = await axios.get(`${HOST}/history/${id}`);
+export async function _closeTransaction(id, username, password) {
+  const { data } = await axios.get(`${HOST}/history/${id}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
   console.info('close:', data);
+
+  // replace verifier with seller if verifier was not assigned
+  const verifier = data.verifier ? data.verifier.account : data.listing.owner.account;
+  const verifierAuth = data.verifier_auth
+    ? data.verifier_auth
+    : (await verifierAuthorization(data.listing.owner.account, { username, password }, data.listing.cid)).signature;
+
   return closeChannel(
     data.buyer.account,
     {
       username,
       password,
     },
-    data.verifier.account,
+    verifier,
     data.create_block,
     data.listing.cid,
     data.listing.price,
     data.buyer_auth,
-    data.verifier_auth,
+    verifierAuth,
     id
   );
 }
