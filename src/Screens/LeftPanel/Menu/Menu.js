@@ -23,6 +23,8 @@ import { logout, _addTokens } from '../../../Components/requests';
 import './Menu.css';
 import Logo from '../../../assets/images/logo.png';
 
+import { initSigner } from '../../../Components/signer';
+
 import AuthService from '../../../Auth/AuthService';
 
 const Auth = new AuthService();
@@ -111,6 +113,10 @@ class Menu extends Component {
     this.getTokens = this.getTokens.bind(this);
     this.handleOpenSettings = this.handleOpenSettings.bind(this);
     this.handleCloseSettings = this.handleCloseSettings.bind(this);
+  }
+
+  componentWillMount() {
+    initSigner();
   }
 
   handleOpenSettings = event => {

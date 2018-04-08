@@ -10,6 +10,7 @@ import Slide from 'material-ui/transitions/Slide';
 import Typography from 'material-ui/Typography';
 
 import Card, { CardActions, CardContent } from 'material-ui/Card';
+import ErrorPopup from '../../ErrorPopup';
 
 import { _buyItem } from '../../../Components/requests';
 
@@ -84,14 +85,18 @@ class ItemList extends Component {
   };
 
   async buyItem() {
+    this.setState({ isPasswordWindowOpen: false });
     const { username, address } = this.context.state;
     const { item, password } = this.state;
     try {
       console.log(item, username, password, address);
       const status = await _buyItem(item, username, password, address);
+      this.setState({ status: 'purchased succesfully', password: '' });
       console.log(status);
     } catch (e) {
-      console.log(e);
+      const { message } = e.response.data;
+      console.log(message);
+      this.setState({ status: message, password: '' });
     }
   }
 
@@ -141,9 +146,9 @@ class ItemList extends Component {
           this.context = context;
           return (
             <div className="item-list-container">
+              <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               {this.renderPasswordWindow()}
               {items.map(item => this.renderItem(item))}
-              {/* fjdkljskldjkldfjkldjkldjflksjfkldsjfkldsjfkldsfkldjflkjlksjflksdjfldksjfklsjfdlksjdklsfjdklsjfdlskjfdskllsdkjkdlsjfkldsjfklsklsdjfskdl */}
             </div>
           );
         }}

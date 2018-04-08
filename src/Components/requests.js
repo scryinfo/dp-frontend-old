@@ -26,7 +26,7 @@ export async function _buyItem(listing, username, password, buyer, verifier, rew
   // const listing = await axios.get(`${HOST}/listing/${item}`);
   // convert from %
   const reward = Math.floor(listing.price / 100 * rewardPercent);
-  const createBlock = await openChannel(listing.price, { username, password }, listing.owner.account, reward, 1);
+  const createBlock = await openChannel(listing.price, { username, password }, listing.owner.account, reward || 0, 1);
 
   const buyerAuth = await buyerAuthorization({ username, password }, listing.owner.account, createBlock, listing.price);
 
