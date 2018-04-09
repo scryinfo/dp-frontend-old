@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { Component } from 'react';
 
 import AuthService from './Auth/AuthService';
@@ -31,8 +30,8 @@ export class MainProvider extends Component {
     };
     this.setCurrentUser = this.setCurrentUser.bind(this);
     this.updateState = this.updateState.bind(this);
-    this.updateBalance = this.updateBalance.bind(this)
-    this.getItems = this.getItems.bind(this)
+    this.updateBalance = this.updateBalance.bind(this);
+    this.getItems = this.getItems.bind(this);
   }
 
   componentWillMount() {
@@ -55,7 +54,6 @@ export class MainProvider extends Component {
           username: profile.name,
           address: profile.account,
         });
-        
       } catch (err) {
         Auth.logout();
         this.setState({ currentPage: 'login' });
@@ -67,15 +65,24 @@ export class MainProvider extends Component {
   async getItems() {
     const { address } = this.state;
     try {
-      const allItems = await _getItems();
-      const myItems = await _getItems(address);
-      const historyBuyer = await _getItems(address, 'buyer');
-      const historySeller = await _getItems(address, 'seller');
-      const historyVerifier = await _getItems(address, 'verifier');
+      let allItems = await _getItems();
+      let myItems = await _getItems(address);
+      let historyBuyer = await _getItems(address, 'buyer');
+      let historySeller = await _getItems(address, 'seller');
+      let historyVerifier = await _getItems(address, 'verifier');
       console.log(allItems, myItems, historyBuyer, historySeller, historyVerifier);
-      this.setState({ 
-        allItems: allItems.data.sort((a, b) => b.id - a.id), myItems: myItems.data.sort((a, b) => b.id - a.id), historyBuyer: historyBuyer.data, historySeller: historySeller.data, historyVerifier: historyVerifier.data
-       })
+      allItems = allItems.data.sort((a, b) => b.id - a.id);
+      myItems = myItems.data.sort((a, b) => b.id - a.id);
+      historyBuyer = historyBuyer.data.sort((a, b) => b.created_at - a.created_at);
+      historySeller = historySeller.data.sort((a, b) => b.created_at - a.created_at);
+      historyVerifier = historyVerifier.data.sort((a, b) => b.created_at - a.created_at);
+      this.setState({
+        allItems,
+        myItems,
+        historyBuyer,
+        historySeller,
+        historyVerifier,
+      });
     } catch (e) {
       console.log(e);
     }
@@ -83,26 +90,30 @@ export class MainProvider extends Component {
 
   async setCurrentUser(username, password, address) {
     console.log(`setting account ${username}`);
-      const getAddress = await getAccount(username, password);
-      if (!getAddress) {
-        this.setState({ username, vault: true, address, currentPage: 'add vault', password, action: 'login' });
-        this.props.history.push('/vault');
-        return;
-      }
-      this.setState({
-        address: getAddress, username, currentPage: 'explore', password, vault: true,
-      });
-      this.props.history.push('/explore');
+    const getAddress = await getAccount(username, password);
+    if (!getAddress) {
+      this.setState({ username, vault: true, address, currentPage: 'add vault', password, action: 'login' });
+      this.props.history.push('/vault');
+      return;
+    }
+    this.setState({
+      address: getAddress,
+      username,
+      currentPage: 'explore',
+      password,
+      vault: true,
+    });
+    this.props.history.push('/explore');
   }
 
   async updateBalance() {
-      const response = await _getBalance(this.state.address);
-      this.setState({
-        balance: {
-          tokens: response.data.balance,
-          eth: response.data.eth,
-        }
-      })
+    const response = await _getBalance(this.state.address);
+    this.setState({
+      balance: {
+        tokens: response.data.balance,
+        eth: response.data.eth,
+      },
+    });
   }
 
   updateState(newState) {

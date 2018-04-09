@@ -106,7 +106,35 @@ class ContentContainer extends Component {
                 render={props => <ItemList {...props} history={this.props.history} items={context.state.allItems} />}
               />
               <Route
+                path="/inprogress"
+                render={props => (
+                  <ItemList {...props} history={this.props.history} items={context.state.historyBuyer} />
+                )}
+              />
+              <Route
+                path="/purchased"
+                render={props => (
+                  <ItemList {...props} history={this.props.history} items={context.state.historyBuyer} />
+                )}
+              />
+              <Route
+                path="/sold"
+                render={props => (
+                  <ItemList {...props} history={this.props.history} items={context.state.historySeller} />
+                )}
+              />
+              <Route
+                path="/verified"
+                render={props => (
+                  <ItemList {...props} history={this.props.history} items={context.state.historyVerifier} />
+                )}
+              />
+              <Route
                 path="/sell"
+                render={props => <Sell {...props} history={this.props.history} items={context.state.allItems} />}
+              />
+              <Route
+                path="/verify"
                 render={props => <Sell {...props} history={this.props.history} items={context.state.allItems} />}
               />
             </div>

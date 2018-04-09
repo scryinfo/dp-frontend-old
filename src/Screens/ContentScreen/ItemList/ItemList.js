@@ -12,7 +12,7 @@ import Typography from 'material-ui/Typography';
 import Card, { CardActions, CardContent } from 'material-ui/Card';
 import ErrorPopup from '../../ErrorPopup';
 
-import { _buyItem } from '../../../Components/requests';
+import { _buyItem, _closeTransaction } from '../../../Components/requests';
 
 import './ItemList.css';
 import { MainContext } from '../../../Context';
@@ -47,6 +47,8 @@ class ItemList extends Component {
 
   renderItem = item => {
     const { classes } = this.props;
+    const { currentPage } = this.context.state;
+    const selectedItem = item.listing || item;
     return (
       <div className="card-container" key={Math.random()} style={{ width: '300px' }}>
         <Card className={classes.card}>
@@ -67,16 +69,16 @@ class ItemList extends Component {
                 whiteSpace: 'no-wrap',
               }}
             >
-              {item.name || 'Name'}
+              {selectedItem.name || 'Name'}
             </Typography>
             <Typography className={classes.pos} color="textSecondary">
-              {(item.owner && item.owner.name) || 'seller'}
+              {(selectedItem.owner && selectedItem.owner.name) || 'seller'}
             </Typography>
-            <Typography component="p">{`${item.price} tokens` || 'price'}</Typography>
+            <Typography component="p">{`${selectedItem.price} tokens`}</Typography>
           </CardContent>
           <CardActions>
             <Button size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
-              Buy now
+              {currentPage === 'explore' ? 'Buy now' : 'Close transaction'}
             </Button>
           </CardActions>
         </Card>
@@ -97,6 +99,37 @@ class ItemList extends Component {
       const { message } = e.response.data;
       console.log(message);
       this.setState({ status: message, password: '' });
+    }
+  }
+
+  async closeTransaction() {
+    this.setState({ isPasswordWindowOpen: false });
+    const { username } = this.context.state;
+    const { item, password } = this.state;
+    try {
+      console.log(item.id, username, password);
+      const status = await _closeTransaction(item.id, username, password);
+      this.setState({ status: 'transaction closed', password: '' });
+      console.log(status);
+    } catch (e) {
+      const { message } = e.response.data;
+      console.log(message);
+      this.setState({ status: message, password: '' });
+    }
+  }
+
+  getAction() {
+    const { currentPage } = this.context.state;
+    switch (currentPage) {
+      case 'explore':
+        return this.buyItem();
+      case 'purchased':
+        return this.closeTransaction();
+      case 'sold':
+        return this.closeTransaction();
+      case 'verified':
+        return this.buyItem();
+      default:
     }
   }
 
@@ -130,7 +163,7 @@ class ItemList extends Component {
         <Button onClick={() => this.setState({ isPasswordWindowOpen: false })} color="primary">
           Cancel
         </Button>
-        <Button onClick={() => this.buyItem()} color="primary">
+        <Button onClick={() => this.getAction()} color="primary">
           Confirm
         </Button>
       </DialogActions>
@@ -148,6 +181,7 @@ class ItemList extends Component {
             <div className="item-list-container">
               <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               {this.renderPasswordWindow()}
+
               {items.map(item => this.renderItem(item))}
             </div>
           );
