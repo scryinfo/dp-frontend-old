@@ -49,6 +49,7 @@ class ItemList extends Component {
     const { classes } = this.props;
     const { currentPage } = this.context.state;
     const selectedItem = item.listing || item;
+
     return (
       <div className="card-container" key={Math.random()} style={{ width: '300px' }}>
         <Card className={classes.card}>
@@ -76,13 +77,39 @@ class ItemList extends Component {
             </Typography>
             <Typography component="p">{`${selectedItem.price} tokens`}</Typography>
           </CardContent>
-          <CardActions>
-            <Button size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
-              {currentPage === 'explore' ? 'Buy now' : 'Close transaction'}
-            </Button>
-          </CardActions>
+          <CardActions>{this.renderButton(item)}</CardActions>
         </Card>
       </div>
+    );
+  };
+
+  renderButton = item => {
+    if (item.needs_closure) {
+      if (this.props.type === 'sold') {
+        return (
+          <Button size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
+            Close transaction
+          </Button>
+        );
+      }
+      return (
+        <Button disabled size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
+          Waiting for confirmation
+        </Button>
+      );
+    }
+
+    if (this.context.state.currentPage === 'explore') {
+      return (
+        <Button size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
+          Purchase
+        </Button>
+      );
+    }
+    return (
+      <Button disabled size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
+        Done
+      </Button>
     );
   };
 
@@ -91,10 +118,9 @@ class ItemList extends Component {
     const { username, address } = this.context.state;
     const { item, password } = this.state;
     try {
-      console.log(item, username, password, address);
       const status = await _buyItem(item, username, password, address);
       this.setState({ status: 'purchased succesfully', password: '' });
-      console.log(status);
+      this.context.getItems();
     } catch (e) {
       const { message } = e.response.data;
       console.log(message);
@@ -107,10 +133,9 @@ class ItemList extends Component {
     const { username } = this.context.state;
     const { item, password } = this.state;
     try {
-      console.log(item.id, username, password);
       const status = await _closeTransaction(item.id, username, password);
       this.setState({ status: 'transaction closed', password: '' });
-      console.log(status);
+      this.context.getItems();
     } catch (e) {
       const { message } = e.response.data;
       console.log(message);
@@ -124,6 +149,8 @@ class ItemList extends Component {
       case 'explore':
         return this.buyItem();
       case 'purchased':
+        return this.closeTransaction();
+      case 'in progress':
         return this.closeTransaction();
       case 'sold':
         return this.closeTransaction();
@@ -145,22 +172,35 @@ class ItemList extends Component {
       <DialogContent>
         <DialogContentText style={{ width: '600px' }} />
         <TextField
+          name="password"
+          label="Password"
+          type="password"
+          autoFocus
+          fullWidth
+          value={this.state.password}
+          onChange={event => this.setState({ password: event.target.value })}
+          margin="normal"
+        />
+      </DialogContent>
+      {/* <DialogContent>
+        <DialogContentText style={{ width: '600px' }} />
+        <TextField
+          type="password"
           id="password"
           name="password"
           label="Enter here"
           // placeholder="Placeholder"
           autoFocus
           multiline
-          type="password"
           fullWidth
           value={this.state.password}
           onChange={event => this.setState({ password: event.target.value })}
           // className={classes.textField}
           margin="normal"
         />
-      </DialogContent>
+      </DialogContent> */}
       <DialogActions>
-        <Button onClick={() => this.setState({ isPasswordWindowOpen: false })} color="primary">
+        <Button onClick={() => this.setState({ isPasswordWindowOpen: false, password: '' })} color="primary">
           Cancel
         </Button>
         <Button onClick={() => this.getAction()} color="primary">
@@ -172,7 +212,6 @@ class ItemList extends Component {
 
   render() {
     const { classes, items } = this.props;
-    console.log(items);
     return (
       <MainContext.Consumer>
         {context => {
@@ -181,7 +220,6 @@ class ItemList extends Component {
             <div className="item-list-container">
               <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               {this.renderPasswordWindow()}
-
               {items.map(item => this.renderItem(item))}
             </div>
           );

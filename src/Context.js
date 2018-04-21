@@ -24,9 +24,12 @@ export class MainProvider extends Component {
       currentPage: 'explore',
       allItems: [],
       myItems: [],
-      historyBuyer: [],
-      historySeller: [],
-      historyVerifier: [],
+      itemsBought: [],
+      itemsSold: [],
+      itemsVerified: [],
+      inProgressBought: [],
+      inProgressSold: [],
+      inProgressVerified: [],
     };
     this.setCurrentUser = this.setCurrentUser.bind(this);
     this.updateState = this.updateState.bind(this);
@@ -65,31 +68,48 @@ export class MainProvider extends Component {
   async getItems() {
     const { address } = this.state;
     try {
-      let allItems = await _getItems();
-      let myItems = await _getItems(address);
-      let historyBuyer = await _getItems(address, 'buyer');
-      let historySeller = await _getItems(address, 'seller');
-      let historyVerifier = await _getItems(address, 'verifier');
-      console.log(allItems, myItems, historyBuyer, historySeller, historyVerifier);
-      allItems = allItems.data.sort((a, b) => b.id - a.id);
-      myItems = myItems.data.sort((a, b) => b.id - a.id);
-      historyBuyer = historyBuyer.data.sort((a, b) => b.created_at - a.created_at);
-      historySeller = historySeller.data.sort((a, b) => b.created_at - a.created_at);
-      historyVerifier = historyVerifier.data.sort((a, b) => b.created_at - a.created_at);
+      let { data: allItems } = await _getItems();
+      let { data: myItems } = await _getItems(address);
+      const { data: historyBuyer } = await _getItems(address, 'buyer');
+      const { data: historySeller } = await _getItems(address, 'seller');
+      const { data: historyVerifier } = await _getItems(address, 'verifier');
+
+      // All items
+      allItems = allItems.sort((a, b) => b.id - a.id);
+
+      // My items
+      myItems = myItems.sort((a, b) => b.id - a.id);
+
+      // Transaction closed
+      const itemsBought = this.getClosed(historyBuyer);
+      const itemsSold = this.getClosed(historySeller);
+      const itemsVerified = this.getClosed(historyVerifier);
+
+      // Transaction in progress
+      const inProgressBought = this.getInProgress(historyBuyer);
+      const inProgressSold = this.getInProgress(historySeller);
+      const inProgressVerified = this.getInProgress(historyVerifier);
+
       this.setState({
         allItems,
         myItems,
-        historyBuyer,
-        historySeller,
-        historyVerifier,
+        itemsBought,
+        itemsSold,
+        itemsVerified,
+        inProgressBought,
+        inProgressSold,
+        inProgressVerified,
       });
     } catch (e) {
       console.log(e);
     }
   }
 
+  getInProgress = list => list.filter(data => data.needs_closure).sort((a, b) => b.created_at - a.created_at);
+
+  getClosed = list => list.filter(data => !data.needs_closure).sort((a, b) => b.created_at - a.created_at);
+
   async setCurrentUser(username, password, address) {
-    console.log(`setting account ${username}`);
     const getAddress = await getAccount(username, password);
     if (!getAddress) {
       this.setState({ username, vault: true, address, currentPage: 'add vault', password, action: 'login' });
