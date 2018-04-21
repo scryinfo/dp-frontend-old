@@ -11,6 +11,7 @@ import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } 
 import MenuPopup, { MenuItem } from 'material-ui/Menu';
 import Slide from 'material-ui/transitions/Slide';
 import Popover from 'material-ui/Popover';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { getAccount } from '../../../Components/keyRequests';
 
@@ -19,6 +20,8 @@ import { getMnemonic } from '../../../Components/keys';
 import { MainContext } from '../../../Context';
 
 import { logout, _addTokens } from '../../../Components/requests';
+
+import ErrorPopup from '../../ErrorPopup';
 
 import './Menu.css';
 import Logo from '../../../assets/images/logo.png';
@@ -258,9 +261,15 @@ class Menu extends Component {
           <Button onClick={() => this.setState({ isMnemonicWindowOpen: false })} color="primary">
             Close
           </Button>
-          <Button onClick={this.handleClose} color="primary">
-            Copy
-          </Button>
+          <CopyToClipboard
+            text={this.state.mnemonic}
+            onCopy={() => {
+              this.setState({ isMnemonicWindowOpen: false, status: 'Copied successfully' });
+              setTimeout(() => this.setState({ status: '' }), 3000);
+            }}
+          >
+            <Button color="primary">Copy</Button>
+          </CopyToClipboard>
         </DialogActions>
       </Dialog>
     );
@@ -290,6 +299,7 @@ class Menu extends Component {
           } = context.state;
           return (
             <Fragment>
+              <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               <div className="menu-container">
                 <div className="menu-logo-container">
                   <span>SCRY.INFO</span>
