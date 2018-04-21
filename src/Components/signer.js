@@ -14,15 +14,21 @@ let gasPrice;
 let chainId;
 
 export async function initSigner() {
-  const { data: contracts } = await axios.get(`${HOST}/contracts.json`);
-  const { data: { deployments } } = await axios.get(`${HOST}/registrar.json`);
+  const { data: contracts } = await axios.get(`${HOST}/contracts.json`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
+  const { data: { deployments } } = await axios.get(`${HOST}/registrar.json`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
   const registry = Object.values(deployments).reduce((acc, ele) => (acc = Object.assign(acc, ele)), {});
   token = new web3.eth.Contract(contracts.ScryToken.abi, registry.ScryToken);
   console.info('token:', token._address);
   contract = new web3.eth.Contract(contracts.Scry.abi, registry.Scry);
   console.info('contract:', contract._address);
 
-  ({ data: { gasPrice, chainId } } = await axios.get(`${HOST}/chainInfo`));
+  ({ data: { gasPrice, chainId } } = await axios.get(`${HOST}/chainInfo`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  }));
 
   console.info(`gas:${gasPrice} chain:${chainId}`);
 }
@@ -30,7 +36,9 @@ export async function initSigner() {
 async function signAndSend(from, to, gas, payload, url, extra) {
   const vault = await loadVault(window.localStorage.getItem(from.username), from.password);
   const sender = toChecksumAddress(vault.addresses[0]);
-  const { data: { nonce } } = await axios.get(`${HOST}/nonce/${sender}`);
+  const { data: { nonce } } = await axios.get(`${HOST}/nonce/${sender}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
   console.info(`nonce ${nonce} for acct: ${sender}`);
   console.info(`from: ${sender} to: ${to}`);
   const tx = {
@@ -53,6 +61,7 @@ async function signAndSend(from, to, gas, payload, url, extra) {
     method: 'post',
     url: `${HOST}/${url}`,
     data: { data: signed.rawTransaction, ...extra },
+    headers: { Authorization: localStorage.getItem('id_token') },
   });
   console.info('resp:', resp.data);
   return resp.data.create_block;
@@ -61,7 +70,7 @@ async function signAndSend(from, to, gas, payload, url, extra) {
 export async function openChannel(amount, buyer, seller, reward, verifiers) {
   const hx = toChecksumAddress(seller) + padLeft(reward, 8).slice(2) + padLeft(verifiers, 8).slice(2);
   console.info(`hx: ${hx}`);
-
+  console.log(token);
   const payload = token.methods.transfer(contract._address, amount, hx).encodeABI();
 
   return signAndSend(buyer, token._address, 198580, payload, 'rawTx');

@@ -3,5 +3,7 @@
   height: 100vh;
   background-color: #162632;
   box-sizing: border-box;
-  /* position: fixed; */
+  position: fixed;
+  top: 0;
+  left: 0;
 }

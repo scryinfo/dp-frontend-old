@@ -52,17 +52,19 @@ export default class LeftPanel extends Component {
 
   render() {
     return (
-      <StyledAnimatedSwitch
-        {...this.state.pageTransitions}
-        mapStyles={styles => ({
-          transform: `translate3d(${styles.offset}%, 0, 0)`,
-          // opacity: styles,
-        })}
-      >
-        <Route path="/login" render={props => <LoginLeftSide {...props} history={this.props.history} />} />
-        <Route path="/vault" render={props => <LoginLeftSide {...props} history={this.props.history} />} />
-        <Route path="/" render={props => <Menu {...props} history={this.props.history} />} />
-      </StyledAnimatedSwitch>
+      <div className="left-panel-container">
+        <StyledAnimatedSwitch
+          {...this.state.pageTransitions}
+          mapStyles={styles => ({
+            transform: `translate3d(${styles.offset}%, 0, 0)`,
+            // opacity: styles,
+          })}
+        >
+          <Route path="/login" render={props => <LoginLeftSide {...props} history={this.props.history} />} />
+          <Route path="/vault" render={props => <LoginLeftSide {...props} history={this.props.history} />} />
+          <Route path="/" render={props => <Menu {...props} history={this.props.history} />} />
+        </StyledAnimatedSwitch>
+      </div>
     );
   }
 }

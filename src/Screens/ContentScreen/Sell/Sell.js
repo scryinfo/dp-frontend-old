@@ -215,11 +215,9 @@ class Sell extends Component {
       onUploadProgress: progress => {
         const status = Math.floor(progress.loaded / progress.total * 100);
         this.setState({ uploadProgress: status, status: `Uploading ${whereToUpload}: ${status}% done` });
-        console.log(progress);
       },
     })
       .then(response => {
-        console.log(response);
         const ipfsId = response.headers['ipfs-hash'];
         axios({
           method: 'POST',
@@ -230,7 +228,6 @@ class Sell extends Component {
             Authorization: localStorage.getItem('id_token'),
           },
         }).then(res => {
-          console.log('uploaded', res);
           this.setState({
             done: true,
             status: 'Uploaded successfully',
@@ -270,7 +267,6 @@ class Sell extends Component {
     event.stopPropagation();
     event.preventDefault();
     const file = event.target.files[0];
-    console.log('file here', file);
     this.setState({ file, status: '', activeStep: this.state.activeStep + 1 });
   }
 

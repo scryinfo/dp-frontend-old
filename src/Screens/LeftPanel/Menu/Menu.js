@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { withStyles } from 'material-ui/styles';
 import TextField from 'material-ui/TextField';
 // import { List, ListItem } from 'material-ui/List';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import List, { ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction } from 'material-ui/List';
 import Collapse from 'material-ui/transitions/Collapse';
 // import FlatButton from 'material-ui/FlatButton';
 import Button from 'material-ui/Button';
@@ -11,6 +11,7 @@ import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } 
 import MenuPopup, { MenuItem } from 'material-ui/Menu';
 import Slide from 'material-ui/transitions/Slide';
 import Popover from 'material-ui/Popover';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { getAccount } from '../../../Components/keyRequests';
 
@@ -20,8 +21,12 @@ import { MainContext } from '../../../Context';
 
 import { logout, _addTokens } from '../../../Components/requests';
 
+import ErrorPopup from '../../ErrorPopup';
+
 import './Menu.css';
 import Logo from '../../../assets/images/logo.png';
+
+import { initSigner } from '../../../Components/signer';
 
 import AuthService from '../../../Auth/AuthService';
 
@@ -79,8 +84,8 @@ const styles = theme => ({
   },
   inputText: {
     color: 'white',
-    paddingLeft: '20px',
-    paddingTop: '8px',
+    paddingLeft: '10px',
+    paddingTop: '10px',
     fontSize: '14px',
   },
   buttonProgress: {
@@ -113,18 +118,19 @@ class Menu extends Component {
     this.handleCloseSettings = this.handleCloseSettings.bind(this);
   }
 
+  componentWillMount() {
+    initSigner();
+  }
+
   handleOpenSettings = event => {
     this.setState({ anchorEl: event.currentTarget });
   };
 
   handleCloseSettings = () => {
-    console.log('close called');
     this.setState({ anchorEl: null });
-    console.log(this.state.anchorEl);
   };
 
   componentDidMount() {
-    console.log(this.context);
     if (this.context) {
       this.context.updateBalance();
       this.context.getItems();
@@ -141,7 +147,6 @@ class Menu extends Component {
   };
 
   handleLogout = async context => {
-    console.log(this.props);
     try {
       await Auth.logout();
       context.updateState({ username: '', password: '', mnemonics: '', address: '' });
@@ -156,7 +161,6 @@ class Menu extends Component {
   };
 
   handleInput(event) {
-    console.log(event.target.value);
     this.setState({ tokensToAdd: event.target.value });
     event.preventDefault();
   }
@@ -213,48 +217,15 @@ class Menu extends Component {
     >
       <DialogTitle id="form-dialog-title">Enter your password</DialogTitle>
       <DialogContent>
-        <DialogContentText style={{ width: '600px' }}>
-          {/* To import your existing vault please confirm your password */}
-        </DialogContentText>
-        {/* <TextField
-          id="password"
-          name="password"
-          type="password"
-          label="Enter your password here"
-          // placeholder="Placeholder"
-          // autoFocus
-          multiline
-          fullWidth
-          value={this.state.password}
-          onChange={event => this.setState({ password: event.target.value })}
-          // className={classes.textField}
-          margin="normal"
-          // style={{ width: '600px' }}
-        /> */}
+        <DialogContentText style={{ width: '600px' }} />
         <TextField
           name="password"
           label="Password"
           type="password"
           fullWidth
-          // required={!!passwordError}
-          // error={!!passwordError}
-          // className={classes.textField}
           value={this.state.password}
-          // onChange={this.handleInput}
           onChange={event => this.setState({ password: event.target.value })}
           margin="normal"
-          // InputLabelProps={{
-          //   classes: {
-          //     root: classes.inputLabel,
-          //     shrink: classes.inputShrink,
-          //   },
-          // }}
-          // InputProps={{
-          //   classes: {
-          //     input: classes.inputText,
-          //     underline: classes.inputUnderline,
-          //   },
-          // }}
         />
       </DialogContent>
       <DialogActions>
@@ -290,9 +261,15 @@ class Menu extends Component {
           <Button onClick={() => this.setState({ isMnemonicWindowOpen: false })} color="primary">
             Close
           </Button>
-          <Button onClick={this.handleClose} color="primary">
-            Copy
-          </Button>
+          <CopyToClipboard
+            text={this.state.mnemonic}
+            onCopy={() => {
+              this.setState({ isMnemonicWindowOpen: false, status: 'Copied successfully' });
+              setTimeout(() => this.setState({ status: '' }), 3000);
+            }}
+          >
+            <Button color="primary">Copy</Button>
+          </CopyToClipboard>
         </DialogActions>
       </Dialog>
     );
@@ -300,20 +277,29 @@ class Menu extends Component {
 
   changeRoute(to) {
     this.context.updateState({ currentPage: to.currentPage });
-    this.props.history.push(`/${to.currentPage}`);
+    this.props.history.push(`/${to.currentPage.replace(' ', '')}`);
   }
 
   render() {
     const { classes } = this.props;
     const { loading, tokensToAdd, anchorEl } = this.state;
-    console.log(anchorEl);
     return (
       <MainContext.Consumer>
         {context => {
-          console.log(context);
           this.context = context;
+          const {
+            allItems,
+            myItems,
+            itemsBought,
+            itemsSold,
+            itemsVerified,
+            inProgressBought,
+            inProgressSold,
+            inProgressVerified,
+          } = context.state;
           return (
             <Fragment>
+              <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               <div className="menu-container">
                 <div className="menu-logo-container">
                   <span>SCRY.INFO</span>
@@ -380,13 +366,21 @@ class Menu extends Component {
                 {/* List items */}
                 <div className={classes.root}>
                   <List component="nav">
+                    {/* EXPLORE */}
                     <ListItem
                       button
                       classes={{ root: this.getActiveStyle('explore', context, classes) }}
                       onClick={() => this.changeRoute({ currentPage: 'explore' })}
                     >
                       <ListItemText primary="Explore" classes={{ primary: classes.listText }} />
+                      <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                          {allItems.length}
+                        </div>
+                      </ListItemSecondaryAction>
                     </ListItem>
+
+                    {/* MY ITEMS */}
                     <ListItem button onClick={this.handleClick} classes={{ root: classes.listContainer }}>
                       <ListItemText primary="My Items" classes={{ primary: classes.listText }} />
                       {/* {this.state.open ? <ExpandLess /> : <ExpandMore />} */}
@@ -400,6 +394,11 @@ class Menu extends Component {
                           onClick={() => this.changeRoute({ currentPage: 'in progress' })}
                         >
                           <ListItemText primary="In Progress" classes={{ primary: classes.listText }} />
+                          <ListItemSecondaryAction>
+                            <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                              {inProgressBought.length + inProgressSold.length + inProgressVerified.length}
+                            </div>
+                          </ListItemSecondaryAction>
                         </ListItem>
                       </List>
                       <List component="div" disablePadding>
@@ -410,6 +409,11 @@ class Menu extends Component {
                           onClick={() => this.changeRoute({ currentPage: 'purchased' })}
                         >
                           <ListItemText primary="Purchased" classes={{ primary: classes.listText }} />
+                          <ListItemSecondaryAction>
+                            <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                              {itemsBought.length}
+                            </div>
+                          </ListItemSecondaryAction>
                         </ListItem>
                       </List>
                       <List component="div" disablePadding>
@@ -420,6 +424,11 @@ class Menu extends Component {
                           onClick={() => this.changeRoute({ currentPage: 'sold' })}
                         >
                           <ListItemText primary="Sold" classes={{ primary: classes.listText }} />
+                          <ListItemSecondaryAction>
+                            <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                              {itemsSold.length}
+                            </div>
+                          </ListItemSecondaryAction>
                         </ListItem>
                       </List>
                       <List component="div" disablePadding>
@@ -430,6 +439,11 @@ class Menu extends Component {
                           onClick={() => this.changeRoute({ currentPage: 'verified' })}
                         >
                           <ListItemText primary="Verified" classes={{ primary: classes.listText }} />
+                          <ListItemSecondaryAction>
+                            <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                              {itemsVerified.length}
+                            </div>
+                          </ListItemSecondaryAction>
                         </ListItem>
                       </List>
                     </Collapse>
@@ -439,6 +453,9 @@ class Menu extends Component {
                       onClick={() => this.changeRoute({ currentPage: 'sell' })}
                     >
                       <ListItemText primary="Sell" classes={{ primary: classes.listText }} />
+                      {/* <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>1</div>
+                      </ListItemSecondaryAction> */}
                     </ListItem>
                     <ListItem
                       button
@@ -446,6 +463,11 @@ class Menu extends Component {
                       onClick={() => this.changeRoute({ currentPage: 'verify' })}
                     >
                       <ListItemText primary="Verify" classes={{ primary: classes.listText }} />
+                      {/* <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                          {this.context.state.verified.length}
+                        </div>
+                      </ListItemSecondaryAction> */}
                     </ListItem>
                   </List>
                 </div>
