@@ -60,7 +60,7 @@ class ContentContainer extends Component {
             <div className="content-container">
               <div className="content-header">
                 <div className="content-title">{context.state.currentPage}</div>
-                <div className="content-search-bar-container">
+                {/* <div className="content-search-bar-container">
                   <div className="">
                     <TextField
                       id="search"
@@ -101,7 +101,7 @@ class ContentContainer extends Component {
                       }}
                     />
                   </div>
-                </div>
+                </div> */}
               </div>
               <div className="list-items">
                 <Route

@@ -57,6 +57,7 @@ export class MainProvider extends Component {
           username: profile.name,
           address: profile.account,
         });
+        this.props.history.push('/explore');
       } catch (err) {
         Auth.logout();
         this.setState({ currentPage: 'login' });

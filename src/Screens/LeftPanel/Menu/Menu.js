@@ -81,8 +81,8 @@ const styles = theme => ({
   },
   inputText: {
     color: 'white',
-    paddingLeft: '20px',
-    paddingTop: '8px',
+    paddingLeft: '10px',
+    paddingTop: '10px',
     fontSize: '14px',
   },
   buttonProgress: {
