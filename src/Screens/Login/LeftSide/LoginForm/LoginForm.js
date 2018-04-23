@@ -290,6 +290,7 @@ class LoginForm extends React.Component {
           <TextField
             name="username"
             label="Username"
+            type="text"
             fullWidth
             required={!!usernameError}
             error={!!usernameError}
@@ -310,7 +311,6 @@ class LoginForm extends React.Component {
               },
             }}
           />
-          <br />
           <TextField
             name="password"
             label="Password"

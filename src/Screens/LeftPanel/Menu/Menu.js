@@ -30,6 +30,8 @@ import { initSigner } from '../../../Components/signer';
 
 import AuthService from '../../../Auth/AuthService';
 
+import PasswordModal from '../../PasswordModal';
+
 const Auth = new AuthService();
 
 const styles = theme => ({
@@ -197,49 +199,18 @@ class Menu extends Component {
   }
 
   async getMnemonic() {
-    this.setState({ isPasswordWindowOpen: false });
     try {
+      const password = await this.passwordModal.open();
+      console.log(password);
       const vault = await localStorage.getItem(this.context.state.username);
-      const mnemonic = await getMnemonic(vault, this.state.password);
+      const mnemonic = await getMnemonic(vault, password);
       this.setState({ mnemonic, isMnemonicWindowOpen: true });
     } catch (e) {
       console.log(e);
     }
   }
 
-  renderPasswordWindow = () => (
-    <Dialog
-      disableBackdropClick
-      disableEscapeKeyDown
-      open={this.state.isPasswordWindowOpen}
-      onClose={() => this.setState({ isPasswordWindowOpen: false })}
-      aria-labelledby="form-dialog-title"
-    >
-      <DialogTitle id="form-dialog-title">Enter your password</DialogTitle>
-      <DialogContent>
-        <DialogContentText style={{ width: '600px' }} />
-        <TextField
-          name="password"
-          label="Password"
-          type="password"
-          fullWidth
-          value={this.state.password}
-          onChange={event => this.setState({ password: event.target.value })}
-          margin="normal"
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => this.setState({ isPasswordWindowOpen: false })} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={() => this.getMnemonic()} color="primary">
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
-  Transition(props) {
+  transition(props) {
     return <Slide direction="up" {...props} />;
   }
 
@@ -247,7 +218,7 @@ class Menu extends Component {
     return (
       <Dialog
         open={this.state.isMnemonicWindowOpen}
-        transition={this.Transition}
+        transition={this.transition}
         keepMounted
         onClose={() => this.setState({ isMnemonicWindowOpen: false })}
         aria-labelledby="alert-dialog-slide-title"
@@ -497,7 +468,7 @@ class Menu extends Component {
                     <MenuItem
                       onClick={() => {
                         this.handleCloseSettings();
-                        this.setState({ isPasswordWindowOpen: true });
+                        this.getMnemonic();
                       }}
                     >
                       Export vault
@@ -530,7 +501,11 @@ class Menu extends Component {
                   </Button>
                 </div>
               </div>
-              {this.renderPasswordWindow()}
+              <PasswordModal
+                onRef={ref => {
+                  this.passwordModal = ref;
+                }}
+              />
               {this.renderMnemonicWindow()}
             </Fragment>
           );

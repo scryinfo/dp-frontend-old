@@ -3,9 +3,7 @@ import { withStyles } from 'material-ui/styles';
 
 import Button from 'material-ui/Button';
 
-import TextField from 'material-ui/TextField';
-import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
-import Slide from 'material-ui/transitions/Slide';
+import Modal from 'material-ui/Modal';
 
 import Typography from 'material-ui/Typography';
 
@@ -14,10 +12,12 @@ import ErrorPopup from '../../ErrorPopup';
 
 import { _buyItem, _closeTransaction } from '../../../Components/requests';
 
+import PasswordModal from '../../PasswordModal';
+
 import './ItemList.css';
 import { MainContext } from '../../../Context';
 
-const styles = {
+const styles = theme => ({
   card: {
     minWidth: 275,
   },
@@ -33,15 +33,23 @@ const styles = {
   pos: {
     marginBottom: 12,
   },
-};
+  paper: {
+    position: 'absolute',
+    width: theme.spacing.unit * 50,
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing.unit * 4,
+  },
+});
 
 class ItemList extends Component {
   constructor(props) {
     super(props);
     this.state = {
       password: '',
-      item: {},
+      item: null,
       isPasswordWindowOpen: false,
+      isModalOpen: true,
     };
   }
 
@@ -101,9 +109,18 @@ class ItemList extends Component {
 
     if (this.context.state.currentPage === 'explore') {
       return (
-        <Button size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
+        <Button
+          size="small"
+          onClick={() => {
+            // this.setState({ item });
+            this.buyItem(item);
+          }}
+        >
           Purchase
         </Button>
+        // <Button size="small" onClick={() => this.setState({ item })}>
+        //   Purchase
+        // </Button>
       );
     }
     return (
@@ -113,18 +130,21 @@ class ItemList extends Component {
     );
   };
 
-  async buyItem() {
-    this.setState({ isPasswordWindowOpen: false });
+  async buyItem(item) {
     const { username, address } = this.context.state;
-    const { item, password } = this.state;
+    // const { item } = this.state;
+    console.log('iteeeeem', item);
     try {
+      const password = await this.password.open();
+      console.log(password);
       const status = await _buyItem(item, username, password, address);
       this.setState({ status: 'purchased succesfully', password: '' });
       this.context.getItems();
     } catch (e) {
-      const { message } = e.response.data;
-      console.log(message);
-      this.setState({ status: message, password: '' });
+      console.log(e);
+      // const { message } = e && e.response && e.response.data;
+      // console.log(message);
+      // this.setState({ status: message, password: '' });
     }
   }
 
@@ -160,55 +180,36 @@ class ItemList extends Component {
     }
   }
 
-  renderPasswordWindow = () => (
-    <Dialog
-      disableBackdropClick
-      disableEscapeKeyDown
-      open={this.state.isPasswordWindowOpen}
-      onClose={() => this.setState({ isPasswordWindowOpen: false })}
-      aria-labelledby="form-dialog-title"
-    >
-      <DialogTitle id="form-dialog-title">Enter your password</DialogTitle>
-      <DialogContent>
-        <DialogContentText style={{ width: '600px' }} />
-        <TextField
-          name="password"
-          label="Password"
-          type="password"
-          autoFocus
-          fullWidth
-          value={this.state.password}
-          onChange={event => this.setState({ password: event.target.value })}
-          margin="normal"
-        />
-      </DialogContent>
-      {/* <DialogContent>
-        <DialogContentText style={{ width: '600px' }} />
-        <TextField
-          type="password"
-          id="password"
-          name="password"
-          label="Enter here"
-          // placeholder="Placeholder"
-          autoFocus
-          multiline
-          fullWidth
-          value={this.state.password}
-          onChange={event => this.setState({ password: event.target.value })}
-          // className={classes.textField}
-          margin="normal"
-        />
-      </DialogContent> */}
-      <DialogActions>
-        <Button onClick={() => this.setState({ isPasswordWindowOpen: false, password: '' })} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={() => this.getAction()} color="primary">
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  renderModal = () => {
+    console.log(this.password);
+    const { classes } = this.props;
+    const { item } = this.state;
+    return (
+      <Modal
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+        open={!!item}
+        onClose={this.handleClose}
+      >
+        <div
+          style={{
+            top: `50%`,
+            left: `50%`,
+            transform: `translate(-50%, -50%)`,
+          }}
+          className={classes.paper}
+        >
+          <Typography variant="title" id="modal-title">
+            Text in a modal
+          </Typography>
+          <Typography variant="subheading" id="simple-modal-description">
+            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+          </Typography>
+          {/* <SimpleModalWrapped /> */}
+        </div>
+      </Modal>
+    );
+  };
 
   render() {
     const { classes, items } = this.props;
@@ -219,8 +220,13 @@ class ItemList extends Component {
           return (
             <div className="item-list-container">
               <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
-              {this.renderPasswordWindow()}
               {items.map(item => this.renderItem(item))}
+              {this.renderModal()}
+              <PasswordModal
+                onRef={ref => {
+                  this.password = ref;
+                }}
+              />
             </div>
           );
         }}
