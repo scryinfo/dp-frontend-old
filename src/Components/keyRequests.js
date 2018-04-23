@@ -53,6 +53,7 @@ export const importVault = async (username, password, mnemonic) => {
       address: vault.getAddresses()[0],
     };
   } catch (e) {
+    console.log('errrrororororor');
     throw new Error(e);
   }
 };

@@ -31,7 +31,7 @@ class MnemonicModal extends Component {
     });
 
   close = () => {
-    this.setState({ isOpen: false });
+    this.setState({ isOpen: false, mnemonic: '' });
   };
 
   transition(props) {
@@ -47,7 +47,7 @@ class MnemonicModal extends Component {
         transition={this.transition}
         keepMounted
         open={isOpen}
-        onClose={() => this.setState({ isOpen: false })}
+        onClose={this.close}
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Enter your Mnemonic</DialogTitle>
@@ -70,10 +70,16 @@ class MnemonicModal extends Component {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => this.setState({ isOpen: false })} color="primary">
+          <Button onClick={() => this.close()} color="primary">
             Cancel
           </Button>
-          <Button onClick={() => this.resolve(mnemonic)} color="primary">
+          <Button
+            onClick={() => {
+              this.resolve(mnemonic);
+              this.close();
+            }}
+            color="primary"
+          >
             Import
           </Button>
         </DialogActions>

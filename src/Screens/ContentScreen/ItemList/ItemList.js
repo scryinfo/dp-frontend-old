@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { withStyles } from 'material-ui/styles';
 
+import { createWriteStream } from 'streamsaver';
+
 import Button from 'material-ui/Button';
 
 import Modal from 'material-ui/Modal';
@@ -95,13 +97,18 @@ class ItemList extends Component {
     if (item.needs_closure) {
       if (this.props.type === 'sold') {
         return (
-          <Button size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
+          <Button
+            size="small"
+            onClick={() => {
+              this.setState({ item }, () => this.closeTransaction());
+            }}
+          >
             Close transaction
           </Button>
         );
       }
       return (
-        <Button disabled size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
+        <Button disabled size="small" onClick={() => this.setState({ item })}>
           Waiting for confirmation
         </Button>
       );
@@ -124,18 +131,32 @@ class ItemList extends Component {
       );
     }
     return (
-      <Button disabled size="small" onClick={() => this.setState({ item, isPasswordWindowOpen: true })}>
-        Done
+      <Button size="small" onClick={() => this.downloadFile(`http://localhost:8080/ipfs/${item.cid}`, item.name)}>
+        Download
       </Button>
     );
   };
+
+  async downloadFile(url, name) {
+    try {
+      const response = await fetch(url);
+      const fileStream = createWriteStream(name);
+      const writer = fileStream.getWriter();
+      const reader = response.body.getReader();
+      const pump = () =>
+        reader.read().then(({ value, done }) => (done ? writer.close() : writer.write(value).then(pump)));
+      await pump();
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   async buyItem(item) {
     const { username, address } = this.context.state;
     // const { item } = this.state;
     console.log('iteeeeem', item);
     try {
-      const password = await this.password.open();
+      const password = await this.passwordModal.open();
       console.log(password);
       const status = await _buyItem(item, username, password, address);
       this.setState({ status: 'purchased succesfully', password: '' });
@@ -149,10 +170,10 @@ class ItemList extends Component {
   }
 
   async closeTransaction() {
-    this.setState({ isPasswordWindowOpen: false });
     const { username } = this.context.state;
-    const { item, password } = this.state;
+    const { item } = this.state;
     try {
+      const password = await this.passwordModal.open();
       const status = await _closeTransaction(item.id, username, password);
       this.setState({ status: 'transaction closed', password: '' });
       this.context.getItems();
@@ -221,10 +242,10 @@ class ItemList extends Component {
             <div className="item-list-container">
               <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               {items.map(item => this.renderItem(item))}
-              {this.renderModal()}
+              {/* {this.renderModal()} */}
               <PasswordModal
                 onRef={ref => {
-                  this.password = ref;
+                  this.passwordModal = ref;
                 }}
               />
             </div>

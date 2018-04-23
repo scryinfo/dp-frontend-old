@@ -39,7 +39,7 @@ class PasswordModal extends Component {
         disableBackdropClick
         disableEscapeKeyDown
         open={isOpen}
-        onClose={() => this.setState({ isOpen: false })}
+        onClose={this.close}
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Enter your password</DialogTitle>
@@ -63,7 +63,7 @@ class PasswordModal extends Component {
           <Button
             onClick={() => {
               this.resolve(password);
-              this.setState({ isOpen: false });
+              this.close();
             }}
             color="primary"
           >
