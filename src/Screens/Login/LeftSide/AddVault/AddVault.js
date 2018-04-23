@@ -5,8 +5,6 @@ import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import { CircularProgress } from 'material-ui/Progress';
 import TextField from 'material-ui/TextField';
-import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
-import Slide from 'material-ui/transitions/Slide';
 
 import './AddVault.css';
 
@@ -17,6 +15,9 @@ import { register } from '../../../../Components/requests';
 import { MainContext } from '../../../../Context';
 
 import AuthService from '../../../../Auth/AuthService';
+
+import PasswordModal from '../../../PasswordModal';
+import MnemonicModal from '../../../MnemonicModal';
 
 const Auth = new AuthService();
 
@@ -49,13 +50,8 @@ class AddVault extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isMnemonicWindowOpen: false,
-      isPasswordWindowOpen: false,
-      mnemonic: '',
-      password: '',
+      loading: false,
     };
-    this.handleMnemonicOpen = this.handleMnemonicOpen.bind(this);
-    this.handlePasswordOpen = this.handlePasswordOpen.bind(this);
     this.Auth = new AuthService();
   }
 
@@ -63,10 +59,12 @@ class AddVault extends Component {
     this.setState({ loading: true });
     console.log(this.context);
     if (this.context) {
-      const { username, password } = this.context.state;
+      const { username } = this.context.state;
       try {
+        const password = await this.passwordModal.open();
+        // const mnemonic = await this.mnemonicModal.open();
         const createdVault = await newVault(username, password);
-        const { address, mnemonic } = createdVault;
+        const { address } = createdVault;
         const response = await register(username, password, address);
         const { account, token } = response.data;
         this.Auth.setToken(token);
@@ -85,13 +83,14 @@ class AddVault extends Component {
 
   async handleImportVault() {
     console.log('importing');
-    this.setState({ loading: true, isMnemonicWindowOpen: false });
+    this.setState({ loading: true });
     if (this.context) {
       console.log('context');
       const { username } = this.context.state;
-      const { mnemonic, password } = this.state;
-      console.log(username, password, mnemonic);
+      console.log(username);
       try {
+        const password = await this.passwordModal.open();
+        const mnemonic = await this.mnemonicModal.open();
         const importedVault = await importVault(username, password, mnemonic);
         console.log(importedVault);
         const { address } = importedVault;
@@ -99,18 +98,12 @@ class AddVault extends Component {
         this.props.history.push('/explore');
         console.log(address, mnemonic);
       } catch (e) {
+        this.passwordModal.close();
+        this.mnemonicModal.close();
         console.log(e);
       }
     }
   }
-
-  handleMnemonicOpen = () => {
-    this.setState({ isMnemonicWindowOpen: true, isPasswordWindowOpen: false });
-  };
-
-  handlePasswordOpen = () => {
-    this.setState({ isPasswordWindowOpen: true });
-  };
 
   handleLogout = async context => {
     console.log(this.props);
@@ -142,90 +135,6 @@ class AddVault extends Component {
       }
     });
   }
-
-  Transition(props) {
-    return <Slide direction="up" {...props} />;
-  }
-
-  renderMnemonicWindow = () => (
-    <Dialog
-      disableBackdropClick
-      disableEscapeKeyDown
-      transition={this.Transition}
-      keepMounted
-      open={this.state.isMnemonicWindowOpen}
-      onClose={() => this.setState({ isMnemonicWindowOpen: false })}
-      aria-labelledby="form-dialog-title"
-    >
-      <DialogTitle id="form-dialog-title">Enter your mnemonics</DialogTitle>
-      <DialogContent>
-        <DialogContentText style={{ width: '600px' }}>
-          To import your existing vault please enter your mnemonic in the field below
-        </DialogContentText>
-        <TextField
-          id="mnemonic"
-          name="mnemonic"
-          label="Enter here"
-          // placeholder="Placeholder"
-          // autoFocus
-          multiline
-          fullWidth
-          value={this.state.mnemonic}
-          onChange={event => this.setState({ mnemonic: event.target.value })}
-          // className={classes.textField}
-          margin="normal"
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => this.setState({ isMnemonicWindowOpen: false })} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={() => this.handleImportVault()} color="primary">
-          Import
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
-  renderPasswordWindow = () => (
-    <Dialog
-      disableBackdropClick
-      disableEscapeKeyDown
-      open={this.state.isPasswordWindowOpen}
-      onClose={() => this.setState({ isPasswordWindowOpen: false })}
-      aria-labelledby="form-dialog-title"
-    >
-      <DialogTitle id="form-dialog-title">Enter your password</DialogTitle>
-      <DialogContent>
-        {/* <DialogContentText style={{ width: '600px' }}>
-          To import your existing vault please confirm your password
-        </DialogContentText> */}
-        <TextField
-          id="password"
-          name="password"
-          label="Enter here"
-          // placeholder="Placeholder"
-          autoFocus
-          multiline
-          type="password"
-          fullWidth
-          value={this.state.password}
-          onChange={event => this.setState({ password: event.target.value })}
-          // className={classes.textField}
-          margin="normal"
-          style={{ width: '600px' }}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => this.setState({ isPasswordWindowOpen: false })} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={() => this.handleMnemonicOpen()} color="primary">
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
 
   render() {
     const { classes } = this.props;
@@ -270,7 +179,7 @@ class AddVault extends Component {
                     classes={{
                       disabled: classes.buttonDisabled,
                     }}
-                    onClick={() => this.handlePasswordOpen()}
+                    onClick={() => this.handleImportVault()}
                   >
                     Import existing
                   </Button>
@@ -295,8 +204,16 @@ class AddVault extends Component {
                   </Button>
                 </div>
               )}
-              {this.renderMnemonicWindow()}
-              {this.renderPasswordWindow()}
+              <PasswordModal
+                onRef={ref => {
+                  this.passwordModal = ref;
+                }}
+              />
+              <MnemonicModal
+                onRef={ref => {
+                  this.mnemonicModal = ref;
+                }}
+              />
             </div>
           );
         }}

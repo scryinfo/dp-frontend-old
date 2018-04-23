@@ -38,17 +38,22 @@ export const newVault = async (username, password) => {
 // IMPORT VAULT
 export const importVault = async (username, password, mnemonic) => {
   // create
-  const vault = await createVault(password, mnemonic);
-  console.info('created vault:', vault, ' for:', username, ' mnemonic:', mnemonic);
-  const addresses = await createAddress(vault, password);
-  // save locally
-  window.localStorage.setItem(username, vault.serialize());
-  const key = await getKey(vault, password);
-  // save on remote
-  // await newAccount(username, addresses[0], key);
-  return {
-    username,
-    mnemonic,
-    address: vault.getAddresses()[0],
-  };
+  try {
+    const vault = await createVault(password, mnemonic);
+    console.info('created vault:', vault, ' for:', username, ' mnemonic:', mnemonic);
+    const addresses = await createAddress(vault, password);
+    // save locally
+    window.localStorage.setItem(username, vault.serialize());
+    const key = await getKey(vault, password);
+    // save on remote
+    // await newAccount(username, addresses[0], key);
+    return {
+      username,
+      mnemonic,
+      address: vault.getAddresses()[0],
+    };
+  } catch (e) {
+    console.log('errrrororororor');
+    throw new Error(e);
+  }
 };
