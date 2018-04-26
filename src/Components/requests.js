@@ -36,7 +36,7 @@ export async function _buyItem(listing, username, password, buyer, verifier, rew
     data: {
       listing: listing.id,
       buyer,
-      verifier,
+      verifier: verifier !== 'none' ? verifier : null,
       rewards: rewardPercent,
       createBlock,
       buyerAuth: buyerAuth.signature,

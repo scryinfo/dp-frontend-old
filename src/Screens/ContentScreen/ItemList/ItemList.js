@@ -168,14 +168,18 @@ class ItemList extends Component {
 
   async buyItem(item) {
     const { username, address } = this.context.state;
+    const { verifier, reward } = this.state;
     // const { item } = this.state;
     try {
       await this.checkForErrors();
       const password = await this.passwordModal.open();
       console.log(password);
-      const status = await _buyItem(item, username, password, address);
+      const status = await _buyItem(item, username, password, address, verifier, reward);
       this.context.showPopup('purchased successfully');
+      this.context.updateState({ currentPage: 'in progress' });
       this.context.getItems();
+      this.setState({ item: null });
+      this.props.history.push('/inprogress');
     } catch (e) {
       console.log(e);
       this.context.showPopup(JSON.stringify(e));
@@ -195,6 +199,7 @@ class ItemList extends Component {
           reject('reward should be more than 1% and less than 99%');
         }
       }
+      resolve();
     });
 
   async closeTransaction() {
@@ -285,7 +290,7 @@ class ItemList extends Component {
               </Select>
             </FormControl>
             {!this.state.verifier ? null : this.state.verifier === 'none' ? (
-              <Button color="primary" className={classes.button}>
+              <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
                 Buy
               </Button>
             ) : (
@@ -313,6 +318,7 @@ class ItemList extends Component {
   };
 
   render() {
+    console.log(this.props);
     const { classes, items } = this.props;
     return (
       <MainContext.Consumer>

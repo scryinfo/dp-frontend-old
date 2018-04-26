@@ -45,7 +45,7 @@ class InProgress extends Component {
                 <div className="content-title" style={{ marginTop: '30px' }}>
                   Purchased
                 </div>
-                <ItemList items={inProgressBought} />
+                <ItemList items={inProgressBought} history={this.props.history} />
               </Fragment>
             )}
             {inProgressSold.length > 0 && (
@@ -53,7 +53,7 @@ class InProgress extends Component {
                 <div className="content-title" style={{ marginTop: '30px' }}>
                   Sold
                 </div>
-                <ItemList items={inProgressSold} type="sold" />
+                <ItemList items={inProgressSold} type="sold" history={this.props.history} />
               </Fragment>
             )}
             {inProgressVerified.length > 0 && (
@@ -61,7 +61,7 @@ class InProgress extends Component {
                 <div className="content-title" style={{ marginTop: '30px' }}>
                   Verified
                 </div>
-                <ItemList items={inProgressVerified} />
+                <ItemList items={inProgressVerified} history={this.props.history} />
               </Fragment>
             )}
           </div>
