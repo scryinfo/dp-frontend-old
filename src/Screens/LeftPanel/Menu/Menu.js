@@ -109,10 +109,8 @@ class Menu extends Component {
     this.state = {
       open: true,
       anchorEl: null,
-      isPasswordWindowOpen: false,
       isMnemonicWindowOpen: false,
       tokensToAdd: '',
-      password: '',
     };
     this.handleInput = this.handleInput.bind(this);
     this.getTokens = this.getTokens.bind(this);
