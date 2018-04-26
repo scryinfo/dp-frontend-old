@@ -75,9 +75,6 @@ const styles = theme => ({
   buttonDisabled: {
     backgroundColor: 'rgba(255, 255, 255, 0.1) !important',
   },
-  errorPopup: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
 });
 
 class LoginForm extends React.Component {
@@ -210,7 +207,7 @@ class LoginForm extends React.Component {
       if (e.response) {
         const { message } = e.response.data;
         console.log(message);
-        this.setState({ errorMessage: message, errorPopupOpen: true });
+        this.context.showPopup(JSON.stringify(message));
       }
       console.log(e);
     }
@@ -234,42 +231,15 @@ class LoginForm extends React.Component {
           return;
         }
         if (message === 'bad password') {
-          this.setState({ errorMessage: 'user already exists', errorPopupOpen: true });
+          this.context.showPopup('user already exists');
           return;
         }
-        this.setState({ errorMessage: message, errorPopupOpen: true });
+        this.context.showPopup(JSON.stringify(message));
         console.log(message);
       }
       console.log(e);
     }
   }
-
-  renderErrorPopup = () => (
-    <Snackbar
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'left',
-      }}
-      open={this.state.errorPopupOpen}
-      autoHideDuration={6000}
-      onClose={() => this.setState({ errorPopupOpen: false })}
-      SnackbarContentProps={{
-        className: this.props.classes.errorPopup,
-        'aria-describedby': 'message-id',
-      }}
-      message={<span id="message-id">{this.state.errorMessage}</span>}
-      action={[
-        <IconButton
-          key="close"
-          aria-label="Close"
-          color="inherit"
-          onClick={() => this.setState({ errorPopupOpen: false })}
-        >
-          <CloseIcon />
-        </IconButton>,
-      ]}
-    />
-  );
 
   renderForm = () => {
     const {
@@ -280,7 +250,6 @@ class LoginForm extends React.Component {
       confirmPassword,
       confirmPasswordError,
       loading,
-      errorMessage,
       type,
     } = this.state;
     const { classes } = this.props;
@@ -440,7 +409,6 @@ class LoginForm extends React.Component {
                 <TabContainer />
                 <TabContainer dir={theme.direction}>{this.renderForm('register')}</TabContainer>
               </SwipeableViews>
-              {this.renderErrorPopup()}
             </div>
           );
         }}

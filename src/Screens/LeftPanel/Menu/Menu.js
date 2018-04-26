@@ -21,7 +21,7 @@ import { MainContext } from '../../../Context';
 
 import { logout, _addTokens } from '../../../Components/requests';
 
-import ErrorPopup from '../../ErrorPopup';
+import InfoPopup from '../../InfoPopup';
 
 import './Menu.css';
 import Logo from '../../../assets/images/logo.png';
@@ -268,7 +268,7 @@ class Menu extends Component {
           } = context.state;
           return (
             <Fragment>
-              <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
+              <InfoPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               <div className="menu-container">
                 <div className="menu-logo-container">
                   <span>SCRY.INFO</span>

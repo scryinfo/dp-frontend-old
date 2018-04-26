@@ -19,7 +19,7 @@ import { FormControl } from 'material-ui/Form';
 import Select from 'material-ui/Select';
 
 import Card, { CardActions, CardContent } from 'material-ui/Card';
-import ErrorPopup from '../../ErrorPopup';
+import InfoPopup from '../../InfoPopup';
 
 import { _buyItem, _closeTransaction } from '../../../Components/requests';
 
@@ -320,7 +320,7 @@ class ItemList extends Component {
           this.context = context;
           return (
             <div className="item-list-container">
-              <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
+              <InfoPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               {items.map(item => this.renderItem(item))}
               {this.renderModal()}
               <PasswordModal

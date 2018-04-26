@@ -10,14 +10,14 @@ const styles = theme => ({
     width: theme.spacing.unit * 4,
     height: theme.spacing.unit * 4,
   },
-  errorPopup: {
+  infoPopup: {
     backgroundColor: '#14222C',
     marginBottom: '20px',
     borderRadius: '3px',
   },
 });
 
-class ErrorPopup extends React.Component {
+class InfoPopup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -35,7 +35,7 @@ class ErrorPopup extends React.Component {
         autoHideDuration={20000}
         onClose={this.props.handleClose}
         SnackbarContentProps={{
-          className: this.props.classes.errorPopup,
+          className: this.props.classes.infoPopup,
           'aria-describedby': 'message-id',
         }}
         message={<span id="message-id">{this.props.message}</span>}
@@ -55,4 +55,4 @@ class ErrorPopup extends React.Component {
   }
 }
 
-export default withStyles(styles)(ErrorPopup);
+export default withStyles(styles)(InfoPopup);

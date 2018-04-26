@@ -7,7 +7,7 @@ import { getAccount } from './Components/keyRequests';
 
 import { _getBalance, _getItems, _getVerifiers } from './Components/requests';
 
-import ErrorPopup from './Screens/ErrorPopup';
+import InfoPopup from './Screens/InfoPopup';
 
 export const MainContext = React.createContext();
 
@@ -161,7 +161,11 @@ export class MainProvider extends Component {
 
   showPopup(status) {
     this.setState({ status });
-    setTimeout(() => this.setState({ status: '' }), 3000);
+    setTimeout(() => {
+      if (this.state.status === status) {
+        this.setState({ status: '' });
+      }
+    }, 3000);
   }
 
   render() {
@@ -177,7 +181,7 @@ export class MainProvider extends Component {
         }}
       >
         {this.props.children}
-        <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
+        <InfoPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
       </MainContext.Provider>
     );
   }

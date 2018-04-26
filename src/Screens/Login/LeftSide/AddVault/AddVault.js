@@ -74,9 +74,10 @@ class AddVault extends Component {
         if (e.response) {
           const { message } = e.response.data;
           console.log(message);
-          this.setState({ errorMessage: message });
+          this.context.showPopup(JSON.stringify(message));
         }
         console.log(e);
+        this.context.showPopup(JSON.stringify(e));
       }
     }
   }
