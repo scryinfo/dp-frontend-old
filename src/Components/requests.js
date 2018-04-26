@@ -2,19 +2,23 @@ import axios from 'axios';
 import { HOST } from './Remote';
 import { openChannel, buyerAuthorization, verifierAuthorization, closeChannel } from './signer';
 
-const token = {
-  headers: { Authorization: localStorage.getItem('id_token') },
-};
+// const token = {
+//   headers: { Authorization: localStorage.getItem('id_token') },
+// };
 
 // Get tokens
 export async function _addTokens(account, amount) {
   console.log(account, amount);
-  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, token);
+  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 // Get balance
 export async function _getBalance(account) {
-  return axios.get(`${HOST}/balance?account=${account}`, token);
+  return axios.get(`${HOST}/balance?account=${account}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 // Buy an item
@@ -66,7 +70,9 @@ export async function _verifyItem(item, username, password) {
 
 // Close the pending transaction
 export async function _closeTransaction(id, username, password) {
-  const { data } = await axios.get(`${HOST}/history/${id}`, token);
+  const { data } = await axios.get(`${HOST}/history/${id}`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
   console.info('close:', data);
 
   // replace verifier with seller if verifier was not assigned
@@ -94,17 +100,25 @@ export async function _closeTransaction(id, username, password) {
 // Get list of items
 export async function _getItems(account, type) {
   if (account && type) {
-    return axios.get(`${HOST}/history?${type}=${account}`, token);
+    return axios.get(`${HOST}/history?${type}=${account}`, {
+      headers: { Authorization: localStorage.getItem('id_token') },
+    });
   }
   if (account) {
-    return axios.get(`${HOST}/listings?owner=${account}`, token);
+    return axios.get(`${HOST}/listings?owner=${account}`, {
+      headers: { Authorization: localStorage.getItem('id_token') },
+    });
   }
-  return axios.get(`${HOST}/listings`, token);
+  return axios.get(`${HOST}/listings`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 // Get list of verifiers
 export async function _getVerifiers() {
-  return axios.get(`${HOST}/trader`, token);
+  return axios.get(`${HOST}/trader`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
 }
 
 export const login = (username, password) =>
