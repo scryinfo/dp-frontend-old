@@ -104,10 +104,7 @@ class ContentContainer extends Component {
                 </div> */}
               </div>
               <div className="list-items">
-                <Route
-                  path="/explore"
-                  render={props => <ItemList {...props} history={this.props.history} items={context.state.allItems} />}
-                />
+                <Route path="/explore" render={props => <ItemList {...props} items={context.state.allItems} />} />
                 <Route
                   path="/inprogress"
                   render={props => (
@@ -119,30 +116,11 @@ class ContentContainer extends Component {
                     />
                   )}
                 />
-                <Route
-                  path="/purchased"
-                  render={props => (
-                    <ItemList {...props} history={this.props.history} items={context.state.itemsBought} />
-                  )}
-                />
-                <Route
-                  path="/sold"
-                  render={props => <ItemList {...props} history={this.props.history} items={context.state.itemsSold} />}
-                />
-                <Route
-                  path="/verified"
-                  render={props => (
-                    <ItemList {...props} history={this.props.history} items={context.state.itemsVerified} />
-                  )}
-                />
-                <Route
-                  path="/sell"
-                  render={props => <Sell {...props} history={this.props.history} items={context.state.allItems} />}
-                />
-                <Route
-                  path="/verify"
-                  render={props => <Sell {...props} history={this.props.history} items={context.state.allItems} />}
-                />
+                <Route path="/purchased" render={props => <ItemList {...props} items={context.state.itemsBought} />} />
+                <Route path="/sold" render={props => <ItemList {...props} items={context.state.itemsSold} />} />
+                <Route path="/verified" render={props => <ItemList {...props} items={context.state.itemsVerified} />} />
+                <Route path="/sell" render={props => <Sell {...props} items={context.state.allItems} />} />
+                <Route path="/verify" render={props => <Sell {...props} items={context.state.allItems} />} />
               </div>
             </div>
           );

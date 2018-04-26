@@ -21,7 +21,7 @@ import { MainContext } from '../../../Context';
 
 import { logout, _addTokens } from '../../../Components/requests';
 
-import ErrorPopup from '../../ErrorPopup';
+import InfoPopup from '../../InfoPopup';
 
 import './Menu.css';
 import Logo from '../../../assets/images/logo.png';
@@ -109,10 +109,8 @@ class Menu extends Component {
     this.state = {
       open: true,
       anchorEl: null,
-      isPasswordWindowOpen: false,
       isMnemonicWindowOpen: false,
       tokensToAdd: '',
-      password: '',
     };
     this.handleInput = this.handleInput.bind(this);
     this.getTokens = this.getTokens.bind(this);
@@ -270,7 +268,7 @@ class Menu extends Component {
           } = context.state;
           return (
             <Fragment>
-              <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
+              <InfoPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               <div className="menu-container">
                 <div className="menu-logo-container">
                   <span>SCRY.INFO</span>
@@ -426,18 +424,6 @@ class Menu extends Component {
                       <ListItemText primary="Sell" classes={{ primary: classes.listText }} />
                       {/* <ListItemSecondaryAction>
                         <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>1</div>
-                      </ListItemSecondaryAction> */}
-                    </ListItem>
-                    <ListItem
-                      button
-                      classes={{ root: this.getActiveStyle('verify', context, classes) }}
-                      onClick={() => this.changeRoute({ currentPage: 'verify' })}
-                    >
-                      <ListItemText primary="Verify" classes={{ primary: classes.listText }} />
-                      {/* <ListItemSecondaryAction>
-                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
-                          {this.context.state.verified.length}
-                        </div>
                       </ListItemSecondaryAction> */}
                     </ListItem>
                   </List>

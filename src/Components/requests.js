@@ -2,23 +2,19 @@ import axios from 'axios';
 import { HOST } from './Remote';
 import { openChannel, buyerAuthorization, verifierAuthorization, closeChannel } from './signer';
 
+const token = {
+  headers: { Authorization: localStorage.getItem('id_token') },
+};
+
 // Get tokens
 export async function _addTokens(account, amount) {
   console.log(account, amount);
-  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
-  });
+  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, token);
 }
 
 // Get balance
 export async function _getBalance(account) {
-  return axios.get(`${HOST}/balance?account=${account}`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
-  });
-}
-
-export async function getPassword(username) {
-  return prompt(`Please enter password for your UserName ${username}`);
+  return axios.get(`${HOST}/balance?account=${account}`, token);
 }
 
 // Buy an item
@@ -36,7 +32,7 @@ export async function _buyItem(listing, username, password, buyer, verifier, rew
     data: {
       listing: listing.id,
       buyer,
-      verifier,
+      verifier: verifier !== 'none' ? verifier : null,
       rewards: rewardPercent,
       createBlock,
       buyerAuth: buyerAuth.signature,
@@ -46,10 +42,9 @@ export async function _buyItem(listing, username, password, buyer, verifier, rew
 }
 
 // Verify item
-export async function _verifyItem(item, username) {
+export async function _verifyItem(item, username, password) {
   // const listing = await axios.get(`${HOST}/listing/${item}`);
   console.log('verify', item);
-  const password = await getPassword(username);
 
   const verifierAuth = await verifierAuthorization(
     item.listing.owner.account,
@@ -58,17 +53,20 @@ export async function _verifyItem(item, username) {
   );
   console.info('verifierAuth:', verifierAuth);
 
-  return axios.post(`${HOST}/verifier/sign`, {
-    item: item.id,
-    verifierAuth: verifierAuth.signature,
+  return axios({
+    method: 'post',
+    url: `${HOST}/verifier/sign`,
+    data: {
+      item: item.id,
+      verifierAuth: verifierAuth.signature,
+    },
+    headers: { Authorization: localStorage.getItem('id_token') },
   });
 }
 
 // Close the pending transaction
 export async function _closeTransaction(id, username, password) {
-  const { data } = await axios.get(`${HOST}/history/${id}`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
-  });
+  const { data } = await axios.get(`${HOST}/history/${id}`, token);
   console.info('close:', data);
 
   // replace verifier with seller if verifier was not assigned
@@ -96,23 +94,17 @@ export async function _closeTransaction(id, username, password) {
 // Get list of items
 export async function _getItems(account, type) {
   if (account && type) {
-    return axios.get(`${HOST}/history?${type}=${account}`, {
-      headers: { Authorization: localStorage.getItem('id_token') },
-    });
+    return axios.get(`${HOST}/history?${type}=${account}`, token);
   }
   if (account) {
-    return axios.get(`${HOST}/listings?owner=${account}`, {
-      headers: { Authorization: localStorage.getItem('id_token') },
-    });
+    return axios.get(`${HOST}/listings?owner=${account}`, token);
   }
-  return axios.get(`${HOST}/listings`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
-  });
+  return axios.get(`${HOST}/listings`, token);
 }
 
 // Get list of verifiers
 export async function _getVerifiers() {
-  return axios.get(`${HOST}/trader`);
+  return axios.get(`${HOST}/trader`, token);
 }
 
 export const login = (username, password) =>

@@ -1,10 +1,13 @@
+/* eslint-disable react/no-unused-state */
 import React, { Component } from 'react';
 
 import AuthService from './Auth/AuthService';
 
 import { getAccount } from './Components/keyRequests';
 
-import { _getBalance, _getItems } from './Components/requests';
+import { _getBalance, _getItems, _getVerifiers } from './Components/requests';
+
+import InfoPopup from './Screens/InfoPopup';
 
 export const MainContext = React.createContext();
 
@@ -15,6 +18,7 @@ export class MainProvider extends Component {
     super(props);
 
     this.state = {
+      status: '',
       username: null,
       address: null,
       balance: {
@@ -30,11 +34,14 @@ export class MainProvider extends Component {
       inProgressBought: [],
       inProgressSold: [],
       inProgressVerified: [],
+      verifiers: [],
     };
     this.setCurrentUser = this.setCurrentUser.bind(this);
     this.updateState = this.updateState.bind(this);
     this.updateBalance = this.updateBalance.bind(this);
     this.getItems = this.getItems.bind(this);
+    this.getVerifiers = this.getVerifiers.bind(this);
+    this.showPopup = this.showPopup.bind(this);
   }
 
   componentWillMount() {
@@ -57,12 +64,23 @@ export class MainProvider extends Component {
           username: profile.name,
           address: profile.account,
         });
+        this.getVerifiers();
         this.props.history.push('/explore');
       } catch (err) {
         Auth.logout();
         this.setState({ currentPage: 'login' });
         this.props.history.replace('/login');
       }
+    }
+  }
+
+  async getVerifiers() {
+    try {
+      const { data: verifiers } = await _getVerifiers();
+      console.log(verifiers);
+      this.setState({ verifiers });
+    } catch (e) {
+      console.log(e);
     }
   }
 
@@ -141,6 +159,15 @@ export class MainProvider extends Component {
     this.setState(newState);
   }
 
+  showPopup(status) {
+    this.setState({ status });
+    setTimeout(() => {
+      if (this.state.status === status) {
+        this.setState({ status: '' });
+      }
+    }, 3000);
+  }
+
   render() {
     return (
       <MainContext.Provider
@@ -148,11 +175,13 @@ export class MainProvider extends Component {
           state: this.state,
           setCurrentUser: this.setCurrentUser,
           updateState: this.updateState,
+          showPopup: this.showPopup,
           updateBalance: this.updateBalance,
           getItems: this.getItems,
         }}
       >
         {this.props.children}
+        <InfoPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
       </MainContext.Provider>
     );
   }

@@ -17,7 +17,6 @@ import { LinearProgress } from 'material-ui/Progress';
 import './Sell.css';
 import { MainContext } from '../../../Context';
 import { HOST } from '../../../Components/Remote';
-import ErrorPopup from '../../ErrorPopup';
 import ItemList from '../ItemList/ItemList';
 
 const styles = theme => ({
@@ -160,33 +159,6 @@ class Sell extends Component {
     }
   }
 
-  renderErrorPopup = () => (
-    <Snackbar
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'left',
-      }}
-      open={this.state.errorPopupOpen}
-      autoHideDuration={6000}
-      onClose={() => this.setState({ errorPopupOpen: false })}
-      SnackbarContentProps={{
-        className: this.props.classes.errorPopup,
-        'aria-describedby': 'message-id',
-      }}
-      message={<span id="message-id">{this.state.errorMessage}</span>}
-      action={[
-        <IconButton
-          key="close"
-          aria-label="Close"
-          color="inherit"
-          onClick={() => this.setState({ errorPopupOpen: false })}
-        >
-          <CloseIcon />
-        </IconButton>,
-      ]}
-    />
-  );
-
   async onFileChange(event, server) {
     // event.stopPropagation();
     // event.preventDefault();
@@ -214,7 +186,8 @@ class Sell extends Component {
       data,
       onUploadProgress: progress => {
         const status = Math.floor(progress.loaded / progress.total * 100);
-        this.setState({ uploadProgress: status, status: `Uploading ${whereToUpload}: ${status}% done` });
+        this.context.showPopup(`Uploading ${whereToUpload}: ${status}% done`);
+        // this.setState({ uploadProgress: status, status: `Uploading ${whereToUpload}: ${status}% done` });
       },
     })
       .then(response => {
@@ -228,6 +201,7 @@ class Sell extends Component {
             Authorization: localStorage.getItem('id_token'),
           },
         }).then(res => {
+          this.context.showPopup('Uploaded successfully');
           this.setState({
             done: true,
             status: 'Uploaded successfully',
@@ -236,18 +210,19 @@ class Sell extends Component {
             activeStep: this.state.activeStep + 1,
           });
           this.context.getItems();
-          setTimeout(() => this.setState({ status: '', activeStep: 0 }), 3000);
         });
       })
       .catch(err => {
         console.log(err.request);
         if (err.request.status === 405) {
           console.log('request', err);
-          this.setState({ status: 'IPFS should be writable', done: true });
+          this.context.showPopup('IPFS should be writable');
+          this.setState({ done: true });
           return;
         }
         if (!err.request.response) {
           console.log('Please install IPFS');
+          this.context.showPopup(`Please install IPFS`);
           this.setState({
             status: 'Please install IPFS',
             done: true,
@@ -258,6 +233,7 @@ class Sell extends Component {
         }
         if (err.request.status === 400) {
           console.log('request', err);
+          this.context.showPopup(`File already exists. Try another`);
           this.setState({ status: 'File already exists. Try another', done: true });
         }
       });
@@ -288,26 +264,12 @@ class Sell extends Component {
           this.context = context;
           return (
             <div className="sell-container">
-              <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               <div className="sell-stepper">
                 <Stepper activeStep={activeStep} orientation="vertical" className={classes.stepperRoot}>
                   {steps.map((label, index) => (
                     <Step key={label}>
                       <StepLabel>{label}</StepLabel>
-                      <StepContent>
-                        {this.getStepContent(index, classes)}
-
-                        {/* <div className={classes.actionsContainer}>
-                        <div>
-                          <Button disabled={activeStep === 0} onClick={this.handleBack} className={classes.button}>
-                            Back
-                          </Button>
-                          <Button variant="raised" color="primary" onClick={this.handleNext} className={classes.button}>
-                            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                          </Button>
-                        </div>
-                      </div> */}
-                      </StepContent>
+                      <StepContent>{this.getStepContent(index, classes)}</StepContent>
                     </Step>
                   ))}
                 </Stepper>
@@ -317,7 +279,7 @@ class Sell extends Component {
                   Recent Files
                 </div>
                 <div>
-                  <ItemList items={this.context.state.myItems} />
+                  <ItemList items={this.context.state.myItems} type="sell" />
                 </div>
               </div>
             </div>
