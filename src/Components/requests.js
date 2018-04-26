@@ -17,10 +17,6 @@ export async function _getBalance(account) {
   return axios.get(`${HOST}/balance?account=${account}`, token);
 }
 
-export async function getPassword(username) {
-  return prompt(`Please enter password for your UserName ${username}`);
-}
-
 // Buy an item
 export async function _buyItem(listing, username, password, buyer, verifier, rewardPercent) {
   // const listing = await axios.get(`${HOST}/listing/${item}`);
@@ -46,10 +42,9 @@ export async function _buyItem(listing, username, password, buyer, verifier, rew
 }
 
 // Verify item
-export async function _verifyItem(item, username) {
+export async function _verifyItem(item, username, password) {
   // const listing = await axios.get(`${HOST}/listing/${item}`);
   console.log('verify', item);
-  const password = await getPassword(username);
 
   const verifierAuth = await verifierAuthorization(
     item.listing.owner.account,
@@ -58,9 +53,14 @@ export async function _verifyItem(item, username) {
   );
   console.info('verifierAuth:', verifierAuth);
 
-  return axios.post(`${HOST}/verifier/sign`, {
-    item: item.id,
-    verifierAuth: verifierAuth.signature,
+  return axios({
+    method: 'post',
+    url: `${HOST}/verifier/sign`,
+    data: {
+      item: item.id,
+      verifierAuth: verifierAuth.signature,
+    },
+    headers: { Authorization: localStorage.getItem('id_token') },
   });
 }
 

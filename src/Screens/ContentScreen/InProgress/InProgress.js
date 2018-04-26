@@ -39,19 +39,19 @@ class InProgress extends Component {
     return (
       <MainContext.Consumer>
         {context => (
-          <div className="in-progress-container" style={{ marginTop: '100px' }}>
+          <div className="in-progress-container" style={{ marginTop: '100px', marginBottom: '30px' }}>
             {inProgressBought.length > 0 && (
               <Fragment>
                 <div className="content-title" style={{ marginTop: '30px' }}>
-                  Purchased
+                  Purchasing
                 </div>
-                <ItemList items={inProgressBought} history={this.props.history} />
+                <ItemList items={inProgressBought} type="bought" history={this.props.history} />
               </Fragment>
             )}
             {inProgressSold.length > 0 && (
               <Fragment>
                 <div className="content-title" style={{ marginTop: '30px' }}>
-                  Sold
+                  Selling
                 </div>
                 <ItemList items={inProgressSold} type="sold" history={this.props.history} />
               </Fragment>
@@ -59,7 +59,7 @@ class InProgress extends Component {
             {inProgressVerified.length > 0 && (
               <Fragment>
                 <div className="content-title" style={{ marginTop: '30px' }}>
-                  Verified
+                  Verifying
                 </div>
                 <ItemList items={inProgressVerified} history={this.props.history} />
               </Fragment>

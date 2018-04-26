@@ -426,18 +426,6 @@ class Menu extends Component {
                         <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>1</div>
                       </ListItemSecondaryAction> */}
                     </ListItem>
-                    <ListItem
-                      button
-                      classes={{ root: this.getActiveStyle('verify', context, classes) }}
-                      onClick={() => this.changeRoute({ currentPage: 'verify' })}
-                    >
-                      <ListItemText primary="Verify" classes={{ primary: classes.listText }} />
-                      {/* <ListItemSecondaryAction>
-                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
-                          {this.context.state.verified.length}
-                        </div>
-                      </ListItemSecondaryAction> */}
-                    </ListItem>
                   </List>
                 </div>
 

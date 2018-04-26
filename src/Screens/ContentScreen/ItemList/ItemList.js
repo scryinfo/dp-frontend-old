@@ -21,7 +21,7 @@ import Select from 'material-ui/Select';
 import Card, { CardActions, CardContent } from 'material-ui/Card';
 import InfoPopup from '../../InfoPopup';
 
-import { _buyItem, _closeTransaction } from '../../../Components/requests';
+import { _buyItem, _closeTransaction, _verifyItem } from '../../../Components/requests';
 
 import PasswordModal from '../../PasswordModal';
 
@@ -107,12 +107,37 @@ class ItemList extends Component {
 
   renderButton = item => {
     if (item.needs_closure) {
-      if (this.props.type === 'sold') {
+      if (this.props.type !== 'sold' && this.props.type !== 'bought' && item.needs_verification) {
         return (
           <Button
             size="small"
             onClick={() => {
-              this.setState({ item }, () => this.closeTransaction());
+              this.verify(item);
+            }}
+          >
+            Verify
+          </Button>
+        );
+      }
+      if (this.props.type === 'sold') {
+        if (item.needs_verification) {
+          return (
+            <Button
+              size="small"
+              disabled
+              onClick={() => {
+                this.closeTransaction(item);
+              }}
+            >
+              Waiting for verification
+            </Button>
+          );
+        }
+        return (
+          <Button
+            size="small"
+            onClick={() => {
+              this.closeTransaction(item);
             }}
           >
             Close transaction
@@ -151,6 +176,28 @@ class ItemList extends Component {
       </Button>
     );
   };
+
+  async verify(item) {
+    const { username, address } = this.context.state;
+    // const { item } = this.state;
+    try {
+      const password = await this.passwordModal.open();
+      console.log(password);
+      const status = await _verifyItem(item, username, password);
+      this.context.showPopup('verified successfully');
+      this.context.updateState({ currentPage: 'verified' });
+      this.context.getItems();
+      this.setState({ item: null });
+      this.props.history.push('/verified');
+    } catch (e) {
+      console.log(e);
+      this.context.showPopup(JSON.stringify(e));
+      // this.setState({ message: JSON.stringify(e) });
+      // const { message } = e && e.response && e.response.data;
+      // console.log(message);
+      // this.setState({ status: message, password: '' });
+    }
+  }
 
   async downloadFile(url, name) {
     try {
@@ -202,21 +249,25 @@ class ItemList extends Component {
       resolve();
     });
 
-  async closeTransaction() {
+  async closeTransaction(item) {
     const { username } = this.context.state;
-    const { item } = this.state;
     try {
       const password = await this.passwordModal.open();
+      console.log(password);
       const status = await _closeTransaction(item.id, username, password);
+      console.log(status);
       this.context.showPopup('transaction closed');
+      this.context.updateState({ currentPage: 'sold' });
+      this.props.history.push('/sold');
       this.context.getItems();
     } catch (e) {
+      console.log(e);
       if (e && e.response && e.response.data) {
         const { message } = e.response.data;
-        this.context.showPopup(message);
+        this.context.showPopup(JSON.stringify(message));
         return;
       }
-      this.context.showPopup(e);
+      this.context.showPopup(JSON.stringify(e));
     }
   }
 
@@ -318,7 +369,6 @@ class ItemList extends Component {
   };
 
   render() {
-    console.log(this.props);
     const { classes, items } = this.props;
     return (
       <MainContext.Consumer>
