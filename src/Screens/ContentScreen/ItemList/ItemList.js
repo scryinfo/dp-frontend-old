@@ -106,6 +106,13 @@ class ItemList extends Component {
   };
 
   renderButton = item => {
+    if (this.props.type === 'sell') {
+      return (
+        <Button size="small" disabled>
+          Uploaded
+        </Button>
+      );
+    }
     if (item.needs_closure) {
       if (this.props.type !== 'sold' && this.props.type !== 'bought' && item.needs_verification) {
         return (
@@ -170,7 +177,13 @@ class ItemList extends Component {
     return (
       <Button
         size="small"
-        onClick={() => this.downloadFile(`http://localhost:8080/ipfs/${item.listing.cid}`, item.listing.name)}
+        onClick={() => {
+          if (item.listing) {
+            this.downloadFile(`http://localhost:8080/ipfs/${item.listing.cid}`, item.listing.name);
+            return;
+          }
+          this.downloadFile(`http://localhost:8080/ipfs/${item.cid}`, item.name);
+        }}
       >
         Download
       </Button>

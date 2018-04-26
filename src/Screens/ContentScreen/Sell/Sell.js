@@ -279,7 +279,7 @@ class Sell extends Component {
                   Recent Files
                 </div>
                 <div>
-                  <ItemList items={this.context.state.myItems} />
+                  <ItemList items={this.context.state.myItems} type="sell" />
                 </div>
               </div>
             </div>
