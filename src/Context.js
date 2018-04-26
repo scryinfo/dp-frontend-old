@@ -7,6 +7,8 @@ import { getAccount } from './Components/keyRequests';
 
 import { _getBalance, _getItems, _getVerifiers } from './Components/requests';
 
+import ErrorPopup from './Screens/ErrorPopup';
+
 export const MainContext = React.createContext();
 
 const Auth = new AuthService();
@@ -16,6 +18,7 @@ export class MainProvider extends Component {
     super(props);
 
     this.state = {
+      status: '',
       username: null,
       address: null,
       balance: {
@@ -38,6 +41,7 @@ export class MainProvider extends Component {
     this.updateBalance = this.updateBalance.bind(this);
     this.getItems = this.getItems.bind(this);
     this.getVerifiers = this.getVerifiers.bind(this);
+    this.showPopup = this.showPopup.bind(this);
   }
 
   componentWillMount() {
@@ -155,6 +159,11 @@ export class MainProvider extends Component {
     this.setState(newState);
   }
 
+  showPopup(status) {
+    this.setState({ status });
+    setTimeout(() => this.setState({ status: '' }), 3000);
+  }
+
   render() {
     return (
       <MainContext.Provider
@@ -162,11 +171,13 @@ export class MainProvider extends Component {
           state: this.state,
           setCurrentUser: this.setCurrentUser,
           updateState: this.updateState,
+          showPopup: this.showPopup,
           updateBalance: this.updateBalance,
           getItems: this.getItems,
         }}
       >
         {this.props.children}
+        <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
       </MainContext.Provider>
     );
   }

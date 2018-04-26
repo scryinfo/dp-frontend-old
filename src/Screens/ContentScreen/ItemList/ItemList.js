@@ -174,11 +174,12 @@ class ItemList extends Component {
       const password = await this.passwordModal.open();
       console.log(password);
       const status = await _buyItem(item, username, password, address);
-      this.setState({ status: 'purchased succesfully' });
+      this.context.showPopup('purchased successfully');
       this.context.getItems();
     } catch (e) {
       console.log(e);
-      this.setState({ message: JSON.stringify(e) });
+      this.context.showPopup(JSON.stringify(e));
+      // this.setState({ message: JSON.stringify(e) });
       // const { message } = e && e.response && e.response.data;
       // console.log(message);
       // this.setState({ status: message, password: '' });
@@ -202,12 +203,15 @@ class ItemList extends Component {
     try {
       const password = await this.passwordModal.open();
       const status = await _closeTransaction(item.id, username, password);
-      this.setState({ status: 'transaction closed', password: '' });
+      this.context.showPopup('transaction closed');
       this.context.getItems();
     } catch (e) {
-      const { message } = e.response.data;
-      console.log(message);
-      this.setState({ status: message, password: '' });
+      if (e && e.response && e.response.data) {
+        const { message } = e.response.data;
+        this.context.showPopup(message);
+        return;
+      }
+      this.context.showPopup(e);
     }
   }
 
