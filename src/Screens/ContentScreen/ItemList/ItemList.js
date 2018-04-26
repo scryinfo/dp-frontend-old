@@ -94,6 +94,7 @@ class ItemList extends Component {
   };
 
   renderButton = item => {
+    console.log(item);
     if (item.needs_closure) {
       if (this.props.type === 'sold') {
         return (
@@ -131,7 +132,10 @@ class ItemList extends Component {
       );
     }
     return (
-      <Button size="small" onClick={() => this.downloadFile(`http://localhost:8080/ipfs/${item.cid}`, item.name)}>
+      <Button
+        size="small"
+        onClick={() => this.downloadFile(`http://localhost:8080/ipfs/${item.listing.cid}`, item.listing.name)}
+      >
         Download
       </Button>
     );
