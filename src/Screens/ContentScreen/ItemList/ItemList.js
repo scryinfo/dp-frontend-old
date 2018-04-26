@@ -1,13 +1,22 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { withStyles } from 'material-ui/styles';
 
 import { createWriteStream } from 'streamsaver';
+
+import classNames from 'classnames';
 
 import Button from 'material-ui/Button';
 
 import Modal from 'material-ui/Modal';
 
 import Typography from 'material-ui/Typography';
+
+import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
+import TextField from 'material-ui/TextField';
+
+import { MenuItem } from 'material-ui/Menu';
+import { FormControl } from 'material-ui/Form';
+import Select from 'material-ui/Select';
 
 import Card, { CardActions, CardContent } from 'material-ui/Card';
 import ErrorPopup from '../../ErrorPopup';
@@ -42,16 +51,19 @@ const styles = theme => ({
     boxShadow: theme.shadows[5],
     padding: theme.spacing.unit * 4,
   },
+  select: {
+    maxHeight: '200px',
+    minWidth: '50px',
+  },
 });
 
 class ItemList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      password: '',
       item: null,
-      isPasswordWindowOpen: false,
-      isModalOpen: true,
+      verifier: '',
+      reward: '',
     };
   }
 
@@ -94,7 +106,6 @@ class ItemList extends Component {
   };
 
   renderButton = item => {
-    console.log(item);
     if (item.needs_closure) {
       if (this.props.type === 'sold') {
         return (
@@ -120,11 +131,11 @@ class ItemList extends Component {
         <Button
           size="small"
           onClick={() => {
-            // this.setState({ item });
-            this.buyItem(item);
+            this.setState({ item });
+            // this.buyItem(item);
           }}
         >
-          Purchase
+          See more
         </Button>
         // <Button size="small" onClick={() => this.setState({ item })}>
         //   Purchase
@@ -158,20 +169,32 @@ class ItemList extends Component {
   async buyItem(item) {
     const { username, address } = this.context.state;
     // const { item } = this.state;
-    console.log('iteeeeem', item);
     try {
+      await this.checkForErrors();
       const password = await this.passwordModal.open();
       console.log(password);
       const status = await _buyItem(item, username, password, address);
-      this.setState({ status: 'purchased succesfully', password: '' });
+      this.setState({ status: 'purchased succesfully' });
       this.context.getItems();
     } catch (e) {
       console.log(e);
+      this.setState({ message: JSON.stringify(e) });
       // const { message } = e && e.response && e.response.data;
       // console.log(message);
       // this.setState({ status: message, password: '' });
     }
   }
+
+  checkForErrors = () =>
+    new Promise((resolve, reject) => {
+      const { verifier, reward } = this.state;
+      if (verifier && verifier !== 'none') {
+        // check if reward correct
+        if (reward < 1 || reward > 99) {
+          reject('reward should be more than 1% and less than 99%');
+        }
+      }
+    });
 
   async closeTransaction() {
     const { username } = this.context.state;
@@ -188,33 +211,18 @@ class ItemList extends Component {
     }
   }
 
-  getAction() {
-    const { currentPage } = this.context.state;
-    switch (currentPage) {
-      case 'explore':
-        return this.buyItem();
-      case 'purchased':
-        return this.closeTransaction();
-      case 'in progress':
-        return this.closeTransaction();
-      case 'sold':
-        return this.closeTransaction();
-      case 'verified':
-        return this.buyItem();
-      default:
-    }
-  }
-
   renderModal = () => {
-    console.log(this.password);
     const { classes } = this.props;
     const { item } = this.state;
+    if (!item) {
+      return <div />;
+    }
     return (
       <Modal
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
         open={!!item}
-        onClose={this.handleClose}
+        onClose={() => this.setState({ item: null })}
       >
         <div
           style={{
@@ -224,13 +232,77 @@ class ItemList extends Component {
           }}
           className={classes.paper}
         >
-          <Typography variant="title" id="modal-title">
-            Text in a modal
+          <Typography variant="title" id="modal-title" style={{ paddingBottom: '20px' }}>
+            {item.name}
           </Typography>
           <Typography variant="subheading" id="simple-modal-description">
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+            <span style={{ fontWeight: '600' }}>Seller:</span> {item.owner.name}
           </Typography>
-          {/* <SimpleModalWrapped /> */}
+          <Typography variant="subheading" id="simple-modal-description">
+            <span style={{ fontWeight: '600' }}>Price:</span> {item.price}
+          </Typography>
+          <Typography variant="subheading" id="simple-modal-description">
+            <span style={{ fontWeight: '600' }}>Size:</span> {item.size}
+          </Typography>
+          <Typography variant="subheading" id="simple-modal-description">
+            <span style={{ fontWeight: '600' }}>Date uploaded:</span> {item.created_at}
+          </Typography>
+          <div
+            style={{
+              marginTop: '10px',
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+            }}
+          >
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="controlled-open-select">Verifier</InputLabel>
+              <Select
+                // open={this.state.open}
+                // onClose={this.handleClose}
+                // onOpen={this.handleOpen}
+                value={this.state.verifier}
+                classes={{ select: classes.select }}
+                onChange={e => this.setState({ verifier: e.target.value })}
+                inputProps={{
+                  name: 'verifier',
+                  id: 'controlled-open-select',
+                }}
+              >
+                <MenuItem value="none">
+                  <em>None</em>
+                </MenuItem>
+                {this.context.state.verifiers.map(verifier => (
+                  <MenuItem key={verifier.id} value={verifier.account}>
+                    {verifier.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {!this.state.verifier ? null : this.state.verifier === 'none' ? (
+              <Button color="primary" className={classes.button}>
+                Buy
+              </Button>
+            ) : (
+              <Fragment>
+                <TextField
+                  label="Verifier's reward"
+                  id="simple-start-adornment"
+                  type="number"
+                  value={this.state.reward}
+                  onChange={e => this.setState({ reward: e.target.value })}
+                  className={classNames(classes.margin, classes.textField)}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">%</InputAdornment>,
+                  }}
+                />
+                <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
+                  Buy
+                </Button>
+              </Fragment>
+            )}
+          </div>
         </div>
       </Modal>
     );
@@ -246,7 +318,7 @@ class ItemList extends Component {
             <div className="item-list-container">
               <ErrorPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
               {items.map(item => this.renderItem(item))}
-              {/* {this.renderModal()} */}
+              {this.renderModal()}
               <PasswordModal
                 onRef={ref => {
                   this.passwordModal = ref;
