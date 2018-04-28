@@ -45,16 +45,13 @@ export class MainProvider extends Component {
   }
 
   componentWillMount() {
-    console.log('mounted');
     if (!Auth.loggedIn()) {
-      console.log('not logged in');
       this.setState({ currentPage: 'login' });
       this.props.history.replace('/login');
     } else {
       try {
         const profile = Auth.getProfile();
         if (!localStorage.getItem(profile.name)) {
-          console.log('nope');
           // throw new Error();
           this.setState({ currentPage: 'add vault' });
           this.props.history.push('/vault');
@@ -79,7 +76,6 @@ export class MainProvider extends Component {
   async getVerifiers() {
     try {
       const { data: verifiers } = await _getVerifiers();
-      console.log(verifiers);
       this.setState({ verifiers });
     } catch (e) {
       console.log(e);

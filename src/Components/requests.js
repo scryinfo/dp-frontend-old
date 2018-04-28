@@ -2,29 +2,20 @@ import axios from 'axios';
 import { HOST } from './Remote';
 import { openChannel, buyerAuthorization, verifierAuthorization, closeChannel } from './signer';
 
-// const token = {
-//   headers: { Authorization: localStorage.getItem('id_token') },
-// };
-
 // Get tokens
-export async function _addTokens(account, amount) {
-  console.log(account, amount);
-  return axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, {
+export const _addTokens = (account, amount) =>
+  axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, {
     headers: { Authorization: localStorage.getItem('id_token') },
   });
-}
 
 // Get balance
-export async function _getBalance(account) {
-  return axios.get(`${HOST}/balance?account=${account}`, {
+export const _getBalance = account =>
+  axios.get(`${HOST}/balance?account=${account}`, {
     headers: { Authorization: localStorage.getItem('id_token') },
   });
-}
 
 // Buy an item
-export async function _buyItem(listing, username, password, buyer, verifier, rewardPercent) {
-  // const listing = await axios.get(`${HOST}/listing/${item}`);
-  // convert from %
+export const _buyItem = async (listing, username, password, buyer, verifier, rewardPercent) => {
   const reward = Math.floor(listing.price / 100 * rewardPercent);
   const createBlock = await openChannel(listing.price, { username, password }, listing.owner.account, reward || 0, 1);
 
@@ -43,13 +34,10 @@ export async function _buyItem(listing, username, password, buyer, verifier, rew
     },
     headers: { Authorization: localStorage.getItem('id_token') },
   });
-}
+};
 
 // Verify item
-export async function _verifyItem(item, username, password) {
-  // const listing = await axios.get(`${HOST}/listing/${item}`);
-  console.log('verify', item);
-
+export const _verifyItem = async (item, username, password) => {
   const verifierAuth = await verifierAuthorization(
     item.listing.owner.account,
     { username, password },
@@ -66,10 +54,10 @@ export async function _verifyItem(item, username, password) {
     },
     headers: { Authorization: localStorage.getItem('id_token') },
   });
-}
+};
 
 // Close the pending transaction
-export async function _closeTransaction(id, username, password) {
+export const _closeTransaction = async (id, username, password) => {
   const { data } = await axios.get(`${HOST}/history/${id}`, {
     headers: { Authorization: localStorage.getItem('id_token') },
   });
@@ -95,10 +83,10 @@ export async function _closeTransaction(id, username, password) {
     verifierAuth,
     id
   );
-}
+};
 
 // Get list of items
-export async function _getItems(account, type) {
+export const _getItems = (account, type) => {
   if (account && type) {
     return axios.get(`${HOST}/history?${type}=${account}`, {
       headers: { Authorization: localStorage.getItem('id_token') },
@@ -112,21 +100,22 @@ export async function _getItems(account, type) {
   return axios.get(`${HOST}/listings`, {
     headers: { Authorization: localStorage.getItem('id_token') },
   });
-}
+};
 
 // Get list of verifiers
-export async function _getVerifiers() {
-  return axios.get(`${HOST}/trader`, {
+export const _getVerifiers = () =>
+  axios.get(`${HOST}/trader`, {
     headers: { Authorization: localStorage.getItem('id_token') },
   });
-}
 
+// Login
 export const login = (username, password) =>
   axios.post(`${HOST}/login`, {
     username,
     password,
   });
 
+// Signup
 export const register = (username, password, account) =>
   axios.post(`${HOST}/signup`, {
     username,
@@ -134,4 +123,5 @@ export const register = (username, password, account) =>
     account,
   });
 
+// Logout
 export const logout = () => axios.post(`${HOST}/logout`);

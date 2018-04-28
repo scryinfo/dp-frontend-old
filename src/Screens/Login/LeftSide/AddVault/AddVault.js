@@ -1,10 +1,8 @@
 import React, { Component, Fragment } from 'react';
-// import RaisedButton from 'material-ui/RaisedButton';
 import { withStyles } from 'material-ui/styles';
 
 import Button from 'material-ui/Button';
 import { CircularProgress } from 'material-ui/Progress';
-import TextField from 'material-ui/TextField';
 
 import './AddVault.css';
 
@@ -21,9 +19,8 @@ import MnemonicModal from '../../../MnemonicModal';
 
 const Auth = new AuthService();
 
-const styles = theme => ({
+const styles = () => ({
   buttonProgress: {
-    // color: green[500],
     position: 'absolute',
     top: '50%',
     left: '50%',
@@ -57,15 +54,10 @@ class AddVault extends Component {
 
   async handleNewVault() {
     this.setState({ loading: true });
-    console.log(this.context);
     if (this.context) {
       const { username } = this.context.state;
       try {
         const password = await this.passwordModal.open();
-        console.log('-=-=-=-=-=-=-=-');
-        console.log(password);
-        console.log(this.context.state.password);
-        console.log('-=-=-=-=-=-=-=-');
         if (password !== this.context.state.password) {
           throw new Error('wrong password');
         }
@@ -75,7 +67,6 @@ class AddVault extends Component {
         const { account, token } = response.data;
         this.Auth.setToken(token);
         this.context.setCurrentUser(username, password, account);
-        console.log(response);
       } catch (e) {
         this.setState({ loading: false });
         console.log(e);
@@ -95,28 +86,19 @@ class AddVault extends Component {
   }
 
   async handleImportVault() {
-    console.log('importing');
     this.setState({ loading: true });
     if (this.context) {
-      console.log('context', this.context);
       const { username } = this.context.state;
-      console.log(username);
       try {
         const password = await this.passwordModal.open();
-        console.log('-=-=-=-=-=-=-=-');
-        console.log(password);
-        console.log(this.context.state.password);
-        console.log('-=-=-=-=-=-=-=-');
         if (password !== this.context.state.password) {
           throw new Error('wrong password');
         }
         const mnemonic = await this.mnemonicModal.open();
         const importedVault = await importVault(username, password, mnemonic);
-        console.log(importedVault);
         const { address } = importedVault;
         this.context.updateState({ address });
         this.props.history.push('/explore');
-        console.log(address, mnemonic);
       } catch (e) {
         this.setState({ loading: false });
         this.passwordModal.close();
@@ -132,7 +114,6 @@ class AddVault extends Component {
   }
 
   handleLogout = async context => {
-    console.log(this.props);
     try {
       await Auth.logout();
       context.updateState({ username: '', password: '', mnemonics: '', address: '' });
@@ -143,7 +124,7 @@ class AddVault extends Component {
   };
 
   loaderSpin() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       if (!this.state.loading) {
         this.setState(
           {

@@ -1,4 +1,4 @@
-const { keystore, signing } = require('eth-lightwallet');
+import { keystore, signing } from 'eth-lightwallet';
 
 const DERIVATION_PATH = "m/44'/60'/0'/0";
 

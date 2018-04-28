@@ -31,7 +31,6 @@ const theme = createMuiTheme({
       dark: '#ffffff',
       contrastText: '#ffffff',
     },
-    // error: will us the default color
   },
 });
 

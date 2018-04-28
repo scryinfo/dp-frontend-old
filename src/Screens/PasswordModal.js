@@ -63,7 +63,7 @@ class PasswordModal extends Component {
               type="password"
               autoFocus
               fullWidth
-              value={this.state.password}
+              value={password}
               onChange={event => this.setState({ password: event.target.value })}
               margin="normal"
             />

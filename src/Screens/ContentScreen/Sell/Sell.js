@@ -3,14 +3,7 @@ import axios from 'axios';
 import { withStyles } from 'material-ui/styles';
 import Stepper, { Step, StepLabel, StepContent } from 'material-ui/Stepper';
 import Button from 'material-ui/Button';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import Icon from 'material-ui/Icon';
 import AttachFile from 'material-ui-icons/AttachFile';
-import ButtonBase from 'material-ui/ButtonBase';
-import Snackbar from 'material-ui/Snackbar';
-import CloseIcon from 'material-ui-icons/Close';
-import IconButton from 'material-ui/IconButton';
 import TextField from 'material-ui/TextField';
 import { LinearProgress } from 'material-ui/Progress';
 
@@ -40,9 +33,7 @@ const styles = theme => ({
   },
 });
 
-function getSteps() {
-  return ['Select a file', 'Set a price', 'Submit'];
-}
+const getSteps = () => ['Select a file', 'Set a price', 'Submit'];
 
 class Sell extends Component {
   constructor() {
@@ -71,6 +62,7 @@ class Sell extends Component {
   };
 
   getStepContent(step, classes) {
+    const { uploadStatus, file, itemPrice, uploadCompleted, activeStep } = this.state;
     switch (step) {
       case 0:
         return (
@@ -91,21 +83,20 @@ class Sell extends Component {
                   <AttachFile className={classes.rightIcon} style={{ height: '18px' }} />
                 </Button>
               </label>
-              <span>{this.state.uploadStatus}</span>
+              <span>{uploadStatus}</span>
             </div>
           </div>
         );
       case 1:
         return (
           <div>
-            {/* <div></div> */}
             <TextField
               id="itemPrice"
               label="Price"
               className={classes.textField}
               type="number"
               margin="normal"
-              value={this.state.itemPrice}
+              value={itemPrice}
               onChange={this.setItemPrice}
             />
             <div>
@@ -113,8 +104,8 @@ class Sell extends Component {
                 className={classes.button}
                 variant="raised"
                 color="primary"
-                // disabled={this.state.loading}
-                onClick={() => this.setState({ activeStep: this.state.activeStep + 1 })}
+                // disabled={loading}
+                onClick={() => this.setState({ activeStep: activeStep + 1 })}
               >
                 Confirm
               </Button>
@@ -126,32 +117,28 @@ class Sell extends Component {
           <div>
             <div>
               <span style={{ fontWeight: 800 }}>File name: </span>
-              {this.state.file.name}
+              {file.name}
             </div>
             <div>
               <span style={{ fontWeight: 800 }}>File size: </span>
-              {this.state.file.size}kb
+              {file.size}kb
             </div>
-            {/* <div>
-              <span style={{ fontWeight: 800 }}>File name: </span>
-              {this.state.file.type}
-            </div> */}
             <div>
               <span style={{ fontWeight: 800 }}>Price </span>
-              {this.state.itemPrice} tokens
+              {itemPrice} tokens
             </div>
             <div>
               <Button
                 className={classes.button}
                 variant="raised"
                 color="primary"
-                // disabled={this.state.loading}
+                // disabled={loading}
                 onClick={this.onFileChange}
               >
                 Upload
               </Button>
             </div>
-            <LinearProgress variant="determinate" value={this.state.uploadCompleted} />
+            <LinearProgress variant="determinate" value={uploadCompleted} />
           </div>
         );
       default:
@@ -160,14 +147,11 @@ class Sell extends Component {
   }
 
   async onFileChange(event, server) {
-    // event.stopPropagation();
-    // event.preventDefault();
-    this.setState({ uploadStatus: '', uploadProgress: '', status: '' });
+    this.setState({ uploadStatus: '' });
     const { file } = this.state;
     const { username, address } = this.context.state;
     const { itemPrice } = this.state;
 
-    // eslint-disable-next-line
     const data = new FormData();
     data.append('data', file);
 
@@ -187,7 +171,6 @@ class Sell extends Component {
       onUploadProgress: progress => {
         const status = Math.floor(progress.loaded / progress.total * 100);
         this.context.showPopup(`Uploading ${whereToUpload}: ${status}% done`);
-        // this.setState({ uploadProgress: status, status: `Uploading ${whereToUpload}: ${status}% done` });
       },
     })
       .then(response => {
@@ -203,9 +186,6 @@ class Sell extends Component {
         }).then(res => {
           this.context.showPopup('Uploaded successfully');
           this.setState({
-            done: true,
-            status: 'Uploaded successfully',
-            uploadProgress: 0,
             file: {},
             activeStep: this.state.activeStep + 1,
           });
@@ -217,24 +197,15 @@ class Sell extends Component {
         if (err.request.status === 405) {
           console.log('request', err);
           this.context.showPopup('IPFS should be writable');
-          this.setState({ done: true });
           return;
         }
         if (!err.request.response) {
-          console.log('Please install IPFS');
           this.context.showPopup(`Please install IPFS`);
-          this.setState({
-            status: 'Please install IPFS',
-            done: true,
-            viaScry: true,
-            uploadText: 'Install IPFS',
-          });
           return;
         }
         if (err.request.status === 400) {
           console.log('request', err);
           this.context.showPopup(`File already exists. Try another`);
-          this.setState({ status: 'File already exists. Try another', done: true });
         }
       });
   }
@@ -243,7 +214,7 @@ class Sell extends Component {
     event.stopPropagation();
     event.preventDefault();
     const file = event.target.files[0];
-    this.setState({ file, status: '', activeStep: this.state.activeStep + 1 });
+    this.setState({ file, activeStep: this.state.activeStep + 1 });
   }
 
   setItemPrice(event) {

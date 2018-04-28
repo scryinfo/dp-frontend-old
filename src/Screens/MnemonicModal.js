@@ -69,13 +69,10 @@ class MnemonicModal extends Component {
               id="mnemonic"
               name="mnemonic"
               label="Enter here"
-              // placeholder="Placeholder"
-              // autoFocus
               multiline
               fullWidth
-              value={this.state.mnemonic}
+              value={mnemonic}
               onChange={event => this.setState({ mnemonic: event.target.value })}
-              // className={classes.textField}
               margin="normal"
             />
           </DialogContent>

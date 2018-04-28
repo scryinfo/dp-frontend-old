@@ -1,25 +1,21 @@
 import React, { Component, Fragment } from 'react';
 import { withStyles } from 'material-ui/styles';
 import TextField from 'material-ui/TextField';
-// import { List, ListItem } from 'material-ui/List';
-import List, { ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction } from 'material-ui/List';
+import List, { ListItem, ListItemText, ListItemSecondaryAction } from 'material-ui/List';
 import Collapse from 'material-ui/transitions/Collapse';
-// import FlatButton from 'material-ui/FlatButton';
 import Button from 'material-ui/Button';
 import { CircularProgress } from 'material-ui/Progress';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
-import MenuPopup, { MenuItem } from 'material-ui/Menu';
+import { MenuItem } from 'material-ui/Menu';
 import Slide from 'material-ui/transitions/Slide';
 import Popover from 'material-ui/Popover';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-
-import { getAccount } from '../../../Components/keyRequests';
 
 import { getMnemonic } from '../../../Components/keys';
 
 import { MainContext } from '../../../Context';
 
-import { logout, _addTokens } from '../../../Components/requests';
+import { _addTokens } from '../../../Components/requests';
 
 import InfoPopup from '../../InfoPopup';
 
@@ -34,12 +30,9 @@ import PasswordModal from '../../PasswordModal';
 
 const Auth = new AuthService();
 
-const styles = theme => ({
+const styles = () => ({
   root: {
     width: '100%',
-    // paddingLeft: '15px',
-    // maxWidth: 360,
-    // backgroundColor: theme.palette.background.paper,
   },
   nested: {
     paddingLeft: 55,
@@ -91,16 +84,12 @@ const styles = theme => ({
     fontSize: '14px',
   },
   buttonProgress: {
-    // color: green[500],
     position: 'absolute',
     top: '50%',
     left: '50%',
     marginTop: -12,
     marginLeft: -12,
   },
-  // popoverRoot: {
-  //   bottom: '100px',
-  // },
 });
 
 class Menu extends Component {
@@ -191,7 +180,7 @@ class Menu extends Component {
   }
 
   loaderSpin() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       if (!this.state.loading) {
         this.setState(
           {
@@ -213,7 +202,6 @@ class Menu extends Component {
   async getMnemonic() {
     try {
       const password = await this.passwordModal.open();
-      console.log(password);
       const vault = await localStorage.getItem(this.context.state.username);
       const mnemonic = await getMnemonic(vault, password);
       this.setState({ mnemonic, isMnemonicWindowOpen: true });
@@ -303,13 +291,11 @@ class Menu extends Component {
                   </div>
                   <form className="menu-balance-add" onSubmit={this.getTokens}>
                     <TextField
-                      id="username"
-                      name="username"
+                      id="tokens"
+                      name="tokens"
                       type="number"
                       fullWidth
                       placeholder="Get more tokens"
-                      // required={!!usernameError}
-                      // error={!!usernameError}
                       className={classes.textField}
                       value={tokensToAdd}
                       onChange={this.handleInput}
@@ -477,18 +463,6 @@ class Menu extends Component {
                       Export vault
                     </MenuItem>
                   </Popover>
-                  {/* <MenuPopup
-                    id="settings"
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={this.handleCloseSettings}
-                    // style={{ marginBottom: '40px' }}
-                    // PopoverClasses={classes.popoverRoot}
-                  >
-                    <MenuItem onClick={this.handleCloseSettings}>Export vault</MenuItem>
-                    {/* <MenuItem onClick={this.handleCloseSettings}>My account</MenuItem>
-                    <MenuItem onClick={this.handleCloseSettings}>Logout</MenuItem> */}
-                  {/* </MenuPopup> */}
                   <li
                     style={{
                       color: 'rgba(255, 255, 255, 0.5)',

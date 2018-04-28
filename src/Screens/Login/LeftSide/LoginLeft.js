@@ -8,19 +8,16 @@ import styled from 'styled-components';
 // React-router-transition
 import { AnimatedSwitch, spring } from 'react-router-transition';
 
-import { MainContext } from '../../../Context';
-
 import './LoginLeft.css';
 
 import LoginForm from './LoginForm/LoginForm';
 import AddVault from './AddVault/AddVault';
 
-function glide(val) {
-  return spring(val, {
+const glide = val =>
+  spring(val, {
     stiffness: 174,
     damping: 24,
   });
-}
 
 const StyledAnimatedSwitch = styled(AnimatedSwitch)`
   position: relative;
@@ -57,19 +54,6 @@ export default class Login extends Component {
     };
   }
 
-  // getCurrentPage = context => {
-  //   switch (context.state.currentPage) {
-  //     case 'login':
-  //       return <LoginForm />;
-  //     case 'register':
-  //       return <LoginForm />;
-  //     case 'add vault':
-  //       return <AddVault />;
-  //     default:
-  //       return <div />;
-  //   }
-  // };
-
   render() {
     return (
       <StyledAnimatedSwitch
@@ -80,7 +64,6 @@ export default class Login extends Component {
       >
         <Route path="/login" render={props => <LoginForm {...props} history={this.props.history} />} />
         <Route path="/vault" render={props => <AddVault {...props} history={this.props.history} />} />
-        {/* <MainContext.Consumer>{context => this.getCurrentPage(context)}</MainContext.Consumer> */}
       </StyledAnimatedSwitch>
     );
   }

@@ -6,18 +6,16 @@ import styled from 'styled-components';
 // React-router-transition
 import { AnimatedSwitch, spring } from 'react-router-transition';
 
-import { MainContext } from '../../Context';
 import './LeftPanel.css';
 
 import Menu from '../../Screens/LeftPanel/Menu/Menu';
 import LoginLeftSide from '../../Screens/Login/LeftSide/LoginLeft';
 
-function glide(val) {
-  return spring(val, {
+const glide = val =>
+  spring(val, {
     stiffness: 174,
     damping: 24,
   });
-}
 
 const StyledAnimatedSwitch = styled(AnimatedSwitch)`
   position: relative;
@@ -57,7 +55,6 @@ export default class LeftPanel extends Component {
           {...this.state.pageTransitions}
           mapStyles={styles => ({
             transform: `translate3d(${styles.offset}%, 0, 0)`,
-            // opacity: styles,
           })}
         >
           <Route path="/login" render={props => <LoginLeftSide {...props} history={this.props.history} />} />

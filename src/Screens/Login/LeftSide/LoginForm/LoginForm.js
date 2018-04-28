@@ -6,30 +6,21 @@ import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
 import { CircularProgress } from 'material-ui/Progress';
-import Snackbar from 'material-ui/Snackbar';
-import CloseIcon from 'material-ui-icons/Close';
-import { FormControl } from 'material-ui/Form';
-import IconButton from 'material-ui/IconButton';
 import AuthService from '../../../../Auth/AuthService';
 
 import { login } from '../../../../Components/requests';
-
 import { MainContext } from '../../../../Context';
 
 import './LoginForm.css';
-import { FormGroup } from 'material-ui';
 
-function TabContainer({ children, dir }) {
-  return (
-    <Typography component="div" dir={dir}>
-      {children}
-    </Typography>
-  );
-}
+const TabContainer = ({ children, dir }) => (
+  <Typography component="div" dir={dir}>
+    {children}
+  </Typography>
+);
 
-const styles = theme => ({
+const styles = () => ({
   root: {
-    // backgroundColor: theme.palette.background.paper,
     width: '100%',
     height: '600px',
     marginTop: '300px',
@@ -38,12 +29,10 @@ const styles = theme => ({
     color: '#ffffff',
   },
   tabRoot: {
-    // width: 'auto',
     minWidth: '0px',
   },
   label: {
     color: '#4AA4E0',
-    // fontSize: '14px',
   },
   labelContainer: {
     padding: 0,
@@ -67,7 +56,6 @@ const styles = theme => ({
     color: 'rgba(255, 255, 255, 0.7)',
   },
   buttonProgress: {
-    // color: green[500],
     position: 'absolute',
     top: 'calc(50% + 15px)',
     left: '50%',
@@ -90,7 +78,6 @@ class LoginForm extends React.Component {
       usernameError: '',
       passwordError: '',
       confirmPasswordError: '',
-      errorMessage: '',
       type: 'login',
     };
     this.handleInput = this.handleInput.bind(this);
@@ -112,12 +99,10 @@ class LoginForm extends React.Component {
       usernameError: '',
       passwordError: '',
       confirmPasswordError: '',
-      errorMessage: '',
     });
   }
 
   handleChange = (event, value) => {
-    console.log(value);
     if (value === 0) {
       this.setState({ type: 'login' });
     }
@@ -133,8 +118,7 @@ class LoginForm extends React.Component {
   };
 
   handleInput(event) {
-    console.log(event.target.name);
-    this.setState({ usernameError: '', passwordError: '', confirmPasswordError: '', errorMessage: '' });
+    this.setState({ usernameError: '', passwordError: '', confirmPasswordError: '' });
     switch (event.target.name) {
       case 'username':
         this.setState({ username: event.target.value });
@@ -150,7 +134,7 @@ class LoginForm extends React.Component {
   }
 
   loaderSpin() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       if (!this.state.loading) {
         this.setState(
           {
@@ -172,46 +156,39 @@ class LoginForm extends React.Component {
   async checkForErrors() {
     const { type } = this.state;
     await this.loaderSpin();
-    console.log(type);
     const { username, password, confirmPassword } = this.state;
     if (!username) {
       this.setState({ usernameError: 'This field is required' });
       this.context.showPopup('Please enter username');
       return;
     }
-    console.log('first line');
     if (!password) {
       this.setState({ passwordError: 'This field is required' });
       this.context.showPopup('Please enter password');
       return;
     }
-    console.log('second line');
     if (type === 'register') {
       if (!confirmPassword) {
         this.setState({ confirmPasswordError: 'This field is required' });
         this.context.showPopup('Please confirm password');
         return;
       }
-      console.log('third line');
       if (password !== confirmPassword) {
         this.setState({ confirmPasswordError: 'Passwords do not match', passwordError: 'Passwords do not match' });
         this.context.showPopup('Passwords do not match');
         return;
       }
     }
-    console.log('last');
     type === 'login' ? this.handleLogin() : this.handleRegister();
   }
 
   async handleLogin() {
     const { username, password } = this.state;
-    console.log('login happening');
     try {
       const response = await login(username, password);
       const { account, token } = response.data;
       this.Auth.setToken(token);
       this.context.setCurrentUser(username, password, account);
-      console.log(response);
     } catch (e) {
       if (e.response) {
         const { message } = e.response.data;
@@ -224,13 +201,11 @@ class LoginForm extends React.Component {
 
   async handleRegister() {
     const { username, password } = this.state;
-    console.log('register happening');
     try {
       const response = await login(username, password);
       const { account, token } = response.data;
       this.Auth.setToken(token);
       this.context.setCurrentUser(username, password, account);
-      console.log(response);
     } catch (e) {
       if (e.response) {
         const { message } = e.response.data;
@@ -265,13 +240,6 @@ class LoginForm extends React.Component {
     if (this.context) {
       return (
         <div style={styles.formStyle} className="login-form-container">
-          {/* <FormControl> */}
-          {/* <form
-            onSubmit={e => {
-              e.preventDefault();
-              this.checkForErrors();
-            }}
-          > */}
           <TextField
             name="username"
             label="Username"
@@ -381,11 +349,6 @@ class LoginForm extends React.Component {
             </Button>
             {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
           </div>
-          {/* </form> */}
-          {/* </FormControl> */}
-          {/* <div style={{ paddingTop: '20px', lineHeight: '30px', color: 'red', textAlign: 'center' }}>
-            {errorMessage}
-          </div> */}
         </div>
       );
     }
@@ -401,7 +364,7 @@ class LoginForm extends React.Component {
           return (
             <div className={classes.root}>
               <Tabs
-                value={this.state.value}
+                value={value}
                 onChange={this.handleChange}
                 indicatorColor="transparent"
                 textColor="inherit"
@@ -422,7 +385,6 @@ class LoginForm extends React.Component {
                   disabled
                   classes={{
                     root: classes.tabRoot,
-                    // label: value === 0 ? classes.label : null,
                     labelContainer: classes.labelContainerMiddle,
                   }}
                 />
@@ -438,7 +400,7 @@ class LoginForm extends React.Component {
               </Tabs>
               <SwipeableViews
                 axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-                index={this.state.value}
+                index={value}
                 onChangeIndex={this.handleChangeIndex}
               >
                 <TabContainer dir={theme.direction}>{this.renderForm('login')}</TabContainer>

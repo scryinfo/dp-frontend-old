@@ -11,7 +11,7 @@ import Modal from 'material-ui/Modal';
 
 import Typography from 'material-ui/Typography';
 
-import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
+import { InputLabel, InputAdornment } from 'material-ui/Input';
 import TextField from 'material-ui/TextField';
 
 import { MenuItem } from 'material-ui/Menu';
@@ -69,16 +69,12 @@ class ItemList extends Component {
 
   renderItem = item => {
     const { classes } = this.props;
-    const { currentPage } = this.context.state;
     const selectedItem = item.listing || item;
 
     return (
       <div className="card-container" key={Math.random()} style={{ width: '300px' }}>
         <Card className={classes.card}>
           <CardContent>
-            {/* <Typography className={classes.title} color="textSecondary">
-              Text
-            </Typography> */}
             <Typography
               variant="headline"
               component="h2"
@@ -106,6 +102,8 @@ class ItemList extends Component {
   };
 
   renderButton = item => {
+    const { currentPage } = this.context.state;
+
     if (this.props.type === 'sell') {
       return (
         <Button size="small" disabled>
@@ -158,20 +156,16 @@ class ItemList extends Component {
       );
     }
 
-    if (this.context.state.currentPage === 'explore') {
+    if (currentPage === 'explore') {
       return (
         <Button
           size="small"
           onClick={() => {
             this.setState({ item });
-            // this.buyItem(item);
           }}
         >
           See more
         </Button>
-        // <Button size="small" onClick={() => this.setState({ item })}>
-        //   Purchase
-        // </Button>
       );
     }
     return (
@@ -191,12 +185,11 @@ class ItemList extends Component {
   };
 
   async verify(item) {
-    const { username, address } = this.context.state;
+    const { username } = this.context.state;
     // const { item } = this.state;
     try {
       const password = await this.passwordModal.open();
-      console.log(password);
-      const status = await _verifyItem(item, username, password);
+      await _verifyItem(item, username, password);
       this.context.showPopup('verified successfully');
       this.context.updateState({ currentPage: 'verified' });
       this.context.getItems();
@@ -205,10 +198,6 @@ class ItemList extends Component {
     } catch (e) {
       console.log(e);
       this.context.showPopup(JSON.stringify(e));
-      // this.setState({ message: JSON.stringify(e) });
-      // const { message } = e && e.response && e.response.data;
-      // console.log(message);
-      // this.setState({ status: message, password: '' });
     }
   }
 
@@ -233,8 +222,7 @@ class ItemList extends Component {
     try {
       await this.checkForErrors(item);
       const password = await this.passwordModal.open();
-      console.log(password);
-      const status = await _buyItem(item, username, password, address, verifier, reward);
+      await _buyItem(item, username, password, address, verifier, reward);
       this.context.showPopup('purchased successfully');
       this.context.updateState({ currentPage: 'in progress' });
       this.context.getItems();
@@ -247,10 +235,6 @@ class ItemList extends Component {
         return;
       }
       this.context.showPopup(JSON.stringify(e));
-      // this.setState({ message: JSON.stringify(e) });
-      // const { message } = e && e.response && e.response.data;
-      // console.log(message);
-      // this.setState({ status: message, password: '' });
     }
   }
 
@@ -273,9 +257,7 @@ class ItemList extends Component {
     const { username } = this.context.state;
     try {
       const password = await this.passwordModal.open();
-      console.log(password);
-      const status = await _closeTransaction(item.id, username, password);
-      console.log(status);
+      await _closeTransaction(item.id, username, password);
       this.context.showPopup('transaction closed');
       this.context.updateState({ currentPage: 'sold' });
       this.props.history.push('/sold');
@@ -293,7 +275,7 @@ class ItemList extends Component {
 
   renderModal = () => {
     const { classes } = this.props;
-    const { item } = this.state;
+    const { item, verifier, reward } = this.state;
     if (!item) {
       return <div />;
     }
@@ -330,7 +312,7 @@ class ItemList extends Component {
           <form
             onSubmit={e => {
               e.preventDefault();
-              if (!this.state.verifier) return;
+              if (!verifier) return;
               this.buyItem(item);
             }}
             style={{
@@ -344,10 +326,7 @@ class ItemList extends Component {
             <FormControl className={classes.formControl}>
               <InputLabel htmlFor="controlled-open-select">Verifier</InputLabel>
               <Select
-                // open={this.state.open}
-                // onClose={this.handleClose}
-                // onOpen={this.handleOpen}
-                value={this.state.verifier}
+                value={verifier}
                 classes={{ select: classes.select }}
                 onChange={e => this.setState({ verifier: e.target.value })}
                 inputProps={{
@@ -358,14 +337,14 @@ class ItemList extends Component {
                 <MenuItem value="none">
                   <em>None</em>
                 </MenuItem>
-                {this.context.state.verifiers.map(verifier => (
-                  <MenuItem key={verifier.id} value={verifier.account}>
-                    {verifier.name}
+                {this.context.state.verifiers.map(ver => (
+                  <MenuItem key={ver.id} value={ver.account}>
+                    {ver.name}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            {!this.state.verifier ? null : this.state.verifier === 'none' ? (
+            {!verifier ? null : verifier === 'none' ? (
               <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
                 Buy
               </Button>
@@ -375,7 +354,7 @@ class ItemList extends Component {
                   label="Verifier's reward"
                   id="simple-start-adornment"
                   type="number"
-                  value={this.state.reward}
+                  value={reward}
                   onChange={e => this.setState({ reward: e.target.value })}
                   className={classNames(classes.margin, classes.textField)}
                   InputProps={{
@@ -394,7 +373,7 @@ class ItemList extends Component {
   };
 
   render() {
-    const { classes, items } = this.props;
+    const { items } = this.props;
     return (
       <MainContext.Consumer>
         {context => {
