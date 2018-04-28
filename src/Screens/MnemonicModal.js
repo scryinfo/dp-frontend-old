@@ -32,6 +32,9 @@ class MnemonicModal extends Component {
 
   close = () => {
     this.setState({ isOpen: false, mnemonic: '' });
+    if (this.reject) {
+      this.reject('mnemonic not entered');
+    }
   };
 
   transition(props) {
@@ -51,38 +54,46 @@ class MnemonicModal extends Component {
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Enter your Mnemonic</DialogTitle>
-        <DialogContent>
-          <DialogContentText style={{ width: '600px' }}>
-            To import your existing vault please enter your mnemonic in the field below
-          </DialogContentText>
-          <TextField
-            id="mnemonic"
-            name="mnemonic"
-            label="Enter here"
-            // placeholder="Placeholder"
-            // autoFocus
-            multiline
-            fullWidth
-            value={this.state.mnemonic}
-            onChange={event => this.setState({ mnemonic: event.target.value })}
-            // className={classes.textField}
-            margin="normal"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => this.close()} color="primary">
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              this.resolve(mnemonic);
-              this.close();
-            }}
-            color="primary"
-          >
-            Import
-          </Button>
-        </DialogActions>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            this.resolve(mnemonic);
+            this.setState({ isOpen: false, mnemonic: '' });
+          }}
+        >
+          <DialogContent style={{ paddingTop: 0 }}>
+            <DialogContentText style={{ width: '600px' }}>
+              To import your existing vault please enter your mnemonic in the field below
+            </DialogContentText>
+            <TextField
+              id="mnemonic"
+              name="mnemonic"
+              label="Enter here"
+              // placeholder="Placeholder"
+              // autoFocus
+              multiline
+              fullWidth
+              value={this.state.mnemonic}
+              onChange={event => this.setState({ mnemonic: event.target.value })}
+              // className={classes.textField}
+              margin="normal"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.close} color="primary">
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                this.resolve(mnemonic);
+                this.setState({ isOpen: false, mnemonic: '' });
+              }}
+              color="primary"
+            >
+              Import
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     );
   }

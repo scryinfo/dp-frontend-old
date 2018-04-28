@@ -33,9 +33,11 @@ export const getMnemonic = (vaultJs, password) => {
     vault.keyFromPassword(password, (err, key) => {
       if (err) {
         reject(err);
+        return;
       }
       if (!vault.isDerivedKeyCorrect(key)) {
-        reject(new Error('bad password'));
+        reject('bad password');
+        return;
       }
       resolve(vault.getSeed(key));
     });

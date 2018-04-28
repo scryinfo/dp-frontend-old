@@ -62,7 +62,13 @@ class AddVault extends Component {
       const { username } = this.context.state;
       try {
         const password = await this.passwordModal.open();
-        // const mnemonic = await this.mnemonicModal.open();
+        console.log('-=-=-=-=-=-=-=-');
+        console.log(password);
+        console.log(this.context.state.password);
+        console.log('-=-=-=-=-=-=-=-');
+        if (password !== this.context.state.password) {
+          throw new Error('wrong password');
+        }
         const createdVault = await newVault(username, password);
         const { address } = createdVault;
         const response = await register(username, password, address);
@@ -71,12 +77,18 @@ class AddVault extends Component {
         this.context.setCurrentUser(username, password, account);
         console.log(response);
       } catch (e) {
+        this.setState({ loading: false });
+        console.log(e);
         if (e.response) {
           const { message } = e.response.data;
           console.log(message);
           this.context.showPopup(JSON.stringify(message));
+          return;
         }
-        console.log(e);
+        if (e.message) {
+          this.context.showPopup(JSON.stringify(e.message));
+          return;
+        }
         this.context.showPopup(JSON.stringify(e));
       }
     }
@@ -86,11 +98,18 @@ class AddVault extends Component {
     console.log('importing');
     this.setState({ loading: true });
     if (this.context) {
-      console.log('context');
+      console.log('context', this.context);
       const { username } = this.context.state;
       console.log(username);
       try {
         const password = await this.passwordModal.open();
+        console.log('-=-=-=-=-=-=-=-');
+        console.log(password);
+        console.log(this.context.state.password);
+        console.log('-=-=-=-=-=-=-=-');
+        if (password !== this.context.state.password) {
+          throw new Error('wrong password');
+        }
         const mnemonic = await this.mnemonicModal.open();
         const importedVault = await importVault(username, password, mnemonic);
         console.log(importedVault);
@@ -99,9 +118,15 @@ class AddVault extends Component {
         this.props.history.push('/explore');
         console.log(address, mnemonic);
       } catch (e) {
+        this.setState({ loading: false });
         this.passwordModal.close();
         this.mnemonicModal.close();
         console.log(e);
+        if (e.message) {
+          this.context.showPopup(JSON.stringify(e.message));
+          return;
+        }
+        this.context.showPopup(JSON.stringify(e));
       }
     }
   }

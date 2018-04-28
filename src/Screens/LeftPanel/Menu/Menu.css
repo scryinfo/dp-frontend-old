@@ -49,6 +49,10 @@ input[type="number"] {
   border-radius: 3px;
 }
 
+.menu-balance-container-form {
+  border: 1px solid black
+}
+
 .menu-balance-container {
 
 }

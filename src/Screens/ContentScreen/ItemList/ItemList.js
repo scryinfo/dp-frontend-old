@@ -231,7 +231,7 @@ class ItemList extends Component {
     const { verifier, reward } = this.state;
     // const { item } = this.state;
     try {
-      await this.checkForErrors();
+      await this.checkForErrors(item);
       const password = await this.passwordModal.open();
       console.log(password);
       const status = await _buyItem(item, username, password, address, verifier, reward);
@@ -242,6 +242,10 @@ class ItemList extends Component {
       this.props.history.push('/inprogress');
     } catch (e) {
       console.log(e);
+      if (e && e.message) {
+        this.context.showPopup(e.message);
+        return;
+      }
       this.context.showPopup(JSON.stringify(e));
       // this.setState({ message: JSON.stringify(e) });
       // const { message } = e && e.response && e.response.data;
@@ -250,7 +254,7 @@ class ItemList extends Component {
     }
   }
 
-  checkForErrors = () =>
+  checkForErrors = item =>
     new Promise((resolve, reject) => {
       const { verifier, reward } = this.state;
       if (verifier && verifier !== 'none') {
@@ -258,6 +262,9 @@ class ItemList extends Component {
         if (reward < 1 || reward > 99) {
           reject('reward should be more than 1% and less than 99%');
         }
+      }
+      if (this.context.state.balance.tokens < item.price) {
+        reject("you don't have enough tokens");
       }
       resolve();
     });
@@ -295,7 +302,7 @@ class ItemList extends Component {
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
         open={!!item}
-        onClose={() => this.setState({ item: null })}
+        onClose={() => this.setState({ item: null, verifier: '', reward: '' })}
       >
         <div
           style={{
@@ -320,7 +327,12 @@ class ItemList extends Component {
           <Typography variant="subheading" id="simple-modal-description">
             <span style={{ fontWeight: '600' }}>Date uploaded:</span> {item.created_at}
           </Typography>
-          <div
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              if (!this.state.verifier) return;
+              this.buyItem(item);
+            }}
             style={{
               marginTop: '10px',
               display: 'flex',
@@ -375,7 +387,7 @@ class ItemList extends Component {
                 </Button>
               </Fragment>
             )}
-          </div>
+          </form>
         </div>
       </Modal>
     );

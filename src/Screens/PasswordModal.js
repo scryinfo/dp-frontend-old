@@ -29,7 +29,8 @@ class PasswordModal extends Component {
     });
 
   close = () => {
-    this.setState({ isOpen: false });
+    this.setState({ isOpen: false, password: '' });
+    this.reject('password not entered');
   };
 
   render() {
@@ -43,33 +44,45 @@ class PasswordModal extends Component {
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Enter your password</DialogTitle>
-        <DialogContent>
-          <DialogContentText style={{ width: '600px' }} />
-          <TextField
-            name="password"
-            label="Password"
-            type="password"
-            autoFocus
-            fullWidth
-            value={this.state.password}
-            onChange={event => this.setState({ password: event.target.value })}
-            margin="normal"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => this.setState({ isOpen: false, password: '' })} color="primary">
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              this.resolve(password);
-              this.close();
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            this.resolve(password);
+            this.setState({ isOpen: false, password: '' });
+          }}
+        >
+          <DialogContent
+            style={{
+              paddingTop: 0,
             }}
-            color="primary"
           >
-            Confirm
-          </Button>
-        </DialogActions>
+            <DialogContentText style={{ width: '600px' }} />
+            <TextField
+              name="password"
+              label="Password"
+              type="password"
+              autoFocus
+              fullWidth
+              value={this.state.password}
+              onChange={event => this.setState({ password: event.target.value })}
+              margin="normal"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.close} color="primary">
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                this.resolve(password);
+                this.setState({ isOpen: false, password: '' });
+              }}
+              color="primary"
+            >
+              Confirm
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     );
   }

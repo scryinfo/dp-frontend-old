@@ -8,6 +8,7 @@ import TextField from 'material-ui/TextField';
 import { CircularProgress } from 'material-ui/Progress';
 import Snackbar from 'material-ui/Snackbar';
 import CloseIcon from 'material-ui-icons/Close';
+import { FormControl } from 'material-ui/Form';
 import IconButton from 'material-ui/IconButton';
 import AuthService from '../../../../Auth/AuthService';
 
@@ -16,6 +17,7 @@ import { login } from '../../../../Components/requests';
 import { MainContext } from '../../../../Context';
 
 import './LoginForm.css';
+import { FormGroup } from 'material-ui';
 
 function TabContainer({ children, dir }) {
   return (
@@ -174,19 +176,26 @@ class LoginForm extends React.Component {
     const { username, password, confirmPassword } = this.state;
     if (!username) {
       this.setState({ usernameError: 'This field is required' });
+      this.context.showPopup('Please enter username');
+      return;
     }
     console.log('first line');
     if (!password) {
       this.setState({ passwordError: 'This field is required' });
+      this.context.showPopup('Please enter password');
+      return;
     }
     console.log('second line');
     if (type === 'register') {
       if (!confirmPassword) {
         this.setState({ confirmPasswordError: 'This field is required' });
+        this.context.showPopup('Please confirm password');
+        return;
       }
       console.log('third line');
       if (password !== confirmPassword) {
         this.setState({ confirmPasswordError: 'Passwords do not match', passwordError: 'Passwords do not match' });
+        this.context.showPopup('Passwords do not match');
         return;
       }
     }
@@ -255,7 +264,14 @@ class LoginForm extends React.Component {
     const { classes } = this.props;
     if (this.context) {
       return (
-        <form style={styles.formStyle} className="login-form-container">
+        <div style={styles.formStyle} className="login-form-container">
+          {/* <FormControl> */}
+          {/* <form
+            onSubmit={e => {
+              e.preventDefault();
+              this.checkForErrors();
+            }}
+          > */}
           <TextField
             name="username"
             label="Username"
@@ -278,6 +294,12 @@ class LoginForm extends React.Component {
                 input: classes.inputText,
                 underline: classes.inputUnderline,
               },
+            }}
+            onKeyPress={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                this.checkForErrors();
+              }
             }}
           />
           <TextField
@@ -302,6 +324,12 @@ class LoginForm extends React.Component {
                 input: classes.inputText,
                 underline: classes.inputUnderline,
               },
+            }}
+            onKeyPress={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                this.checkForErrors();
+              }
             }}
           />
           {type === 'register' ? (
@@ -328,6 +356,12 @@ class LoginForm extends React.Component {
                   underline: classes.inputUnderline,
                 },
               }}
+              onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  this.checkForErrors();
+                }
+              }}
             />
           ) : null}
           <br />
@@ -347,10 +381,12 @@ class LoginForm extends React.Component {
             </Button>
             {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
           </div>
+          {/* </form> */}
+          {/* </FormControl> */}
           {/* <div style={{ paddingTop: '20px', lineHeight: '30px', color: 'red', textAlign: 'center' }}>
             {errorMessage}
           </div> */}
-        </form>
+        </div>
       );
     }
   };

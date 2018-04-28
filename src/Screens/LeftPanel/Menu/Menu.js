@@ -165,14 +165,28 @@ class Menu extends Component {
     event.preventDefault();
   }
 
+  timeout = async time =>
+    new Promise(resolve => {
+      setTimeout(() => resolve(), time);
+    });
+
   async getTokens(event) {
-    // event.preventDefault();
+    event.preventDefault();
+    if (this.state.tokensToAdd <= 0) {
+      this.context.showPopup('Add 1 or more tokens');
+      return;
+    }
+    this.setState({ loading: true });
     try {
+      await this.timeout(2000);
       await _addTokens(this.context.state.address, this.state.tokensToAdd);
       this.context.updateBalance();
-      this.setState({ tokensToAdd: '' });
+      this.context.showPopup(`Received ${this.state.tokensToAdd} tokens`);
+      this.setState({ tokensToAdd: '', loading: false });
     } catch (e) {
       console.log(e);
+      this.setState({ loading: false });
+      this.context.showPopup('Something went wrong');
     }
   }
 
@@ -205,6 +219,7 @@ class Menu extends Component {
       this.setState({ mnemonic, isMnemonicWindowOpen: true });
     } catch (e) {
       console.log(e);
+      this.context.showPopup(JSON.stringify(e));
     }
   }
 
@@ -286,7 +301,7 @@ class Menu extends Component {
                       <div className="menu-balance-text">ETH</div>
                     </div>
                   </div>
-                  <div className="menu-balance-add">
+                  <form className="menu-balance-add" onSubmit={this.getTokens}>
                     <TextField
                       id="username"
                       name="username"
@@ -322,14 +337,14 @@ class Menu extends Component {
                         variant="raised"
                         color="primary"
                         classes={{ root: classes.balanceButtonRoot }}
-                        onClick={() => this.getTokens()}
+                        onClick={this.getTokens}
                         disabled={loading}
                       >
                         Add
                       </Button>
                       {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
                     </div>
-                  </div>
+                  </form>
                 </div>
 
                 {/* List items */}
@@ -422,9 +437,11 @@ class Menu extends Component {
                       onClick={() => this.changeRoute({ currentPage: 'sell' })}
                     >
                       <ListItemText primary="Sell" classes={{ primary: classes.listText }} />
-                      {/* <ListItemSecondaryAction>
-                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>1</div>
-                      </ListItemSecondaryAction> */}
+                      <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                          {myItems.length}
+                        </div>
+                      </ListItemSecondaryAction>
                     </ListItem>
                   </List>
                 </div>

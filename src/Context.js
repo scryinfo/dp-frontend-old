@@ -60,11 +60,13 @@ export class MainProvider extends Component {
           this.props.history.push('/vault');
           // return;
         }
-        this.setState({
-          username: profile.name,
-          address: profile.account,
-        });
-        this.getVerifiers();
+        this.setState(
+          {
+            username: profile.name,
+            address: profile.account,
+          },
+          () => this.getVerifiers()
+        );
         this.props.history.push('/explore');
       } catch (err) {
         Auth.logout();
