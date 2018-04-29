@@ -197,6 +197,14 @@ class ItemList extends Component {
       this.props.history.push('/verified');
     } catch (e) {
       console.log(e);
+      if (e.response) {
+        if (e.response.status === 401) {
+          console.log('aaaaaaahhhhhh 40000001111');
+          this.context.showPopup('You was logged out');
+          this.context.logout();
+          return;
+        }
+      }
       this.context.showPopup(JSON.stringify(e));
     }
   }
@@ -230,6 +238,13 @@ class ItemList extends Component {
       this.props.history.push('/inprogress');
     } catch (e) {
       console.log(e);
+      if (e.response) {
+        if (e.response.status === 401) {
+          this.context.showPopup('You was logged out');
+          this.context.logout();
+          return;
+        }
+      }
       if (e && e.message) {
         this.context.showPopup(e.message);
         return;
@@ -264,6 +279,14 @@ class ItemList extends Component {
       this.context.getItems();
     } catch (e) {
       console.log(e);
+      if (e.response) {
+        if (e.response.status === 401) {
+          console.log('aaaaaaahhhhhh 40000001111');
+          this.context.showPopup('You was logged out');
+          this.context.logout();
+          return;
+        }
+      }
       if (e && e.response && e.response.data) {
         const { message } = e.response.data;
         this.context.showPopup(JSON.stringify(message));

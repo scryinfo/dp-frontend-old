@@ -92,8 +92,8 @@ input[type="number"] {
 
 .menu-balance-add {
   margin: 20px 40px;
-  /* border: 1px solid #4AA4E0; */
-  /* border-radius: 3px; */
+  border: 1px solid #4AA4E0;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   height: 36px;

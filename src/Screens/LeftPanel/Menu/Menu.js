@@ -3,12 +3,21 @@ import { withStyles } from 'material-ui/styles';
 import TextField from 'material-ui/TextField';
 import List, { ListItem, ListItemText, ListItemSecondaryAction } from 'material-ui/List';
 import Collapse from 'material-ui/transitions/Collapse';
+import Fade from 'material-ui/transitions/Fade';
 import Button from 'material-ui/Button';
 import { CircularProgress } from 'material-ui/Progress';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
-import { MenuItem } from 'material-ui/Menu';
+import { MenuItem, MenuList } from 'material-ui/Menu';
 import Slide from 'material-ui/transitions/Slide';
 import Popover from 'material-ui/Popover';
+
+import { Manager, Target, Popper } from 'react-popper';
+import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
+import Grow from 'material-ui/transitions/Grow';
+import Paper from 'material-ui/Paper';
+import Portal from 'material-ui/Portal';
+
+import classNames from 'classnames';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { getMnemonic } from '../../../Components/keys';
@@ -75,7 +84,8 @@ const styles = () => ({
     },
   },
   balanceButtonRoot: {
-    borderRadius: '0 3px 3px 0',
+    borderRadius: '0 2px 2px 0',
+    boxShadow: 'none',
   },
   inputText: {
     color: 'white',
@@ -90,6 +100,9 @@ const styles = () => ({
     marginTop: -12,
     marginLeft: -12,
   },
+  popperClose: {
+    pointerEvents: 'none',
+  },
 });
 
 class Menu extends Component {
@@ -100,6 +113,7 @@ class Menu extends Component {
       anchorEl: null,
       isMnemonicWindowOpen: false,
       tokensToAdd: '',
+      settingsOpen: false,
     };
     this.handleInput = this.handleInput.bind(this);
     this.getTokens = this.getTokens.bind(this);
@@ -175,28 +189,15 @@ class Menu extends Component {
     } catch (e) {
       console.log(e);
       this.setState({ loading: false });
+      if (e.response) {
+        if (e.response.status === 401) {
+          this.context.showPopup('You was logged out');
+          this.context.logout();
+          return;
+        }
+      }
       this.context.showPopup('Something went wrong');
     }
-  }
-
-  loaderSpin() {
-    return new Promise(resolve => {
-      if (!this.state.loading) {
-        this.setState(
-          {
-            loading: true,
-          },
-          () => {
-            this.timer = setTimeout(() => {
-              this.setState({
-                loading: false,
-              });
-              resolve('next');
-            }, 2000);
-          }
-        );
-      }
-    });
   }
 
   async getMnemonic() {
@@ -254,7 +255,7 @@ class Menu extends Component {
 
   render() {
     const { classes } = this.props;
-    const { loading, tokensToAdd, anchorEl } = this.state;
+    const { loading, tokensToAdd, anchorEl, settingsOpen } = this.state;
     return (
       <MainContext.Consumer>
         {context => {
@@ -299,12 +300,12 @@ class Menu extends Component {
                       className={classes.textField}
                       value={tokensToAdd}
                       onChange={this.handleInput}
-                      style={{
-                        height: '34px',
-                        border: '1px solid #4AA4E0',
-                        borderRightColor: 'transparent',
-                        borderRadius: '3px 0 0 3px',
-                      }}
+                      // style={{
+                      //   height: '34px',
+                      //   border: '1px solid #4AA4E0',
+                      //   borderRightColor: 'transparent',
+                      //   borderRadius: '3px 0 0 3px',
+                      // }}
                       InputLabelProps={{
                         classes: {
                           root: classes.inputLabel,
@@ -434,14 +435,44 @@ class Menu extends Component {
 
                 {/* Bottom buttons */}
                 <div className="menu-buttons">
-                  <Button
-                    classes={{ root: classes.buttonRoot }}
-                    onClick={this.handleOpenSettings}
-                    aria-owns={anchorEl ? 'settings' : null}
-                  >
-                    Settings
-                  </Button>
-                  <Popover
+                  <Manager>
+                    <Target>
+                      <Button
+                        classes={{ root: classes.buttonRoot }}
+                        onClick={() => this.setState({ settingsOpen: !this.state.settingsOpen })}
+                        aria-owns={anchorEl ? 'settings' : null}
+                      >
+                        {console.log(this.state.settingsOpen)}
+                        Settings
+                      </Button>
+                    </Target>
+                    <Popper
+                      placement="bottom"
+                      // eventsEnabled={settingsOpen}
+                      className={classNames({ [classes.popperClose]: !settingsOpen })}
+                    >
+                      <ClickAwayListener onClickAway={() => this.setState({ settingsOpen: false })}>
+                        <Fade in={settingsOpen} id="menu-list-collapse" style={{ transformOrigin: '0 0 0' }}>
+                          <Paper style={{ margin: 5, marginLeft: 16 }}>
+                            <MenuList role="menu">
+                              <MenuItem disabled onClick={this.handleClose}>
+                                More
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => {
+                                  this.handleCloseSettings();
+                                  this.getMnemonic();
+                                }}
+                              >
+                                Export vault
+                              </MenuItem>
+                            </MenuList>
+                          </Paper>
+                        </Fade>
+                      </ClickAwayListener>
+                    </Popper>
+                  </Manager>
+                  {/* <Popover
                     open={Boolean(anchorEl)}
                     anchorEl={anchorEl}
                     // anchorReference={anchorReference}
@@ -462,7 +493,7 @@ class Menu extends Component {
                     >
                       Export vault
                     </MenuItem>
-                  </Popover>
+                  </Popover> */}
                   <li
                     style={{
                       color: 'rgba(255, 255, 255, 0.5)',

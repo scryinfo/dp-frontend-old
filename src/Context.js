@@ -42,6 +42,7 @@ export class MainProvider extends Component {
     this.getItems = this.getItems.bind(this);
     this.getVerifiers = this.getVerifiers.bind(this);
     this.showPopup = this.showPopup.bind(this);
+    this.logout = this.logout.bind(this);
   }
 
   componentWillMount() {
@@ -66,11 +67,15 @@ export class MainProvider extends Component {
         );
         this.props.history.push('/explore');
       } catch (err) {
-        Auth.logout();
-        this.setState({ currentPage: 'login' });
-        this.props.history.replace('/login');
+        this.logout();
       }
     }
+  }
+
+  logout() {
+    Auth.logout();
+    this.setState({ currentPage: 'login' });
+    this.props.history.replace('/login');
   }
 
   async getVerifiers() {
@@ -176,6 +181,7 @@ export class MainProvider extends Component {
           showPopup: this.showPopup,
           updateBalance: this.updateBalance,
           getItems: this.getItems,
+          logout: this.logout,
         }}
       >
         {this.props.children}
