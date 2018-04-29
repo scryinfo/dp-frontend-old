@@ -113,25 +113,15 @@ class Menu extends Component {
       anchorEl: null,
       isMnemonicWindowOpen: false,
       tokensToAdd: '',
-      settingsOpen: false,
+      isSettingsOpen: false,
     };
     this.handleInput = this.handleInput.bind(this);
     this.getTokens = this.getTokens.bind(this);
-    this.handleOpenSettings = this.handleOpenSettings.bind(this);
-    this.handleCloseSettings = this.handleCloseSettings.bind(this);
   }
 
   componentWillMount() {
     initSigner();
   }
-
-  handleOpenSettings = event => {
-    this.setState({ anchorEl: event.currentTarget });
-  };
-
-  handleCloseSettings = () => {
-    this.setState({ anchorEl: null });
-  };
 
   componentDidMount() {
     if (this.context) {
@@ -255,7 +245,7 @@ class Menu extends Component {
 
   render() {
     const { classes } = this.props;
-    const { loading, tokensToAdd, anchorEl, settingsOpen } = this.state;
+    const { loading, tokensToAdd, anchorEl, isSettingsOpen } = this.state;
     return (
       <MainContext.Consumer>
         {context => {
@@ -437,22 +427,37 @@ class Menu extends Component {
                 <div className="menu-buttons">
                   <Manager>
                     <Target>
-                      <Button
-                        classes={{ root: classes.buttonRoot }}
-                        onClick={() => this.setState({ settingsOpen: !this.state.settingsOpen })}
-                        aria-owns={anchorEl ? 'settings' : null}
+                      <div
+                        ref={node => {
+                          this.settingsButton = node;
+                        }}
                       >
-                        {console.log(this.state.settingsOpen)}
-                        Settings
-                      </Button>
+                        <Button
+                          classes={{ root: classes.buttonRoot }}
+                          onClick={() => {
+                            this.setState({ isSettingsOpen: !this.state.isSettingsOpen });
+                          }}
+                          aria-owns={anchorEl ? 'settings' : null}
+                        >
+                          Settings
+                        </Button>
+                      </div>
                     </Target>
                     <Popper
                       placement="bottom"
-                      // eventsEnabled={settingsOpen}
-                      className={classNames({ [classes.popperClose]: !settingsOpen })}
+                      eventsEnabled={isSettingsOpen}
+                      className={classNames({ [classes.popperClose]: !isSettingsOpen })}
                     >
-                      <ClickAwayListener onClickAway={() => this.setState({ settingsOpen: false })}>
-                        <Fade in={settingsOpen} id="menu-list-collapse" style={{ transformOrigin: '0 0 0' }}>
+                      <ClickAwayListener
+                        onClickAway={event => {
+                          if (this.settingsButton.contains(event.target)) {
+                            return;
+                          }
+
+                          this.setState({ isSettingsOpen: false });
+                        }}
+                      >
+                        <Fade in={isSettingsOpen} id="menu-list-collapse" style={{ transformOrigin: '0 0 0' }}>
                           <Paper style={{ margin: 5, marginLeft: 16 }}>
                             <MenuList role="menu">
                               <MenuItem disabled onClick={this.handleClose}>
@@ -460,7 +465,7 @@ class Menu extends Component {
                               </MenuItem>
                               <MenuItem
                                 onClick={() => {
-                                  this.handleCloseSettings();
+                                  this.setState({ isSettingsOpen: false });
                                   this.getMnemonic();
                                 }}
                               >
