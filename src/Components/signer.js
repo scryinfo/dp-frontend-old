@@ -13,19 +13,17 @@ let gasPrice;
 let chainId;
 
 export const initSigner = async () => {
-  const { data: contracts } = await axios.get(`${HOST}/contracts.json`, {
+  const { data: _contract } = await axios.get(`${HOST}/contract`, {
     headers: { Authorization: localStorage.getItem('id_token') },
   });
-  const { data: { deployments } } = await axios.get(`${HOST}/registrar.json`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
-  });
-
-  // eslint-disable-next-line
-  const registry = Object.values(deployments).reduce((acc, ele) => (acc = Object.assign(acc, ele)), {});
-  token = new web3.eth.Contract(contracts.ScryToken.abi, registry.ScryToken);
-  console.info('token:', token._address);
-  contract = new web3.eth.Contract(contracts.Scry.abi, registry.Scry);
+  contract = new web3.eth.Contract(_contract.abi, _contract.address);
   console.info('contract:', contract._address);
+
+  const { data: _token } = await axios.get(`${HOST}/token`, {
+    headers: { Authorization: localStorage.getItem('id_token') },
+  });
+  token = new web3.eth.Contract(_token.abi, _token.address);
+  console.info('token:', token._address);
 
   ({ data: { gasPrice, chainId } } = await axios.get(`${HOST}/chainInfo`, {
     headers: { Authorization: localStorage.getItem('id_token') },

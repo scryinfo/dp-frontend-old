@@ -192,7 +192,7 @@ class Menu extends Component {
   async getMnemonic() {
     try {
       const password = await this.passwordModal.open();
-      const vault = await localStorage.getItem(this.context.state.username);
+      const vault = localStorage.getItem(this.context.state.username);
       const mnemonic = await getMnemonic(vault, password);
       this.setState({ mnemonic, isMnemonicWindowOpen: true });
     } catch (e) {
