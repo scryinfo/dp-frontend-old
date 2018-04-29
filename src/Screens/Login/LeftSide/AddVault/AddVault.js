@@ -70,14 +70,14 @@ class AddVault extends Component {
       } catch (e) {
         this.setState({ loading: false });
         console.log(e);
-        if (e.response) {
+        if (e.response && e.response.data) {
           const { message } = e.response.data;
           console.log(message);
-          this.context.showPopup(JSON.stringify(message));
+          this.context.showPopup(message);
           return;
         }
         if (e.message) {
-          this.context.showPopup(JSON.stringify(e.message));
+          this.context.showPopup(e.message);
           return;
         }
         this.context.showPopup(JSON.stringify(e));
@@ -105,7 +105,7 @@ class AddVault extends Component {
         this.mnemonicModal.close();
         console.log(e);
         if (e.message) {
-          this.context.showPopup(JSON.stringify(e.message));
+          this.context.showPopup(e.message);
           return;
         }
         this.context.showPopup(JSON.stringify(e));

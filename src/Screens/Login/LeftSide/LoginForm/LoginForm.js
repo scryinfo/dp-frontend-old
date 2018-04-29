@@ -190,10 +190,10 @@ class LoginForm extends React.Component {
       this.Auth.setToken(token);
       this.context.setCurrentUser(username, password, account);
     } catch (e) {
-      if (e.response) {
+      if (e.response && e.response.data) {
         const { message } = e.response.data;
         console.log(message);
-        this.context.showPopup(JSON.stringify(message));
+        this.context.showPopup(message);
       }
       console.log(e);
     }
@@ -207,7 +207,7 @@ class LoginForm extends React.Component {
       this.Auth.setToken(token);
       this.context.setCurrentUser(username, password, account);
     } catch (e) {
-      if (e.response) {
+      if (e.response && e.response.data) {
         const { message } = e.response.data;
         if (message === 'user does not exist') {
           this.context.updateState({ username, password, currentPage: 'add vault', action: 'register' });
@@ -218,7 +218,7 @@ class LoginForm extends React.Component {
           this.context.showPopup('user already exists');
           return;
         }
-        this.context.showPopup(JSON.stringify(message));
+        this.context.showPopup(message);
         console.log(message);
       }
       console.log(e);

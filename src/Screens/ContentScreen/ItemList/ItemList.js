@@ -292,7 +292,7 @@ class ItemList extends Component {
       }
       if (e && e.response && e.response.data) {
         const { message } = e.response.data;
-        this.context.showPopup(JSON.stringify(message));
+        this.context.showPopup(message);
         return;
       }
       this.context.showPopup(JSON.stringify(e));
