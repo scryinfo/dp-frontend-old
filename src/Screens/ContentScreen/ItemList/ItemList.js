@@ -193,6 +193,7 @@ class ItemList extends Component {
       this.context.showPopup('verified successfully');
       this.context.updateState({ currentPage: 'verified' });
       this.context.getItems();
+      this.context.updateBalance();
       this.setState({ item: null });
       this.props.history.push('/verified');
     } catch (e) {
@@ -234,6 +235,7 @@ class ItemList extends Component {
       this.context.showPopup('purchased successfully');
       this.context.updateState({ currentPage: 'in progress' });
       this.context.getItems();
+      this.context.updateBalance();
       this.setState({ item: null });
       this.props.history.push('/inprogress');
     } catch (e) {
@@ -277,6 +279,7 @@ class ItemList extends Component {
       this.context.updateState({ currentPage: 'sold' });
       this.props.history.push('/sold');
       this.context.getItems();
+      this.context.updateBalance();
     } catch (e) {
       console.log(e);
       if (e.response) {

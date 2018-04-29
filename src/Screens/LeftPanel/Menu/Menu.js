@@ -9,13 +9,12 @@ import { CircularProgress } from 'material-ui/Progress';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import { MenuItem, MenuList } from 'material-ui/Menu';
 import Slide from 'material-ui/transitions/Slide';
-import Popover from 'material-ui/Popover';
+
+import { Motion, spring } from 'react-motion';
 
 import { Manager, Target, Popper } from 'react-popper';
 import ClickAwayListener from 'material-ui/utils/ClickAwayListener';
-import Grow from 'material-ui/transitions/Grow';
 import Paper from 'material-ui/Paper';
-import Portal from 'material-ui/Portal';
 
 import classNames from 'classnames';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -270,16 +269,26 @@ class Menu extends Component {
                 </div>
                 {/* Balance section */}
                 <div className="menu-balance-container">
-                  <div className="menu-balance">
-                    <div className="menu-balance-tokens">
-                      <div className="menu-balance-numbers">{context.state.balance.tokens}</div>
-                      <div className="menu-balance-text">TOKENS</div>
-                    </div>
-                    <div className="menu-balance-eth">
-                      <div className="menu-balance-numbers">{context.state.balance.eth}</div>
-                      <div className="menu-balance-text">ETH</div>
-                    </div>
-                  </div>
+                  <Motion
+                    defaultStyle={{ tokens: 0, eth: 0 }}
+                    style={{
+                      tokens: spring(context.state.balance.tokens),
+                      eth: spring(context.state.balance.eth),
+                    }}
+                  >
+                    {value => (
+                      <div className="menu-balance">
+                        <div className="menu-balance-tokens">
+                          <div className="menu-balance-numbers">{Math.round(value.tokens)}</div>
+                          <div className="menu-balance-text">TOKENS</div>
+                        </div>
+                        <div className="menu-balance-eth">
+                          <div className="menu-balance-numbers">{value.eth.toFixed(1)}</div>
+                          <div className="menu-balance-text">ETH</div>
+                        </div>
+                      </div>
+                    )}
+                  </Motion>
                   <form className="menu-balance-add" onSubmit={this.getTokens}>
                     <TextField
                       id="tokens"
@@ -477,28 +486,6 @@ class Menu extends Component {
                       </ClickAwayListener>
                     </Popper>
                   </Manager>
-                  {/* <Popover
-                    open={Boolean(anchorEl)}
-                    anchorEl={anchorEl}
-                    // anchorReference={anchorReference}
-                    // anchorPosition={{ top: positionTop }}
-                    onClose={this.handleCloseSettings}
-                    anchorOrigin={{
-                      vertical: 'top',
-                    }}
-                    transformOrigin={{
-                      vertical: 'bottom',
-                    }}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        this.handleCloseSettings();
-                        this.getMnemonic();
-                      }}
-                    >
-                      Export vault
-                    </MenuItem>
-                  </Popover> */}
                   <li
                     style={{
                       color: 'rgba(255, 255, 255, 0.5)',
