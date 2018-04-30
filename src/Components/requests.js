@@ -4,7 +4,9 @@ import { openChannel, buyerAuthorization, verifierAuthorization, closeChannel } 
 
 // Get tokens
 export const _addTokens = (account, amount) =>
-  axios.get(`${HOST}/fund?account=${account}&amount=${amount}`, {
+  axios({
+    method: 'post',
+    url: `${HOST}/fund?account=${account}&amount=${amount}`,
     headers: { Authorization: localStorage.getItem('id_token') },
   });
 
