@@ -97,7 +97,7 @@ class AddVault extends Component {
         const mnemonic = await this.mnemonicModal.open();
         const importedVault = await importVault(username, password, mnemonic);
         const { address } = importedVault;
-        this.context.updateState({ address });
+        this.context.updateState({ address, currentPage: 'explore' });
         this.props.history.push('/explore');
       } catch (e) {
         this.setState({ loading: false });
