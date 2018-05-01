@@ -3,6 +3,8 @@ import { withStyles } from 'material-ui/styles';
 
 import { createWriteStream } from 'streamsaver';
 
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
 import classNames from 'classnames';
 
 import Button from 'material-ui/Button';
@@ -169,18 +171,31 @@ class ItemList extends Component {
       );
     }
     return (
-      <Button
-        size="small"
-        onClick={() => {
-          if (item.listing) {
-            this.downloadFile(`http://localhost:8080/ipfs/${item.listing.cid}`, item.listing.name);
-            return;
-          }
-          this.downloadFile(`http://localhost:8080/ipfs/${item.cid}`, item.name);
-        }}
-      >
-        Download
-      </Button>
+      <div>
+        <Button
+          size="small"
+          color="primary"
+          style={{ fontSize: '0.875rem' }}
+          onClick={() => {
+            if (item.listing) {
+              this.downloadFile(`http://localhost:8080/ipfs/${item.listing.cid}`, item.listing.name);
+              return;
+            }
+            this.downloadFile(`http://localhost:8080/ipfs/${item.cid}`, item.name);
+          }}
+        >
+          Download
+        </Button>
+        <CopyToClipboard
+          text={item.listing ? item.listing.cid : item.cid}
+          onCopy={() => {
+            this.context.showPopup('Copied to clipboard');
+            // setTimeout(() => this.setState({ status: '' }), 3000);
+          }}
+        >
+          <Button>Copy ipfs hash</Button>
+        </CopyToClipboard>
+      </div>
     );
   };
 
