@@ -36,24 +36,29 @@ export const newVault = async (username, password) => {
 };
 
 // IMPORT VAULT
-export const importVault = async (username, password, mnemonic) => {
-  // create
-  try {
-    const vault = await createVault(password, mnemonic);
-    console.info('created vault:', vault, ' for:', username, ' mnemonic:', mnemonic);
-    await createAddress(vault, password);
-    // save locally
-    window.localStorage.setItem(username, vault.serialize());
-    await getKey(vault, password);
-    // save on remote
-    // await newAccount(username, addresses[0], key);
-    return {
-      username,
-      mnemonic,
-      address: vault.getAddresses()[0],
-    };
-  } catch (e) {
-    console.log('errrrororororor');
-    throw new Error(e);
-  }
-};
+export const importVault = (username, password, mnemonic, address) =>
+  new Promise(async (resolve, reject) => {
+    // create
+    try {
+      const vault = await createVault(password, mnemonic);
+      console.info('created vault:', vault, ' for:', username, ' mnemonic:', mnemonic);
+      await createAddress(vault, password);
+      // save locally
+      window.localStorage.setItem(username, vault.serialize());
+      await getKey(vault, password);
+
+      // check if account matches
+      if (address && vault.getAddresses()[0] !== address) {
+        reject('account does not match the one on the server');
+        return;
+      }
+
+      resolve({
+        username,
+        mnemonic,
+        address: vault.getAddresses()[0],
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });

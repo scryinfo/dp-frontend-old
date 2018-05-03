@@ -30,6 +30,8 @@ import PasswordModal from '../../PasswordModal';
 import './ItemList.css';
 import { MainContext } from '../../../Context';
 
+import { HOST } from '../../../Components/Remote';
+
 const styles = theme => ({
   card: {
     minWidth: 275,
@@ -178,10 +180,10 @@ class ItemList extends Component {
           style={{ fontSize: '0.875rem' }}
           onClick={() => {
             if (item.listing) {
-              this.downloadFile(`http://localhost:8080/ipfs/${item.listing.cid}`, item.listing.name);
+              this.downloadFile(`${HOST}/cid=${item.listing.cid}`, item.listing.name);
               return;
             }
-            this.downloadFile(`http://localhost:8080/ipfs/${item.cid}`, item.name);
+            this.downloadFile(`${HOST}/cid=${item.cid}`, item.name);
           }}
         >
           Download

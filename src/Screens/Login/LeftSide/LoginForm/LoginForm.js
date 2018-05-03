@@ -117,21 +117,10 @@ class LoginForm extends React.Component {
     this.setState({ value: index });
   };
 
-  handleInput(event) {
-    this.setState({ usernameError: '', passwordError: '', confirmPasswordError: '' });
-    switch (event.target.name) {
-      case 'username':
-        this.setState({ username: event.target.value });
-        break;
-      case 'password':
-        this.setState({ password: event.target.value });
-        break;
-      case 'confirmPassword':
-        this.setState({ confirmPassword: event.target.value });
-        break;
-      default:
-    }
-  }
+  handleInput = ({ target: { name, value } }) =>
+    this.setState({
+      [name]: value,
+    });
 
   loaderSpin() {
     return new Promise(resolve => {

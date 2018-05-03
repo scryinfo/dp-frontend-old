@@ -46,17 +46,21 @@ export const getMnemonic = (vaultJs, password) => {
 
 export const createVault = (password, mnemonic) =>
   new Promise((resolve, reject) => {
-    keystore.createVault(
-      {
-        seedPhrase: mnemonic,
-        password,
-        hdPathString: DERIVATION_PATH,
-      },
-      (err, vault) => {
-        if (err) reject(err);
-        resolve(vault);
-      }
-    );
+    if (keystore.isSeedValid(mnemonic)) {
+      keystore.createVault(
+        {
+          seedPhrase: mnemonic,
+          password,
+          hdPathString: DERIVATION_PATH,
+        },
+        (err, vault) => {
+          if (err) reject(err);
+          resolve(vault);
+        }
+      );
+      return;
+    }
+    reject('wrong mnemonic');
   });
 
 export const createAddress = async (vault, password) =>

@@ -38,72 +38,6 @@ import PasswordModal from '../../PasswordModal';
 
 const Auth = new AuthService();
 
-const styles = () => ({
-  root: {
-    width: '100%',
-  },
-  nested: {
-    paddingLeft: 55,
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    },
-  },
-  activeNested: {
-    paddingLeft: 55,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    },
-  },
-  listContainer: {
-    paddingLeft: 40,
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    },
-  },
-  activeListContainer: {
-    paddingLeft: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    },
-  },
-  listText: {
-    color: '#ffffff',
-  },
-  buttonRoot: {
-    borderRadius: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    boxShadow: 0,
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontSize: 12,
-    fontWeight: 500,
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    },
-  },
-  balanceButtonRoot: {
-    borderRadius: '0 2px 2px 0',
-    boxShadow: 'none',
-  },
-  inputText: {
-    color: 'white',
-    paddingLeft: '10px',
-    paddingTop: '10px',
-    fontSize: '14px',
-  },
-  buttonProgress: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -12,
-  },
-  popperClose: {
-    pointerEvents: 'none',
-  },
-});
-
 class Menu extends Component {
   constructor(props) {
     super(props);
@@ -514,5 +448,71 @@ class Menu extends Component {
     );
   }
 }
+
+const styles = () => ({
+  root: {
+    width: '100%',
+  },
+  nested: {
+    paddingLeft: 55,
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    },
+  },
+  activeNested: {
+    paddingLeft: 55,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    },
+  },
+  listContainer: {
+    paddingLeft: 40,
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    },
+  },
+  activeListContainer: {
+    paddingLeft: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    },
+  },
+  listText: {
+    color: '#ffffff',
+  },
+  buttonRoot: {
+    borderRadius: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    boxShadow: 0,
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 12,
+    fontWeight: 500,
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    },
+  },
+  balanceButtonRoot: {
+    borderRadius: '0 2px 2px 0',
+    boxShadow: 'none',
+  },
+  inputText: {
+    color: 'white',
+    paddingLeft: '10px',
+    paddingTop: '10px',
+    fontSize: '14px',
+  },
+  buttonProgress: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },
+  popperClose: {
+    pointerEvents: 'none',
+  },
+});
 
 export default withStyles(styles)(Menu);

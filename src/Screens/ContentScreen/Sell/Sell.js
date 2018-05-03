@@ -46,6 +46,7 @@ class Sell extends Component {
     };
     this.getTheFile = this.getTheFile.bind(this);
     this.onFileChange = this.onFileChange.bind(this);
+    this.onFileChangeLocal = this.onFileChangeLocal.bind(this);
     this.setItemPrice = this.setItemPrice.bind(this);
   }
 
@@ -146,7 +147,8 @@ class Sell extends Component {
     }
   }
 
-  async onFileChange(event, server) {
+  async onFileChange() {
+    // const server = 'scry';
     this.setState({ uploadStatus: '' });
     const { file } = this.state;
     const { username, address } = this.context.state;
@@ -155,12 +157,45 @@ class Sell extends Component {
     const data = new FormData();
     data.append('data', file);
 
-    let whereToUpload = 'locally';
-    let url = 'http://127.0.0.1:8080/ipfs/';
-    if (server === 'scry') {
-      url = 'https://dev.scry.info/scry/seller/upload';
-      whereToUpload = 'to Scry.info';
+    const url = `${HOST}/seller/upload?account=${address}&name=${file.name}&size=${
+      file.size
+    }&price=${itemPrice}&username=${username}`;
+    // Upload file
+    try {
+      await axios({
+        method: 'POST',
+        url,
+        headers: {
+          'content-type': 'multipart/form-data',
+          Authorization: localStorage.getItem('id_token'),
+        },
+        data,
+        onUploadProgress: progress => {
+          const status = Math.floor(progress.loaded / progress.total * 100);
+          this.context.showPopup(`Uploading: ${status}% done`, progress);
+        },
+      });
+      this.context.showPopup('Uploaded successfully');
+      this.setState({
+        file: {},
+        activeStep: this.state.activeStep + 1,
+      });
+      this.context.getItems();
+    } catch (e) {
+      console.log(e);
     }
+  }
+
+  async onFileChangeLocal() {
+    this.setState({ uploadStatus: '' });
+    const { file } = this.state;
+    const { username, address } = this.context.state;
+    const { itemPrice } = this.state;
+
+    const data = new FormData();
+    data.append('data', file);
+
+    const url = 'http://127.0.0.1:8080/ipfs/';
     axios({
       method: 'POST',
       url,
@@ -170,7 +205,7 @@ class Sell extends Component {
       data,
       onUploadProgress: progress => {
         const status = Math.floor(progress.loaded / progress.total * 100);
-        this.context.showPopup(`Uploading ${whereToUpload}: ${status}% done`);
+        this.context.showPopup(`Uploading: ${status}% done`);
       },
     })
       .then(response => {

@@ -16,6 +16,7 @@ import AuthService from '../../../../Auth/AuthService';
 
 import PasswordModal from '../../../PasswordModal';
 import MnemonicModal from '../../../MnemonicModal';
+import AlertModal from '../../../AlertModal';
 
 const Auth = new AuthService();
 
@@ -62,10 +63,11 @@ class AddVault extends Component {
           throw new Error('wrong password');
         }
         const createdVault = await newVault(username, password);
-        const { address } = createdVault;
+        const { address, mnemonic } = createdVault;
         const response = await register(username, password, address);
         const { account, token } = response.data;
         this.Auth.setToken(token);
+        await this.alertModal.open(mnemonic);
         this.context.setCurrentUser(username, password, account);
       } catch (e) {
         this.setState({ loading: false });
@@ -88,14 +90,14 @@ class AddVault extends Component {
   async handleImportVault() {
     this.setState({ loading: true });
     if (this.context) {
-      const { username } = this.context.state;
+      const { username, address: account } = this.context.state;
       try {
         const password = await this.passwordModal.open();
         if (password !== this.context.state.password) {
           throw new Error('wrong password');
         }
         const mnemonic = await this.mnemonicModal.open();
-        const importedVault = await importVault(username, password, mnemonic);
+        const importedVault = await importVault(username, password, mnemonic, account);
         const { address } = importedVault;
         this.context.updateState({ address, currentPage: 'explore' });
         this.props.history.push('/explore');
@@ -152,8 +154,21 @@ class AddVault extends Component {
           this.context = context;
           return (
             <div>
-              {context.state.address && <div className="add-vault-text">Welcome back, {context.state.username}</div>}
-              <div className="add-vault-text">You don't have a vault yet</div>
+              {context.state.address ? (
+                <Fragment>
+                  <div className="add-vault-text">Welcome back, {context.state.username}</div>
+                  <div className="add-vault-text" style={{ paddingTop: '5px' }}>
+                    We couldn't find your vault
+                  </div>
+                </Fragment>
+              ) : (
+                <Fragment>
+                  <div className="add-vault-text">Hello, {context.state.username}</div>
+                  <div className="add-vault-text" style={{ paddingTop: '5px' }}>
+                    You don't have a vault yet
+                  </div>
+                </Fragment>
+              )}
               <div className="add-vault-buttons">
                 {!context.state.address ? (
                   <Fragment>
@@ -220,6 +235,12 @@ class AddVault extends Component {
                 onRef={ref => {
                   this.mnemonicModal = ref;
                 }}
+              />
+              <AlertModal
+                onRef={ref => {
+                  this.alertModal = ref;
+                }}
+                context={context}
               />
             </div>
           );

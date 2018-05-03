@@ -56,7 +56,11 @@ export class MainProvider extends Component {
           // throw new Error();
           this.setState({ currentPage: 'add vault' });
           this.props.history.push('/vault');
-          // return;
+          this.setState({
+            username: profile.name,
+            address: profile.account,
+          });
+          return;
         }
         this.setState(
           {
@@ -162,7 +166,11 @@ export class MainProvider extends Component {
     this.setState(newState);
   }
 
-  showPopup(status) {
+  showPopup(status, progress) {
+    if (progress) {
+      this.setState({ status });
+      return;
+    }
     this.setState({ status });
     setTimeout(() => {
       if (this.state.status === status) {
