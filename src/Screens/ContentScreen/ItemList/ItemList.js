@@ -118,14 +118,40 @@ class ItemList extends Component {
     if (item.needs_closure) {
       if (this.props.type !== 'sold' && this.props.type !== 'bought' && item.needs_verification) {
         return (
-          <Button
-            size="small"
-            onClick={() => {
-              this.verify(item);
-            }}
-          >
-            Verify
-          </Button>
+          <div>
+            <Button
+              color="primary"
+              size="small"
+              onClick={() => {
+                this.verify(item);
+              }}
+            >
+              Verify
+            </Button>
+            <CopyToClipboard
+              text={item.listing ? item.listing.cid : item.cid}
+              onCopy={() => {
+                this.context.showPopup('Copied to clipboard');
+                // setTimeout(() => this.setState({ status: '' }), 3000);
+              }}
+            >
+              <Button>Copy ipfs hash</Button>
+            </CopyToClipboard>
+            <Button
+              size="small"
+              // color="primary"
+              style={{ fontSize: '0.875rem' }}
+              onClick={() => {
+                if (item.listing) {
+                  this.downloadFile(`${HOST}/seller/download?CID=${item.listing.cid}`, item.listing.name);
+                  return;
+                }
+                this.downloadFile(`${HOST}/seller/download?CID=${item.cid}`, item.name);
+              }}
+            >
+              Download
+            </Button>
+          </div>
         );
       }
       if (this.props.type === 'sold') {
@@ -242,6 +268,7 @@ class ItemList extends Component {
       await pump();
     } catch (e) {
       console.log(e);
+      this.context.showPopup(JSON.stringify(e));
     }
   }
 

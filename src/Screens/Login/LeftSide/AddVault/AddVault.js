@@ -115,6 +115,42 @@ class AddVault extends Component {
     }
   }
 
+  async handleImportVaultAndRegister() {
+    this.setState({ loading: true });
+    if (this.context) {
+      const { username } = this.context.state;
+      try {
+        const password = await this.passwordModal.open();
+        if (password !== this.context.state.password) {
+          throw new Error('wrong password');
+        }
+        const mnemonic = await this.mnemonicModal.open();
+        const importedVault = await importVault(username, password, mnemonic);
+        const { address } = importedVault;
+        // const createdVault = await newVault(username, password);
+        // const { address, mnemonic } = createdVault;
+        const response = await register(username, password, address);
+        const { account, token } = response.data;
+        this.Auth.setToken(token);
+        this.context.setCurrentUser(username, password, account);
+      } catch (e) {
+        this.setState({ loading: false });
+        console.log(e);
+        if (e.response && e.response.data) {
+          const { message } = e.response.data;
+          console.log(message);
+          this.context.showPopup(message);
+          return;
+        }
+        if (e.message) {
+          this.context.showPopup(e.message);
+          return;
+        }
+        this.context.showPopup(JSON.stringify(e));
+      }
+    }
+  }
+
   handleLogout = async context => {
     try {
       await Auth.logout();
@@ -201,7 +237,9 @@ class AddVault extends Component {
                     classes={{
                       disabled: classes.buttonDisabled,
                     }}
-                    onClick={() => this.handleImportVault()}
+                    onClick={() =>
+                      context.state.address ? this.handleImportVault() : this.handleImportVaultAndRegister()
+                    }
                   >
                     Import existing
                   </Button>
