@@ -127,7 +127,6 @@ export const login = (username, password) =>
       password,
     },
     auth: false,
-    headers: { Authorization: false, auth: false },
   });
 
 // Register
@@ -141,7 +140,6 @@ export const register = (username, password, account) =>
       account,
     },
     auth: false,
-    headers: { Authorization: false, auth: false },
   });
 
 // Logout
@@ -150,5 +148,4 @@ export const logout = () =>
     method: 'post',
     url: `${HOST}/logout`,
     auth: false,
-    headers: { Authorization: false, auth: false },
   });
