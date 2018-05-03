@@ -110,42 +110,28 @@ export const _getVerifiers = () =>
     headers: { Authorization: localStorage.getItem('id_token') },
   });
 
-// // Login
-// export const login = (username, password) =>
-//   axios.post(`${HOST}/login`, {
-//     username,
-//     password,
-//   });
-
 // Login
 export const login = (username, password) =>
-  axios({
-    method: 'post',
-    url: `${HOST}/login`,
-    data: {
+  axios.post(
+    `${HOST}/login`,
+    {
       username,
       password,
     },
-    auth: false,
-  });
+    { auth: false }
+  );
 
-// Register
+// Signup
 export const register = (username, password, account) =>
-  axios({
-    method: 'post',
-    url: `${HOST}/signup`,
-    data: {
+  axios.post(
+    `${HOST}/signup`,
+    {
       username,
       password,
       account,
     },
-    auth: false,
-  });
+    { auth: false }
+  );
 
 // Logout
-export const logout = () =>
-  axios({
-    method: 'post',
-    url: `${HOST}/logout`,
-    auth: false,
-  });
+export const logout = () => axios.post(`${HOST}/logout`, {}, { auth: false });
