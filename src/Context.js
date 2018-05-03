@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 
 import AuthService from './Auth/AuthService';
 
+import { initSigner } from './Components/signer';
+
 import { getAccount } from './Components/keyRequests';
 
 import { _getBalance, _getItems, _getVerifiers } from './Components/requests';
@@ -43,6 +45,7 @@ export class MainProvider extends Component {
     this.getVerifiers = this.getVerifiers.bind(this);
     this.showPopup = this.showPopup.bind(this);
     this.logout = this.logout.bind(this);
+    this.pageLoaded = this.pageLoaded.bind(this);
   }
 
   componentWillMount() {
@@ -62,13 +65,10 @@ export class MainProvider extends Component {
           });
           return;
         }
-        this.setState(
-          {
-            username: profile.name,
-            address: profile.account,
-          },
-          () => this.getVerifiers()
-        );
+        this.setState({
+          username: profile.name,
+          address: profile.account,
+        });
         this.props.history.push('/explore');
       } catch (err) {
         this.logout();
@@ -80,6 +80,13 @@ export class MainProvider extends Component {
     Auth.logout();
     this.setState({ currentPage: 'login' });
     this.props.history.replace('/login');
+  }
+
+  pageLoaded() {
+    initSigner();
+    this.updateBalance();
+    this.getItems();
+    this.getVerifiers();
   }
 
   async getVerifiers() {
@@ -190,6 +197,7 @@ export class MainProvider extends Component {
           updateBalance: this.updateBalance,
           getItems: this.getItems,
           logout: this.logout,
+          pageLoaded: this.pageLoaded,
         }}
       >
         {this.props.children}

@@ -30,8 +30,6 @@ import InfoPopup from '../../InfoPopup';
 import './Menu.css';
 import Logo from '../../../assets/images/logo.png';
 
-import { initSigner } from '../../../Components/signer';
-
 import AuthService from '../../../Auth/AuthService';
 
 import PasswordModal from '../../PasswordModal';
@@ -52,14 +50,9 @@ class Menu extends Component {
     this.getTokens = this.getTokens.bind(this);
   }
 
-  componentWillMount() {
-    initSigner();
-  }
-
   componentDidMount() {
-    if (this.context) {
-      this.context.updateBalance();
-      this.context.getItems();
+    if (this.context && Auth.loggedIn()) {
+      this.context.pageLoaded();
     }
   }
 

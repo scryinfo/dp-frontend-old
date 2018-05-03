@@ -120,6 +120,9 @@ class LoginForm extends React.Component {
   handleInput = ({ target: { name, value } }) =>
     this.setState({
       [name]: value,
+      usernameError: '',
+      passwordError: '',
+      confirmPasswordError: '',
     });
 
   loaderSpin() {
