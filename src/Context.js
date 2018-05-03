@@ -82,8 +82,8 @@ export class MainProvider extends Component {
     this.props.history.replace('/login');
   }
 
-  pageLoaded() {
-    initSigner();
+  async pageLoaded() {
+    await initSigner();
     this.updateBalance();
     this.getItems();
     this.getVerifiers();
