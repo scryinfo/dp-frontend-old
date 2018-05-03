@@ -112,26 +112,44 @@ export const _getVerifiers = () =>
 
 // Login
 export const login = (username, password) =>
-  axios.post(
-    `${HOST}/login`,
-    {
-      username,
-      password,
-    },
-    { auth: false }
-  );
+  axios.post(`${HOST}/login`, {
+    username,
+    password,
+  });
 
 // Signup
 export const register = (username, password, account) =>
-  axios.post(
-    `${HOST}/signup`,
-    {
-      username,
-      password,
-      account,
-    },
-    { auth: false }
-  );
+  axios.post(`${HOST}/signup`, {
+    username,
+    password,
+    account,
+  });
 
 // Logout
-export const logout = () => axios.post(`${HOST}/logout`, {}, { auth: false });
+export const logout = () => axios.post(`${HOST}/logout`);
+
+// // Login
+// export const login = (username, password) =>
+//   axios.post(
+//     `${HOST}/login`,
+//     {
+//       username,
+//       password,
+//     },
+//     { auth: false }
+//   );
+
+// // Signup
+// export const register = (username, password, account) =>
+//   axios.post(
+//     `${HOST}/signup`,
+//     {
+//       username,
+//       password,
+//       account,
+//     },
+//     { auth: false }
+//   );
+
+// // Logout
+// export const logout = () => axios.post(`${HOST}/logout`, {}, { auth: false });

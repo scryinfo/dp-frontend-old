@@ -180,10 +180,10 @@ class ItemList extends Component {
           style={{ fontSize: '0.875rem' }}
           onClick={() => {
             if (item.listing) {
-              this.downloadFile(`${HOST}/cid=${item.listing.cid}`, item.listing.name);
+              this.downloadFile(`${HOST}/download?cid=${item.listing.cid}`, item.listing.name);
               return;
             }
-            this.downloadFile(`${HOST}/cid=${item.cid}`, item.name);
+            this.downloadFile(`${HOST}/download?cid=${item.cid}`, item.name);
           }}
         >
           Download
