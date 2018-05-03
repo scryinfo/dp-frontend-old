@@ -126,7 +126,8 @@ export const login = (username, password) =>
       username,
       password,
     },
-    headers: { Authorization: null },
+    auth: false,
+    headers: { Authorization: false, auth: false },
   });
 
 // Register
@@ -139,7 +140,8 @@ export const register = (username, password, account) =>
       password,
       account,
     },
-    headers: { Authorization: null },
+    auth: false,
+    headers: { Authorization: false, auth: false },
   });
 
 // Logout
@@ -147,5 +149,6 @@ export const logout = () =>
   axios({
     method: 'post',
     url: `${HOST}/logout`,
-    headers: { Authorization: null },
+    auth: false,
+    headers: { Authorization: false, auth: false },
   });
