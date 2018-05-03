@@ -229,7 +229,11 @@ class ItemList extends Component {
 
   async downloadFile(url, name) {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: new Headers({
+          Authorization: localStorage.getItem('id_token'),
+        }),
+      });
       const fileStream = createWriteStream(name);
       const writer = fileStream.getWriter();
       const reader = response.body.getReader();
