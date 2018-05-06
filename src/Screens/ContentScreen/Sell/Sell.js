@@ -4,7 +4,7 @@ import { withStyles } from 'material-ui/styles';
 import Stepper, { Step, StepLabel, StepContent } from 'material-ui/Stepper';
 import Button from 'material-ui/Button';
 import AttachFile from 'material-ui-icons/AttachFile';
-import TextField from 'material-ui/TextField';
+import { TextField, Input } from 'material-ui';
 import { LinearProgress } from 'material-ui/Progress';
 
 import './Sell.css';
@@ -43,6 +43,7 @@ class Sell extends Component {
       file: {},
       itemPrice: '',
       uploadCompleted: 0,
+      ipfsHash: '',
     };
     this.getTheFile = this.getTheFile.bind(this);
     this.onFileChange = this.onFileChange.bind(this);
@@ -68,8 +69,8 @@ class Sell extends Component {
       case 0:
         return (
           <div>
-            <div>First choose a file that you would like to upload</div>
-            <div>
+            <div>First select a file that you would like to upload</div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <label htmlFor="file-input">
                 <Button
                   className={classes.button}
@@ -84,7 +85,29 @@ class Sell extends Component {
                   <AttachFile className={classes.rightIcon} style={{ height: '18px' }} />
                 </Button>
               </label>
-              <span>{uploadStatus}</span>
+              {/* <div style={{ marginTop: '20px', marginBottom: '10px', fontWeight: '500' }}>
+                Or just add the ipfs hash
+              </div>
+              <div>
+                <Input
+                  id="ipfsHash"
+                  className={classes.textField}
+                  placeholder="ipfs hash"
+                  // margin="normal"
+                  value={this.state.ipfsHash}
+                  onChange={e => this.setState({ ipfsHash: e.target.value })}
+                />
+                <Button
+                  className={classes.button}
+                  variant="raised"
+                  color="primary"
+                  // disabled={loading}
+                  onClick={() => this.setState({ activeStep: activeStep + 1 })}
+                >
+                  Confirm
+                </Button>
+              </div> */}
+              {/* <span>{uploadStatus}</span> */}
             </div>
           </div>
         );

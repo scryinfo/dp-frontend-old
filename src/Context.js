@@ -1,9 +1,12 @@
 /* eslint-disable react/no-unused-state */
 import React, { Component } from 'react';
+import 'event-source-polyfill/src/eventsource.min.js';
 
 import AuthService from './Auth/AuthService';
 
 import { initSigner } from './Components/signer';
+
+import { HOST } from './Components/Remote';
 
 import { getAccount } from './Components/keyRequests';
 
@@ -27,6 +30,7 @@ export class MainProvider extends Component {
         tokens: 0,
         eth: 0,
       },
+      searchValue: '',
       currentPage: 'explore',
       allItems: [],
       myItems: [],
@@ -37,6 +41,7 @@ export class MainProvider extends Component {
       inProgressSold: [],
       inProgressVerified: [],
       verifiers: [],
+      foundItems: [],
     };
     this.setCurrentUser = this.setCurrentUser.bind(this);
     this.updateState = this.updateState.bind(this);
@@ -46,6 +51,7 @@ export class MainProvider extends Component {
     this.showPopup = this.showPopup.bind(this);
     this.logout = this.logout.bind(this);
     this.pageLoaded = this.pageLoaded.bind(this);
+    this.onSearch = this.onSearch.bind(this);
   }
 
   componentWillMount() {
@@ -87,6 +93,51 @@ export class MainProvider extends Component {
     this.updateBalance();
     this.getItems();
     this.getVerifiers();
+    this._listenToEvents();
+  }
+
+  // _listenToEvents() {
+  //   console.log('subscribing');
+  //   const evtSrc = new EventSource(`${HOST}/subscribe?user=${this.state.address}`);
+  //   evtSrc.onopen = e => console.log(e);
+  //   evtSrc.onerror = e => console.log(e);
+  //   evtSrc.onmessage = e => {
+  //     console.log(e);
+  //     // // console.log('getting message', e);
+  //     // // const event = JSON.parse(e.data);
+  //     // // if (event.args.)
+  //     // const { events } = this.state;
+  //     // events.push(e.data);
+  //     // this.setState({ events });
+  //     // const event = JSON.parse(e.data);
+
+  //     // console.log('event', event);
+  //   };
+  // }
+
+  _listenToEvents() {
+    console.log('subscribing');
+    const evtSrc = new EventSourcePolyfill(`${HOST}/subscribe?user=${this.state.address}`, {
+      headers: { Authorization: localStorage.getItem('id_token'), withCredentials: true },
+    });
+    evtSrc.addEventListener('message', e => {
+      console.log(console.log(e));
+      // console.log(JSON.parse(e.data));
+    });
+    evtSrc.addEventListener('open', e => console.log(e));
+    evtSrc.addEventListener('error', e => console.log(e));
+    // evtSrc.add = e => {
+    //   console.log(e);
+    //   // // console.log('getting message', e);
+    //   // // const event = JSON.parse(e.data);
+    //   // // if (event.args.)
+    //   // const { events } = this.state;
+    //   // events.push(e.data);
+    //   // this.setState({ events });
+    //   // const event = JSON.parse(e.data);
+
+    //   // console.log('event', event);
+    // };
   }
 
   async getVerifiers() {
@@ -95,6 +146,16 @@ export class MainProvider extends Component {
       this.setState({ verifiers });
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  onSearch({ target: { value } }) {
+    this.setState({ searchValue: value });
+    const { currentPage, allItems } = this.state;
+    if (currentPage === 'explore' && allItems.length > 0) {
+      const foundItems = allItems.filter(item => item.name.toLowerCase().includes(value.toLowerCase()));
+      this.setState({ foundItems });
+      console.log(foundItems);
     }
   }
 
@@ -198,6 +259,7 @@ export class MainProvider extends Component {
           getItems: this.getItems,
           logout: this.logout,
           pageLoaded: this.pageLoaded,
+          onSearch: this.onSearch,
         }}
       >
         {this.props.children}

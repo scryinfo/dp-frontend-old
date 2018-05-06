@@ -4,6 +4,7 @@ import { withStyles } from 'material-ui/styles';
 
 import './ContentContainer.css';
 import { MainContext } from '../../../Context';
+import Search from '../Search';
 import ItemList from '../ItemList/ItemList';
 import Sell from '../Sell/Sell';
 import InProgress from '../InProgress/InProgress';
@@ -32,25 +33,39 @@ const styles = {
 class ContentContainer extends Component {
   constructor() {
     super();
-    this.state = {
-      search: '',
-    };
+    this.state = {};
   }
 
   render() {
-    const { search } = this.state;
-    const { classes } = this.props;
     return (
       <MainContext.Consumer>
         {context => {
-          const { inProgressBought, inProgressSold, inProgressVerified } = context.state;
+          this.context = context;
+          const {
+            inProgressBought,
+            inProgressSold,
+            inProgressVerified,
+            allItems,
+            foundItems,
+            itemsBought,
+            itemsSold,
+            itemsVerified,
+            currentPage,
+            searchValue,
+          } = context.state;
           return (
             <div className="content-container">
               <div className="content-header">
-                <div className="content-title">{context.state.currentPage}</div>
+                <div className="content-title">{currentPage}</div>
+                <div className="content-search">
+                  <Search value={searchValue} onChange={context.onSearch} />
+                </div>
               </div>
               <div className="list-items">
-                <Route path="/explore" render={props => <ItemList {...props} items={context.state.allItems} />} />
+                <Route
+                  path="/explore"
+                  render={props => <ItemList {...props} items={foundItems.length > 0 ? foundItems : allItems} />}
+                />
                 <Route
                   path="/inprogress"
                   render={props => (
@@ -62,11 +77,11 @@ class ContentContainer extends Component {
                     />
                   )}
                 />
-                <Route path="/purchased" render={props => <ItemList {...props} items={context.state.itemsBought} />} />
-                <Route path="/sold" render={props => <ItemList {...props} items={context.state.itemsSold} />} />
-                <Route path="/verified" render={props => <ItemList {...props} items={context.state.itemsVerified} />} />
-                <Route path="/sell" render={props => <Sell {...props} items={context.state.allItems} />} />
-                <Route path="/verify" render={props => <Sell {...props} items={context.state.allItems} />} />
+                <Route path="/purchased" render={props => <ItemList {...props} items={itemsBought} />} />
+                <Route path="/sold" render={props => <ItemList {...props} items={itemsSold} />} />
+                <Route path="/verified" render={props => <ItemList {...props} items={itemsVerified} />} />
+                <Route path="/sell" render={props => <Sell {...props} items={allItems} />} />
+                <Route path="/verify" render={props => <Sell {...props} items={allItems} />} />
               </div>
             </div>
           );

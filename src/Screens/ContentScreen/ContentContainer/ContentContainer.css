@@ -1,16 +1,18 @@
 .content-container {
-  width : 100%;
+  /* width : 100%; */
   height: 100%;
   margin-left: 60px;
   margin-right: 60px;
   margin-top: 35px;
-  /* background: purple; */
 }
 
 .content-header {
   display: flex;
   flex-direction: row;
   align-items: center;
+  /* justify-content: space-between; */
+  margin-right: 60px;
+  position: relative;
 }
 
 .content-title {
@@ -19,6 +21,11 @@
   color: #4AA4E0;
   text-transform: uppercase;
   /* flex: 1; */
+}
+
+.content-search {
+  position: absolute;
+  left: 20%;
 }
 
 .content-search-bar-container {

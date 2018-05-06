@@ -165,7 +165,7 @@ class Menu extends Component {
   }
 
   changeRoute(to) {
-    this.context.updateState({ currentPage: to.currentPage });
+    this.context.updateState({ currentPage: to.currentPage, searchValue: '' });
     this.props.history.push(`/${to.currentPage.replace(' ', '')}`);
   }
 
