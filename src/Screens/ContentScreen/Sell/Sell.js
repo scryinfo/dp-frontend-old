@@ -190,7 +190,7 @@ class Sell extends Component {
         url,
         headers: {
           'content-type': 'multipart/form-data',
-          Authorization: localStorage.getItem('id_token'),
+          JWT: localStorage.getItem('id_token'),
         },
         data,
         onUploadProgress: progress => {
@@ -239,7 +239,7 @@ class Sell extends Component {
             file.size
           }&price=${itemPrice}&username=${username}`,
           headers: {
-            Authorization: localStorage.getItem('id_token'),
+            JWT: localStorage.getItem('id_token'),
           },
         }).then(res => {
           this.context.showPopup('Uploaded successfully');
