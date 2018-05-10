@@ -52,6 +52,7 @@
     "react-router-dom": "^4.2.2",
     "react-router-transition": "^1.2.1",
     "react-swipeable-views": "^0.12.13",
+    "reconnecting-eventsource": "^1.0.1",
     "streamsaver": "^1.0.1",
     "style-loader": "0.19.0",
     "styled-components": "^3.2.5",

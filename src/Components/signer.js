@@ -14,19 +14,19 @@ let chainId;
 
 export const initSigner = async () => {
   const { data: _contract } = await axios.get(`${HOST}/contract`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
   contract = new web3.eth.Contract(_contract.abi, _contract.address);
   console.info('contract:', contract._address);
 
   const { data: _token } = await axios.get(`${HOST}/token`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
   token = new web3.eth.Contract(_token.abi, _token.address);
   console.info('token:', token._address);
 
   ({ data: { gasPrice, chainId } } = await axios.get(`${HOST}/chainInfo`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   }));
 
   console.info(`gas:${gasPrice} chain:${chainId}`);
@@ -36,7 +36,7 @@ const signAndSend = async (from, to, gas, payload, url, extra) => {
   const vault = await loadVault(window.localStorage.getItem(from.username), from.password);
   const sender = toChecksumAddress(vault.addresses[0]);
   const { data: { nonce } } = await axios.get(`${HOST}/nonce/${sender}`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
   console.info(`nonce ${nonce} for acct: ${sender}`);
   console.info(`from: ${sender} to: ${to}`);
@@ -60,7 +60,7 @@ const signAndSend = async (from, to, gas, payload, url, extra) => {
     method: 'post',
     url: `${HOST}/${url}`,
     data: { data: signed.rawTransaction, ...extra },
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
   console.info('resp:', resp.data);
   return resp.data.create_block;

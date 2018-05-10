@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import 'event-source-polyfill/src/eventsource.min.js';
 
+// import ReconnectingEventSource from 'reconnecting-eventsource';
+
 import AuthService from './Auth/AuthService';
 
 import { initSigner } from './Components/signer';
@@ -42,6 +44,7 @@ export class MainProvider extends Component {
       inProgressVerified: [],
       verifiers: [],
       foundItems: [],
+      notifications: {},
     };
     this.setCurrentUser = this.setCurrentUser.bind(this);
     this.updateState = this.updateState.bind(this);
@@ -52,6 +55,8 @@ export class MainProvider extends Component {
     this.logout = this.logout.bind(this);
     this.pageLoaded = this.pageLoaded.bind(this);
     this.onSearch = this.onSearch.bind(this);
+    this.addNotification = this.addNotification.bind(this);
+    this.removeNotifications = this.removeNotifications.bind(this);
   }
 
   componentWillMount() {
@@ -96,48 +101,77 @@ export class MainProvider extends Component {
     this._listenToEvents();
   }
 
-  // _listenToEvents() {
-  //   console.log('subscribing');
-  //   const evtSrc = new EventSource(`${HOST}/subscribe?user=${this.state.address}`);
-  //   evtSrc.onopen = e => console.log(e);
-  //   evtSrc.onerror = e => console.log(e);
-  //   evtSrc.onmessage = e => {
-  //     console.log(e);
-  //     // // console.log('getting message', e);
-  //     // // const event = JSON.parse(e.data);
-  //     // // if (event.args.)
-  //     // const { events } = this.state;
-  //     // events.push(e.data);
-  //     // this.setState({ events });
-  //     // const event = JSON.parse(e.data);
-
-  //     // console.log('event', event);
-  //   };
-  // }
-
   _listenToEvents() {
+    const { address: account } = this.state;
     console.log('subscribing');
-    const evtSrc = new EventSourcePolyfill(`${HOST}/subscribe?user=${this.state.address}`, {
-      headers: { Authorization: localStorage.getItem('id_token'), withCredentials: true },
+    const evtSrc = new window.EventSourcePolyfill(`${HOST}/subscribe?user=${this.state.address}`, {
+      headers: { JWT: localStorage.getItem('id_token'), withCredentials: true },
     });
     evtSrc.addEventListener('message', e => {
-      console.log(console.log(e));
-      // console.log(JSON.parse(e.data));
-    });
-    evtSrc.addEventListener('open', e => console.log(e));
-    evtSrc.addEventListener('error', e => console.log(e));
-    // evtSrc.add = e => {
-    //   console.log(e);
-    //   // // console.log('getting message', e);
-    //   // // const event = JSON.parse(e.data);
-    //   // // if (event.args.)
-    //   // const { events } = this.state;
-    //   // events.push(e.data);
-    //   // this.setState({ events });
-    //   // const event = JSON.parse(e.data);
+      console.log(e);
+      const event = JSON.parse(e.data);
+      const { event: type } = event;
+      console.log(event);
 
-    //   // console.log('event', event);
-    // };
+      // TRANSFER
+      if (type === 'Transfer') {
+        const { to, from } = event.args;
+        if (to.toLowerCase() === account.toLowerCase()) {
+          console.log('you got the money');
+        }
+        if (from.toLowerCase() === account.toLowerCase()) {
+          console.log('you sent the money');
+        }
+      }
+
+      // CHANNEL CREATED
+      if (type === 'ChannelCreated') {
+        const { receiver, sender, verifier } = event.args;
+        if (receiver.toLowerCase() === account.toLowerCase()) {
+          this.showPopup('You have a purchase in progress');
+          this.addNotification('inProgress');
+        }
+        if (sender.toLowerCase() === account.toLowerCase()) {
+          console.log('you buying something');
+          this.addNotification('inProgress');
+        }
+        // if (verifier.toLowerCase() === account.toLowerCase()) {
+        //   console.log('you verifying something');
+        // }
+      }
+
+      // CHANNEL CLOSED
+      if (type === 'ChannelSettled') {
+        const { receiver, sender, verifier } = event.args;
+        if (receiver.toLowerCase() === account.toLowerCase()) {
+          // this.showPopup('Sold');
+          this.addNotification('sold');
+        }
+        if (sender.toLowerCase() === account.toLowerCase()) {
+          console.log('you buying something');
+          this.showPopup('Item purchase complete');
+          this.addNotification('purchased');
+        }
+        if (verifier.toLowerCase() === account.toLowerCase()) {
+          console.log('you verifying something');
+          this.showPopup('Item you verified is complete');
+          this.addNotification('verified');
+        }
+      }
+
+      this.updateBalance();
+      this.getItems();
+      this.getVerifiers();
+    });
+  }
+
+  addNotification(type) {
+    this.setState({ notifications: { [type]: true } });
+    setTimeout(() => this.setState({ notifications: {} }), 5000);
+  }
+
+  removeNotifications() {
+    this.setState({ notifications: {} });
   }
 
   async getVerifiers() {
@@ -260,6 +294,7 @@ export class MainProvider extends Component {
           logout: this.logout,
           pageLoaded: this.pageLoaded,
           onSearch: this.onSearch,
+          removeNotifications: this.removeNotifications,
         }}
       >
         {this.props.children}

@@ -7,13 +7,13 @@ export const _addTokens = (account, amount) =>
   axios({
     method: 'post',
     url: `${HOST}/fund?account=${account}&amount=${amount}`,
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
 
 // Get balance
 export const _getBalance = account =>
   axios.get(`${HOST}/balance?account=${account}`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
 
 // Buy an item
@@ -34,7 +34,7 @@ export const _buyItem = async (listing, username, password, buyer, verifier, rew
       createBlock,
       buyerAuth: buyerAuth.signature,
     },
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
 };
 
@@ -54,14 +54,14 @@ export const _verifyItem = async (item, username, password) => {
       item: item.id,
       verifierAuth: verifierAuth.signature,
     },
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
 };
 
 // Close the pending transaction
 export const _closeTransaction = async (id, username, password) => {
   const { data } = await axios.get(`${HOST}/history/${id}`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
   console.info('close:', data);
 
@@ -91,23 +91,23 @@ export const _closeTransaction = async (id, username, password) => {
 export const _getItems = (account, type) => {
   if (account && type) {
     return axios.get(`${HOST}/history?${type}=${account}`, {
-      headers: { Authorization: localStorage.getItem('id_token') },
+      headers: { JWT: localStorage.getItem('id_token') },
     });
   }
   if (account) {
     return axios.get(`${HOST}/listings?owner=${account}`, {
-      headers: { Authorization: localStorage.getItem('id_token') },
+      headers: { JWT: localStorage.getItem('id_token') },
     });
   }
   return axios.get(`${HOST}/listings`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
 };
 
 // Get list of verifiers
 export const _getVerifiers = () =>
   axios.get(`${HOST}/trader`, {
-    headers: { Authorization: localStorage.getItem('id_token') },
+    headers: { JWT: localStorage.getItem('id_token') },
   });
 
 // Login
@@ -127,29 +127,3 @@ export const register = (username, password, account) =>
 
 // Logout
 export const logout = () => axios.post(`${HOST}/logout`);
-
-// // Login
-// export const login = (username, password) =>
-//   axios.post(
-//     `${HOST}/login`,
-//     {
-//       username,
-//       password,
-//     },
-//     { auth: false }
-//   );
-
-// // Signup
-// export const register = (username, password, account) =>
-//   axios.post(
-//     `${HOST}/signup`,
-//     {
-//       username,
-//       password,
-//       account,
-//     },
-//     { auth: false }
-//   );
-
-// // Logout
-// export const logout = () => axios.post(`${HOST}/logout`, {}, { auth: false });

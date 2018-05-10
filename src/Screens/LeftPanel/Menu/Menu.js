@@ -4,11 +4,12 @@ import TextField from 'material-ui/TextField';
 import List, { ListItem, ListItemText, ListItemSecondaryAction } from 'material-ui/List';
 import Collapse from 'material-ui/transitions/Collapse';
 import Fade from 'material-ui/transitions/Fade';
-import Button from 'material-ui/Button';
+import { Button, Badge } from 'material-ui';
 import { CircularProgress } from 'material-ui/Progress';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import { MenuItem, MenuList } from 'material-ui/Menu';
 import Slide from 'material-ui/transitions/Slide';
+import { Lens } from 'material-ui-icons';
 
 import { Motion, spring } from 'react-motion';
 
@@ -84,7 +85,7 @@ class Menu extends Component {
     event.preventDefault();
   }
 
-  timeout = async time =>
+  timeout = time =>
     new Promise(resolve => {
       setTimeout(() => resolve(), time);
     });
@@ -185,6 +186,7 @@ class Menu extends Component {
             inProgressBought,
             inProgressSold,
             inProgressVerified,
+            notifications,
           } = context.state;
           return (
             <Fragment>
@@ -271,7 +273,15 @@ class Menu extends Component {
                     >
                       <ListItemText primary="Explore" classes={{ primary: classes.listText }} />
                       <ListItemSecondaryAction>
-                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                        <div
+                          style={{
+                            paddingLeft: '10px',
+                            paddingRight: '30px',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
                           {allItems.length}
                         </div>
                       </ListItemSecondaryAction>
@@ -293,6 +303,7 @@ class Menu extends Component {
                           <ListItemText primary="In Progress" classes={{ primary: classes.listText }} />
                           <ListItemSecondaryAction>
                             <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                              {notifications.inProgress && <Lens color="primary" style={{ height: '10px' }} />}
                               {inProgressBought.length + inProgressSold.length + inProgressVerified.length}
                             </div>
                           </ListItemSecondaryAction>
@@ -308,6 +319,7 @@ class Menu extends Component {
                           <ListItemText primary="Purchased" classes={{ primary: classes.listText }} />
                           <ListItemSecondaryAction>
                             <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                              {notifications.purchased && <Lens color="primary" style={{ height: '10px' }} />}
                               {itemsBought.length}
                             </div>
                           </ListItemSecondaryAction>
@@ -323,6 +335,7 @@ class Menu extends Component {
                           <ListItemText primary="Sold" classes={{ primary: classes.listText }} />
                           <ListItemSecondaryAction>
                             <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                              {notifications.sold && <Lens color="primary" style={{ height: '10px' }} />}
                               {itemsSold.length}
                             </div>
                           </ListItemSecondaryAction>
@@ -338,6 +351,7 @@ class Menu extends Component {
                           <ListItemText primary="Verified" classes={{ primary: classes.listText }} />
                           <ListItemSecondaryAction>
                             <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                              {notifications.verified && <Lens color="primary" style={{ height: '10px' }} />}
                               {itemsVerified.length}
                             </div>
                           </ListItemSecondaryAction>
