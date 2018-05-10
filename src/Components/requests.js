@@ -126,4 +126,7 @@ export const register = (username, password, account) =>
   });
 
 // Logout
-export const logout = () => axios.post(`${HOST}/logout`);
+export const logout = () =>
+  axios.post(`${HOST}/logout`, {
+    headers: { JWT: localStorage.getItem('id_token') },
+  });
