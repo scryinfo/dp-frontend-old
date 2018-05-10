@@ -195,7 +195,7 @@ class Sell extends Component {
         data,
         onUploadProgress: progress => {
           const status = Math.floor(progress.loaded / progress.total * 100);
-          this.context.showPopup(`Uploading: ${status}% done`, progress);
+          this.context.showPopup(`Uploading: ${status === 100 ? 99 : status}% done`, progress);
         },
       });
       this.context.showPopup('Uploaded successfully');
