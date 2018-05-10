@@ -2,6 +2,8 @@ import decode from 'jwt-decode';
 import axios from 'axios';
 import { HOST } from '../Components/Remote';
 
+import { logout } from '../Components/requests';
+
 export default class AuthService {
   constructor() {
     this.fetch = this.fetch.bind(this);
@@ -32,9 +34,7 @@ export default class AuthService {
   getToken = () => localStorage.getItem('id_token');
 
   logout = async () => {
-    await axios.post(`${HOST}/logout`, null, {
-      headers: { Authorization: this.getToken() },
-    });
+    await logout();
     localStorage.removeItem('id_token');
   };
 
