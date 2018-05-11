@@ -195,7 +195,7 @@ class Sell extends Component {
         data,
         onUploadProgress: progress => {
           const status = Math.floor(progress.loaded / progress.total * 100);
-          this.context.showPopup(`Uploading: ${status === 100 ? 99 : status}% done`, progress);
+          this.context.showPopup(`Uploading: ${status === 100 ? 99 : status}%`, progress);
         },
       });
       this.context.showPopup('Uploaded successfully');
@@ -206,6 +206,8 @@ class Sell extends Component {
       this.context.getItems();
     } catch (e) {
       console.log(e);
+      this.context.showPopup('File already exists, try another');
+      this.setState({ activeStep: 0 });
     }
   }
 
@@ -302,6 +304,19 @@ class Sell extends Component {
                     </Step>
                   ))}
                 </Stepper>
+                {activeStep === steps.length && (
+                  <div>
+                    <Button
+                      className={classes.button}
+                      variant="raised"
+                      color="primary"
+                      // disabled={loading}
+                      onClick={() => this.setState({ activeStep: 0 })}
+                    >
+                      Upload a new file
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="recent-items-container">
                 <div className="content-title" style={{ marginTop: '30px' }}>

@@ -320,6 +320,10 @@ class ItemList extends Component {
 
   async closeTransaction(item) {
     const { username } = this.context.state;
+    if (this.context.state.balance.tokens === 0) {
+      this.context.showPopup('please get some tokens');
+      return;
+    }
     try {
       const password = await this.passwordModal.open();
       await _closeTransaction(item.id, username, password);
@@ -347,9 +351,19 @@ class ItemList extends Component {
     }
   }
 
+  formatFileSize(bytes, decimalPoint) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1000;
+    const dm = decimalPoint || 2;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  }
+
   renderModal = () => {
     const { classes } = this.props;
     const { item, verifier, reward } = this.state;
+    const { address } = this.context.state;
     if (!item) {
       return <div />;
     }
@@ -378,7 +392,8 @@ class ItemList extends Component {
             <span style={{ fontWeight: '600' }}>Price:</span> {item.price}
           </Typography>
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Size:</span> {item.size}
+            {console.log(item.size)}
+            <span style={{ fontWeight: '600' }}>Size:</span> {this.formatFileSize(item.size)}
           </Typography>
           <Typography variant="subheading" id="simple-modal-description">
             <span style={{ fontWeight: '600' }}>Date uploaded:</span> {item.created_at}
@@ -411,11 +426,15 @@ class ItemList extends Component {
                 <MenuItem value="none">
                   <em>None</em>
                 </MenuItem>
-                {this.context.state.verifiers.map(ver => (
-                  <MenuItem key={ver.id} value={ver.account}>
-                    {ver.name}
-                  </MenuItem>
-                ))}
+                {console.log(address)}
+                {this.context.state.verifiers
+                  .filter(ver => ver.account !== item.owner.account && ver.account !== address)
+                  // .filter(ver => ver.account !== address)
+                  .map(ver => (
+                    <MenuItem key={ver.id} value={ver.account}>
+                      {ver.name}
+                    </MenuItem>
+                  ))}
               </Select>
             </FormControl>
             {!verifier ? null : verifier === 'none' ? (
