@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "autoprefixer": "7.1.6",
+    "aws-sdk": "^2.238.1",
     "axios": "^0.18.0",
     "axios-cookiejar-support": "^0.3.4",
     "babel-core": "6.26.0",
@@ -36,6 +37,7 @@
     "jwt-decode": "^2.2.0",
     "material-ui": "^1.0.0-beta.39",
     "material-ui-icons": "^1.0.0-beta.36",
+    "moment": "^2.22.1",
     "object-assign": "4.1.1",
     "pify": "^3.0.0",
     "postcss-flexbugs-fixes": "3.2.0",

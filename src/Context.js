@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import 'event-source-polyfill/src/eventsource.min.js';
 
-// import ReconnectingEventSource from 'reconnecting-eventsource';
+import moment from 'moment';
 
 import AuthService from './Auth/AuthService';
 
@@ -107,7 +107,7 @@ export class MainProvider extends Component {
     const evtSrc = new window.EventSourcePolyfill(`${HOST}/subscribe?user=${this.state.address}`, {
       headers: { JWT: localStorage.getItem('id_token'), withCredentials: true },
     });
-    evtSrc.addEventListener('message', e => {
+    evtSrc.addEventListener('message', async e => {
       console.log(e);
       const event = JSON.parse(e.data);
       const { event: type } = event;
@@ -130,9 +130,13 @@ export class MainProvider extends Component {
         if (receiver.toLowerCase() === account.toLowerCase()) {
           this.showPopup('You have a purchase in progress');
           this.addNotification('inProgress');
+          this.updateBalance();
+          this.getItems();
         }
         if (sender.toLowerCase() === account.toLowerCase()) {
           console.log('you buying something');
+          await this.updateBalance();
+          await this.getItems();
           this.addNotification('inProgress');
         }
         // if (verifier.toLowerCase() === account.toLowerCase()) {
@@ -149,6 +153,8 @@ export class MainProvider extends Component {
         }
         if (sender.toLowerCase() === account.toLowerCase()) {
           console.log('you buying something');
+          await this.updateBalance();
+          await this.getItems();
           this.showPopup('Item purchase complete');
           this.addNotification('purchased');
         }
@@ -156,12 +162,11 @@ export class MainProvider extends Component {
           console.log('you verifying something');
           this.showPopup('Item you verified is complete');
           this.addNotification('verified');
+          this.updateBalance();
+          this.getItems();
         }
       }
-
-      this.updateBalance();
-      this.getItems();
-      this.getVerifiers();
+      // this.getVerifiers();
     });
   }
 
@@ -176,7 +181,10 @@ export class MainProvider extends Component {
 
   async getVerifiers() {
     try {
-      const { data: verifiers } = await _getVerifiers();
+      // get list of verifiers
+      let { data: verifiers } = await _getVerifiers();
+      // sort newest to oldest
+      verifiers = verifiers.sort((a, b) => moment(b.created_at).unix() - moment(a.created_at).unix());
       this.setState({ verifiers });
     } catch (e) {
       console.log(e);
@@ -202,10 +210,21 @@ export class MainProvider extends Component {
       const { data: historySeller } = await _getItems(address, 'seller');
       const { data: historyVerifier } = await _getItems(address, 'verifier');
 
-      // All items
+      console.log(allItems, myItems);
+
+      // filter out items that are already purchased
+      allItems = allItems.filter(
+        item =>
+          myItems.filter(myItem => item.id === myItem.id).length === 0 &&
+          historyBuyer.filter(buyerItem => item.id === buyerItem.listing.id).length === 0 &&
+          historySeller.filter(sellerItem => item.id === sellerItem.listing.id).length === 0
+        // && historyVerifier.filter(verifierItem => item.id === verifierItem.listing.id).length === 0
+      );
+
+      // sort all items
       allItems = allItems.sort((a, b) => b.id - a.id);
 
-      // My items
+      // sort my items
       myItems = myItems.sort((a, b) => b.id - a.id);
 
       // Transaction closed
