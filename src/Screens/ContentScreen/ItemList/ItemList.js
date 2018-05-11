@@ -229,6 +229,10 @@ class ItemList extends Component {
 
   async verify(item) {
     const { username } = this.context.state;
+    if (this.context.state.balance.tokens === 0) {
+      this.context.showPopup('please get some tokens');
+      return;
+    }
     // const { item } = this.state;
     try {
       const password = await this.passwordModal.open();
