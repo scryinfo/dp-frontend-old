@@ -36,6 +36,9 @@ export class MainProvider extends Component {
       currentPage: 'explore',
       allItems: [],
       myItems: [],
+      historyBuyer: [],
+      historySeller: [],
+      historyVerifier: [],
       itemsBought: [],
       itemsSold: [],
       itemsVerified: [],
@@ -210,7 +213,7 @@ export class MainProvider extends Component {
       const { data: historySeller } = await _getItems(address, 'seller');
       const { data: historyVerifier } = await _getItems(address, 'verifier');
 
-      console.log(allItems, myItems);
+      console.log({ allItems, myItems, historyBuyer, historySeller, historyVerifier });
 
       // filter out items that are already purchased
       allItems = allItems.filter(
@@ -240,6 +243,9 @@ export class MainProvider extends Component {
       this.setState({
         allItems,
         myItems,
+        historyBuyer,
+        historySeller,
+        historyVerifier,
         itemsBought,
         itemsSold,
         itemsVerified,

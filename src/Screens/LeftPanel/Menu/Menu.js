@@ -4,6 +4,8 @@ import TextField from 'material-ui/TextField';
 import List, { ListItem, ListItemText, ListItemSecondaryAction } from 'material-ui/List';
 import Collapse from 'material-ui/transitions/Collapse';
 import Fade from 'material-ui/transitions/Fade';
+import Divider from 'material-ui/Divider';
+
 import { Button, Badge } from 'material-ui';
 import { CircularProgress } from 'material-ui/Progress';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
@@ -180,12 +182,15 @@ class Menu extends Component {
           const {
             allItems,
             myItems,
-            itemsBought,
-            itemsSold,
-            itemsVerified,
-            inProgressBought,
-            inProgressSold,
-            inProgressVerified,
+            historyBuyer,
+            historySeller,
+            historyVerifier,
+            // itemsBought,
+            // itemsSold,
+            // itemsVerified,
+            // inProgressBought,
+            // inProgressSold,
+            // inProgressVerified,
             notifications,
           } = context.state;
           return (
@@ -271,7 +276,7 @@ class Menu extends Component {
                       classes={{ root: this.getActiveStyle('explore', context, classes) }}
                       onClick={() => this.changeRoute({ currentPage: 'explore' })}
                     >
-                      <ListItemText primary="Explore" classes={{ primary: classes.listText }} />
+                      <ListItemText primary="Explore Files" classes={{ primary: classes.listText }} />
                       <ListItemSecondaryAction>
                         <div
                           style={{
@@ -286,29 +291,88 @@ class Menu extends Component {
                         </div>
                       </ListItemSecondaryAction>
                     </ListItem>
-
+                    {/* IN PROGRESS */}
+                    {/* <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('in progress', context, classes) }}
+                      className={classes.nested}
+                      onClick={() => this.changeRoute({ currentPage: 'in progress' })}
+                    >
+                      <ListItemText primary="In Progress" classes={{ primary: classes.listText }} />
+                      <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                          {notifications.inProgress && <Lens color="primary" style={{ height: '10px' }} />}
+                          {inProgressBought.length + inProgressSold.length + inProgressVerified.length}
+                        </div>
+                      </ListItemSecondaryAction>
+                    </ListItem> */}
+                    {/* ------------- */}
+                    {/* <Divider /> */}
+                    <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('purchased', context, classes) }}
+                      className={classes.nested}
+                      onClick={() => this.changeRoute({ currentPage: 'purchased' })}
+                    >
+                      <ListItemText primary="Purchased" classes={{ primary: classes.listText }} />
+                      <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                          {notifications.purchased && <Lens color="primary" style={{ height: '10px' }} />}
+                          {historyBuyer.length}
+                        </div>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    {/* ------------------ */}
+                    <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('sold', context, classes) }}
+                      className={classes.nested}
+                      onClick={() => this.changeRoute({ currentPage: 'sold' })}
+                    >
+                      <ListItemText primary="Sold" classes={{ primary: classes.listText }} />
+                      <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                          {notifications.sold && <Lens color="primary" style={{ height: '10px' }} />}
+                          {historySeller.length}
+                        </div>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    {/* ----------------- */}
+                    <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('verified', context, classes) }}
+                      className={classes.nested}
+                      onClick={() => this.changeRoute({ currentPage: 'verified' })}
+                    >
+                      <ListItemText primary="Verified" classes={{ primary: classes.listText }} />
+                      <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                          {notifications.verified && <Lens color="primary" style={{ height: '10px' }} />}
+                          {historyVerifier.length}
+                        </div>
+                      </ListItemSecondaryAction>
+                    </ListItem>
                     {/* MY ITEMS */}
+                    {/* <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('my items', context, classes) }}
+                      className={classes.nested}
+                      onClick={() => this.changeRoute({ currentPage: 'my items' })}
+                    >
+                      <ListItemText primary="My Items" classes={{ primary: classes.listText }} />
+                      <ListItemSecondaryAction>
+                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
+                          {notifications.inProgress && <Lens color="primary" style={{ height: '10px' }} />}
+                          {itemsBought.length + itemsSold.length + itemsVerified.length}
+                        </div>
+                      </ListItemSecondaryAction>
+                    </ListItem> */}
+                    {/* MY ITEMS
                     <ListItem button onClick={this.handleClick} classes={{ root: classes.listContainer }}>
                       <ListItemText primary="My Items" classes={{ primary: classes.listText }} />
-                      {/* {this.state.open ? <ExpandLess /> : <ExpandMore />} */}
                     </ListItem>
                     <Collapse in={this.state.open} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding>
-                        <ListItem
-                          button
-                          classes={{ root: this.getActiveStyle('in progress', context, classes, 'nested') }}
-                          className={classes.nested}
-                          onClick={() => this.changeRoute({ currentPage: 'in progress' })}
-                        >
-                          <ListItemText primary="In Progress" classes={{ primary: classes.listText }} />
-                          <ListItemSecondaryAction>
-                            <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
-                              {notifications.inProgress && <Lens color="primary" style={{ height: '10px' }} />}
-                              {inProgressBought.length + inProgressSold.length + inProgressVerified.length}
-                            </div>
-                          </ListItemSecondaryAction>
-                        </ListItem>
-                      </List>
+                      <List component="div" disablePadding />
                       <List component="div" disablePadding>
                         <ListItem
                           button
@@ -357,13 +421,13 @@ class Menu extends Component {
                           </ListItemSecondaryAction>
                         </ListItem>
                       </List>
-                    </Collapse>
+                    </Collapse> */}
                     <ListItem
                       button
                       classes={{ root: this.getActiveStyle('sell', context, classes) }}
                       onClick={() => this.changeRoute({ currentPage: 'sell' })}
                     >
-                      <ListItemText primary="Sell" classes={{ primary: classes.listText }} />
+                      <ListItemText primary="Upload your file" classes={{ primary: classes.listText }} />
                       <ListItemSecondaryAction>
                         <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
                           {myItems.length}
