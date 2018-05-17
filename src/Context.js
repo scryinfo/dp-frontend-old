@@ -216,13 +216,13 @@ export class MainProvider extends Component {
       console.log({ allItems, myItems, historyBuyer, historySeller, historyVerifier });
 
       // filter out items that are already purchased
-      allItems = allItems.filter(
-        item =>
-          myItems.filter(myItem => item.id === myItem.id).length === 0 &&
-          historyBuyer.filter(buyerItem => item.id === buyerItem.listing.id).length === 0 &&
-          historySeller.filter(sellerItem => item.id === sellerItem.listing.id).length === 0
-        // && historyVerifier.filter(verifierItem => item.id === verifierItem.listing.id).length === 0
-      );
+      // allItems = allItems.filter(
+      //   item =>
+      //     myItems.filter(myItem => item.id === myItem.id).length === 0 &&
+      //     historyBuyer.filter(buyerItem => item.id === buyerItem.listing.id).length === 0 &&
+      //     historySeller.filter(sellerItem => item.id === sellerItem.listing.id).length === 0
+      //   // && historyVerifier.filter(verifierItem => item.id === verifierItem.listing.id).length === 0
+      // );
 
       // sort all items
       allItems = allItems.sort((a, b) => b.id - a.id);
@@ -239,6 +239,8 @@ export class MainProvider extends Component {
       const inProgressBought = this.getInProgress(historyBuyer);
       const inProgressSold = this.getInProgress(historySeller);
       const inProgressVerified = this.getInProgress(historyVerifier);
+
+      console.log({ historyVerifier });
 
       this.setState({
         allItems,

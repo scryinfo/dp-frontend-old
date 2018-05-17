@@ -424,8 +424,8 @@ class Menu extends Component {
                     </Collapse> */}
                     <ListItem
                       button
-                      classes={{ root: this.getActiveStyle('sell', context, classes) }}
-                      onClick={() => this.changeRoute({ currentPage: 'sell' })}
+                      classes={{ root: this.getActiveStyle('upload', context, classes) }}
+                      onClick={() => this.changeRoute({ currentPage: 'upload' })}
                     >
                       <ListItemText primary="Upload your file" classes={{ primary: classes.listText }} />
                       <ListItemSecondaryAction>

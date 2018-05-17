@@ -40,6 +40,7 @@ export const _buyItem = async (listing, username, password, buyer, verifier, rew
 
 // Verify item
 export const _verifyItem = async (item, username, password) => {
+  console.log(item);
   const verifierAuth = await verifierAuthorization(
     item.listing.owner.account,
     { username, password },

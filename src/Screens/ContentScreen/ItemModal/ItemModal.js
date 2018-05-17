@@ -5,12 +5,15 @@ import { Paper, Button, Collapse, Typography, Modal, TextField, Select } from 'm
 import { InputLabel, InputAdornment } from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import { FormControl } from 'material-ui/Form';
+import { CircularProgress } from 'material-ui/Progress';
 
 import classNames from 'classnames';
 
 import moment from 'moment';
 
 import { _buyItem, _closeTransaction, _verifyItem } from '../../../Components/requests';
+
+import PasswordModal from '../../PasswordModal';
 
 const CustomTableCell = withStyles(theme => ({
   head: {
@@ -39,38 +42,76 @@ const styles = theme => ({
       // backgroundColor: theme.palette.background.default,
     },
   },
+  card: {
+    minWidth: 275,
+  },
+  bullet: {
+    display: 'inline-block',
+    margin: '0 2px',
+    transform: 'scale(0.8)',
+  },
+  title: {
+    marginBottom: 16,
+    fontSize: 14,
+  },
+  pos: {
+    marginBottom: 12,
+  },
+  paper: {
+    position: 'absolute',
+    width: theme.spacing.unit * 70,
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing.unit * 4,
+  },
+  select: {
+    maxHeight: '200px',
+    minWidth: '50px',
+  },
+  buttonProgress: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },
 });
 
 class ItemModal extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      verifier: '',
+      reward: '',
+      loader: {},
+    };
   }
 
   // PURCHASE ITEM
-  buyItem = async item => {
-    const { username, address } = this.context.state;
+  buyItem = async ({ item, context }) => {
+    const { username, address } = context.state;
     const { verifier, reward } = this.state;
     this.spinLoader('buy');
     try {
-      await this.checkForErrors(item);
+      await this.checkForErrors({ item, context });
       const password = await this.passwordModal.open();
       await _buyItem(item, username, password, address, verifier, reward);
-      this.context.showPopup('purchased successfully');
+      context.showPopup('purchased successfully');
+      context.updateState({ item: null, action: '' });
     } catch (e) {
       console.log(e);
       if (e.response) {
         if (e.response.status === 401) {
-          this.context.showPopup('You was logged out');
-          this.context.logout();
+          context.showPopup('You was logged out');
+          context.logout();
           return;
         }
       }
       if (e && e.message) {
-        this.context.showPopup(e.message);
+        context.showPopup(e.message);
         return;
       }
-      this.context.showPopup(JSON.stringify(e));
+      context.showPopup(JSON.stringify(e));
     } finally {
       this.stopLoader('buy');
     }
@@ -104,11 +145,11 @@ class ItemModal extends Component {
   renderStatus = item => {
     console.log({ item });
     if (item.needs_verification) return 'Waiting for verification';
-    if (item.need_closure) return 'Waiting for seller';
+    if (item.need_closure) return "Waiting for seller's authorization";
     return 'Purchased';
   };
 
-  checkForErrors = item =>
+  checkForErrors = ({ item, context }) =>
     new Promise((resolve, reject) => {
       const { verifier, reward } = this.state;
       if (verifier && verifier !== 'none') {
@@ -118,7 +159,7 @@ class ItemModal extends Component {
           return;
         }
       }
-      if (this.context.state.balance.tokens < item.price) {
+      if (context.state.balance.tokens < item.price) {
         reject("you don't have enough tokens");
         return;
       }
@@ -126,10 +167,10 @@ class ItemModal extends Component {
     });
 
   // Verify an item
-  verify = async item => {
-    const { username } = this.context.state;
-    if (this.context.state.balance.tokens === 0) {
-      this.context.showPopup('please get some tokens');
+  verify = async ({ itemHistory: item, context }) => {
+    const { username } = context.state;
+    if (context.state.balance.tokens === 0) {
+      context.showPopup('please get some tokens');
       return;
     }
 
@@ -137,28 +178,28 @@ class ItemModal extends Component {
     try {
       const password = await this.passwordModal.open();
       await _verifyItem(item, username, password);
-      this.setState({ item: null });
-      this.props.history.push('/verified');
+      context.updateState({ item: null });
+      // this.props.history.push('/verified');
     } catch (e) {
       console.log(e);
       if (e.response) {
         if (e.response.status === 401) {
-          this.context.showPopup('You was logged out');
-          this.context.logout();
+          context.showPopup('You was logged out');
+          context.logout();
           return;
         }
       }
-      this.context.showPopup(JSON.stringify(e));
+      context.showPopup(JSON.stringify(e));
     } finally {
       this.stopLoader('verify');
     }
   };
 
   // Close transaction
-  closeTransaction = async item => {
-    const { username } = this.context.state;
-    if (this.context.state.balance.tokens === 0) {
-      this.context.showPopup('please get some tokens');
+  closeTransaction = async ({ item, context }) => {
+    const { username } = context.state;
+    if (context.state.balance.tokens === 0) {
+      context.showPopup('please get some tokens');
       return;
     }
 
@@ -166,31 +207,33 @@ class ItemModal extends Component {
     try {
       const password = await this.passwordModal.open();
       await _closeTransaction(item.id, username, password);
-      this.context.showPopup('transaction closed');
+      context.showPopup('transaction closed');
     } catch (e) {
       console.log(e);
       if (e.response) {
         if (e.response.status === 401) {
-          this.context.showPopup('You was logged out');
-          this.context.logout();
+          context.showPopup('You was logged out');
+          context.logout();
           return;
         }
       }
       if (e && e.response && e.response.data) {
         const { message } = e.response.data;
-        this.context.showPopup(message);
+        context.showPopup(message);
         return;
       }
-      this.context.showPopup(JSON.stringify(e));
+      context.showPopup(JSON.stringify(e));
     } finally {
       this.stopLoader('closeTransaction');
     }
   };
 
-  verifyModal = () => {
-    const { classes, item } = this.props;
+  verifyModal = ({ context, item: itemHistory, classes }) => {
+    const item = itemHistory.listing;
+    const { loader } = this.state;
+
     return (
-      <Modal open={!!item} onClose={() => this.setState({ item: null })}>
+      <Modal open={!!item} onClose={() => context.updateState({ item: null })}>
         <div
           style={{
             top: `50%`,
@@ -204,14 +247,22 @@ class ItemModal extends Component {
             {item.name}
           </Typography>
 
-          {/* FIXME: BUYER NAME */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Buyer:</span> {item.owner.name}
+            <span style={{ fontWeight: '600' }}>Buyer:</span> {itemHistory.buyer.name}
           </Typography>
 
-          {/* FIXME: SELLER NAME */}
           <Typography variant="subheading" id="simple-modal-description">
             <span style={{ fontWeight: '600' }}>Seller:</span> {item.owner.name}
+          </Typography>
+
+          {/* ITEM PRICE */}
+          <Typography variant="subheading" id="simple-modal-description">
+            <span style={{ fontWeight: '600' }}>Price:</span> {item.price} tokens
+          </Typography>
+
+          {/* VERIFIER REWARD */}
+          <Typography variant="subheading" id="simple-modal-description">
+            <span style={{ fontWeight: '600' }}>Verifier reward:</span> {itemHistory.rewards} tokens
           </Typography>
 
           {/* ITEM SIZE */}
@@ -219,16 +270,6 @@ class ItemModal extends Component {
             <span style={{ fontWeight: '600' }}>File size:</span> {this.formatFileSize(item.size)}
           </Typography>
 
-          {/* ITEM PRICE */}
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Price:</span> {item.created_at}
-          </Typography>
-
-          {/* VERIFIER REWARD */}
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Verifier reward:</span> {item.created_at}
-          </Typography>
-
           {/* FILE UPLOADED DATE */}
           <Typography variant="subheading" id="simple-modal-description">
             <span style={{ fontWeight: '600' }}>Date uploaded:</span> {item.created_at}
@@ -236,24 +277,40 @@ class ItemModal extends Component {
 
           {/* PURCHASE DATE */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Purchase date:</span> {item.created_at}
+            <span style={{ fontWeight: '600' }}>Purchase date:</span> {itemHistory.created_at}
           </Typography>
 
           {/* ACTION BUTTONS */}
-          <div>
+          {/* <div>
             <Button>DOWNLOAD THE FILE</Button>
             <Button>COPY IPFS HASH</Button>
             <Button onClick={() => this.verify(item)}>VERIFY</Button>
+          </div> */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <Button>DOWNLOAD THE FILE</Button>
+            <Button>COPY IPFS HASH</Button>
+            {itemHistory.needs_verification ? (
+              <div style={{ position: 'relative' }}>
+                <Button onClick={() => this.verify({ itemHistory, context })}>VERIFY</Button>
+                {loader.verify && <CircularProgress size={24} className={classes.buttonProgress} />}
+              </div>
+            ) : itemHistory.needs_closure ? (
+              <Button disabled>Waiting for seller's authorization</Button>
+            ) : (
+              <Button disabled>Completed</Button>
+            )}
           </div>
         </div>
       </Modal>
     );
   };
 
-  closeTransactionModal = () => {
-    const { classes, item } = this.props;
+  closeTransactionModal = ({ context, item: itemHistory, classes }) => {
+    const { loader } = this.state;
+    const item = itemHistory.listing;
+    console.log(itemHistory);
     return (
-      <Modal open={!!item} onClose={() => this.setState({ item: null })}>
+      <Modal open={!!item} onClose={() => context.updateState({ item: null, type: '' })}>
         <div
           style={{
             top: `50%`,
@@ -266,47 +323,60 @@ class ItemModal extends Component {
           <Typography variant="title" id="modal-title" style={{ paddingBottom: '20px' }}>
             {item.name}
           </Typography>
-          {/* FIXME: BUYER NAME */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Buyer:</span> {item.owner.name}
+            <span style={{ fontWeight: '600' }}>Buyer:</span> {itemHistory.buyer.name}
           </Typography>
           {/* ITEM PRICE */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Item price:</span> {item.created_at}
+            <span style={{ fontWeight: '600' }}>Item price:</span> {item.price} tokens
           </Typography>
-          {/* FIXME: VERIFIER NAME */}
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Verifier:</span> {item.owner.name}
-          </Typography>
-          {/* VERIFIER REWARD */}
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Verifier reward:</span> {item.created_at}
-          </Typography>
+          {itemHistory.verifier && (
+            <Fragment>
+              <Typography variant="subheading" id="simple-modal-description">
+                <span style={{ fontWeight: '600' }}>Verifier:</span> {itemHistory.verifier.name}
+              </Typography>
+              {/* VERIFIER REWARD */}
+              <Typography variant="subheading" id="simple-modal-description">
+                <span style={{ fontWeight: '600' }}>Verifier reward:</span> {itemHistory.rewards} tokens
+              </Typography>
+            </Fragment>
+          )}
           {/* ITEM SIZE */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Item size:</span> {item.created_at}
+            <span style={{ fontWeight: '600' }}>Item size:</span> {item.size}
           </Typography>
           {/* PURCHASE DATE */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Purchase date:</span> {item.created_at}
+            <span style={{ fontWeight: '600' }}>Purchase date:</span> {itemHistory.created_at}
           </Typography>
           {/* FILE UPLOADED DATE */}
           <Typography variant="subheading" id="simple-modal-description">
             <span style={{ fontWeight: '600' }}>Date uploaded:</span> {item.created_at}
           </Typography>
           {/* ACTION BUTTON */}
-          <div>
-            <Button onClick={() => this.closeTransaction(item)}>AUTHORIZE THE TRANSACTION</Button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <div style={{ position: 'relative' }}>
+              {itemHistory.needs_verification ? (
+                <Button disabled>WAITING FOR VERIFICATION</Button>
+              ) : (
+                <Button disabled={loader.closeTransaction} onClick={() => this.closeTransaction({ item, context })}>
+                  AUTHORIZE THE TRANSACTION
+                </Button>
+              )}
+              {loader.closeTransaction && <CircularProgress size={24} className={classes.buttonProgress} />}
+            </div>
           </div>
         </div>
       </Modal>
     );
   };
 
-  buyerItemDetailModal = () => {
-    const { classes, item } = this.props;
+  buyerItemDetailModal = ({ context, item: itemHistory, classes }) => {
+    const item = itemHistory.listing;
+    const { loader } = this.state;
+    console.log(itemHistory);
     return (
-      <Modal open={!!item} onClose={() => this.setState({ item: null })}>
+      <Modal open={!!item} onClose={() => context.updateState({ item: null })}>
         <div
           style={{
             top: `50%`,
@@ -319,29 +389,30 @@ class ItemModal extends Component {
           <Typography variant="title" id="modal-title" style={{ paddingBottom: '20px' }}>
             {item.name}
           </Typography>
-          {/* FIXME: SELLER NAME */}
           <Typography variant="subheading" id="simple-modal-description">
             <span style={{ fontWeight: '600' }}>Seller:</span> {item.owner.name}
           </Typography>
           {/* ITEM PRICE */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Item price:</span> {item.created_at}
+            <span style={{ fontWeight: '600' }}>Item price:</span> {item.price} tokens
           </Typography>
-          {/* FIXME: VERIFIER NAME */}
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Verifier:</span> {item.owner.name}
-          </Typography>
-          {/* VERIFIER REWARD */}
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Verifier reward:</span> {item.created_at}
-          </Typography>
+          {itemHistory.verifier && (
+            <Fragment>
+              <Typography variant="subheading" id="simple-modal-description">
+                <span style={{ fontWeight: '600' }}>Verifier:</span> {itemHistory.verifier.name}
+              </Typography>
+              <Typography variant="subheading" id="simple-modal-description">
+                <span style={{ fontWeight: '600' }}>Verifier reward:</span> {itemHistory.rewards} tokens
+              </Typography>
+            </Fragment>
+          )}
           {/* ITEM SIZE */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Item size:</span> {item.created_at}
+            <span style={{ fontWeight: '600' }}>Item size:</span> {item.size}
           </Typography>
           {/* PURCHASE DATE */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Purchase date:</span> {item.created_at}
+            <span style={{ fontWeight: '600' }}>Purchase date:</span> {itemHistory.created_at}
           </Typography>
           {/* FILE UPLOADED DATE */}
           <Typography variant="subheading" id="simple-modal-description">
@@ -349,9 +420,75 @@ class ItemModal extends Component {
           </Typography>
           {/* TOTAL PRICE */}
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Total price:</span> {item.created_at}
+            <span style={{ fontWeight: '600' }}>Total price:</span>{' '}
+            {itemHistory.rewards ? itemHistory.rewards + item.price : item.price} tokens
           </Typography>
-          {/* 
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <div style={{ position: 'relative' }}>
+              {itemHistory.needs_verification ? (
+                <Button disabled>WAITING FOR VERIFICATION</Button>
+              ) : itemHistory.needs_closure ? (
+                <Button disabled>WAITING FOR SELLER'S AUTHORIZATION</Button>
+              ) : (
+                <div>
+                  <Button>DOWNLOAD THE FILE</Button>
+                  <Button>COPY IPFS HASH</Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Modal>
+    );
+  };
+
+  uploadedFileModal = ({ context, item, classes }) => (
+    <Modal open={!!item} onClose={() => context.updateState({ item: null })}>
+      <div
+        style={{
+          top: `50%`,
+          left: `50%`,
+          transform: `translate(-50%, -50%)`,
+        }}
+        className={classes.paper}
+      >
+        {/* ITEM NAME */}
+        <Typography variant="title" id="modal-title" style={{ paddingBottom: '20px' }}>
+          {item.name}
+        </Typography>
+        {/* FIXME: SELLER NAME */}
+        <Typography variant="subheading" id="simple-modal-description">
+          <span style={{ fontWeight: '600' }}>Seller:</span> {item.owner.name}
+        </Typography>
+        {/* ITEM PRICE */}
+        <Typography variant="subheading" id="simple-modal-description">
+          <span style={{ fontWeight: '600' }}>Item price:</span> {item.created_at}
+        </Typography>
+        {/* FIXME: VERIFIER NAME */}
+        <Typography variant="subheading" id="simple-modal-description">
+          <span style={{ fontWeight: '600' }}>Verifier:</span> {item.owner.name}
+        </Typography>
+        {/* VERIFIER REWARD */}
+        <Typography variant="subheading" id="simple-modal-description">
+          <span style={{ fontWeight: '600' }}>Verifier reward:</span> {item.created_at}
+        </Typography>
+        {/* ITEM SIZE */}
+        <Typography variant="subheading" id="simple-modal-description">
+          <span style={{ fontWeight: '600' }}>Item size:</span> {item.created_at}
+        </Typography>
+        {/* PURCHASE DATE */}
+        <Typography variant="subheading" id="simple-modal-description">
+          <span style={{ fontWeight: '600' }}>Purchase date:</span> {item.created_at}
+        </Typography>
+        {/* FILE UPLOADED DATE */}
+        <Typography variant="subheading" id="simple-modal-description">
+          <span style={{ fontWeight: '600' }}>Date uploaded:</span> {item.created_at}
+        </Typography>
+        {/* TOTAL PRICE */}
+        <Typography variant="subheading" id="simple-modal-description">
+          <span style={{ fontWeight: '600' }}>Total price:</span> {item.created_at}
+        </Typography>
+        {/* 
                     FIXME: create a status stepper.
                     The idea is to have 3 steps.
                     1. Purchase
@@ -359,22 +496,26 @@ class ItemModal extends Component {
                     3. Authorize
                   */}
 
-          {/* ACTION BUTTONS */}
-          <div>
-            <Button>DOWNLOAD THE FILE</Button>
-            <Button>COPY IPFS HASH</Button>
-          </div>
+        {/* ACTION BUTTONS */}
+        <div>
+          <Button>DOWNLOAD THE FILE</Button>
+          <Button>COPY IPFS HASH</Button>
         </div>
-      </Modal>
-    );
-  };
+      </div>
+    </Modal>
+  );
 
-  purchaseFileModal = () => {
-    const { classes, item } = this.props;
-    const { address } = this.context.state;
-    const { verifier, reward } = this.state;
+  purchaseFileModal = ({ context, item, classes }) => {
+    const { address } = context.state;
+    const { verifier, reward, loader } = this.state;
     return (
-      <Modal open={!!item} onClose={() => this.setState({ item: null, verifier: '', reward: '' })}>
+      <Modal
+        open={!!item}
+        onClose={() => {
+          context.updateState({ item: null, action: '' });
+          this.setState({ verifier: '', reward: '' });
+        }}
+      >
         <div
           style={{
             top: `50%`,
@@ -390,10 +531,9 @@ class ItemModal extends Component {
             <span style={{ fontWeight: '600' }}>Seller:</span> {item.owner.name}
           </Typography>
           <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Price:</span> {item.price}
+            <span style={{ fontWeight: '600' }}>Price:</span> {item.price} tokens
           </Typography>
           <Typography variant="subheading" id="simple-modal-description">
-            {console.log(item.size)}
             <span style={{ fontWeight: '600' }}>File size:</span> {this.formatFileSize(item.size)}
           </Typography>
           <Typography variant="subheading" id="simple-modal-description">
@@ -427,8 +567,8 @@ class ItemModal extends Component {
                 <MenuItem value="none">
                   <em>None</em>
                 </MenuItem>
-                {console.log(address)}
-                {this.context.state.verifiers
+
+                {context.state.verifiers
                   .filter(ver => ver.account !== item.owner.account && ver.account !== address)
                   .map(ver => (
                     <MenuItem key={ver.id} value={ver.account}>
@@ -438,14 +578,21 @@ class ItemModal extends Component {
               </Select>
             </FormControl>
             {!verifier ? null : verifier === 'none' ? (
-              <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
-                Buy
-              </Button>
+              <div style={{ position: 'relative' }}>
+                <Button
+                  disabled={loader.buy}
+                  color="primary"
+                  className={classes.button}
+                  onClick={() => this.buyItem({ item, context })}
+                >
+                  Buy
+                </Button>
+                {loader.buy && <CircularProgress size={24} className={classes.buttonProgress} />}
+              </div>
             ) : (
               <Fragment>
                 <TextField
                   label="Verifier's reward"
-                  id="simple-start-adornment"
                   type="number"
                   value={reward}
                   onChange={e => this.setState({ reward: e.target.value })}
@@ -454,9 +601,17 @@ class ItemModal extends Component {
                     startAdornment: <InputAdornment position="start">%</InputAdornment>,
                   }}
                 />
-                <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
-                  Buy
-                </Button>
+                <div style={{ position: 'relative' }}>
+                  <Button
+                    disabled={loader.buy}
+                    color="primary"
+                    className={classes.button}
+                    onClick={() => this.buyItem({ item, context })}
+                  >
+                    Buy
+                  </Button>
+                  {loader.buy && <CircularProgress size={24} className={classes.buttonProgress} />}
+                </div>
               </Fragment>
             )}
           </form>
@@ -465,23 +620,59 @@ class ItemModal extends Component {
     );
   };
 
-  render() {
-    const { classes, type } = this.props;
-    if (type === 'history') {
-      if ('to close transaction') {
-        // CLOSE TRANSACTION
-      }
-      if ('verify') {
-        // VERIFY
-      }
-      if ('buyer checks his file') {
-        // CHECK STATUS
-      }
-      if ('purchase file') {
-        // PURCHASE
-      }
+  renderModal = ({ page, context, item, classes }) => {
+    console.log({ page });
+    switch (page) {
+      case 'purchased':
+        return this.buyerItemDetailModal({ context, item, classes });
+      case 'sold':
+        return this.closeTransactionModal({ context, item, classes });
+      case 'verified':
+        return this.verifyModal({ context, item, classes });
+      case 'upload':
+        return this.uploadedFileModal({ context, item, classes });
+      default:
+        return this.purchaseFileModal({ context, item, classes });
     }
-    return <div />;
+  };
+
+  render() {
+    const { classes, context } = this.props;
+    const { item, currentPage } = context.state;
+
+    return (
+      <div>
+        {!!item && this.renderModal({ page: currentPage, context, item, classes })}
+        <PasswordModal
+          onRef={ref => {
+            this.passwordModal = ref;
+          }}
+        />
+      </div>
+    );
+    // if (type === 'sold') {
+    //   return this.closeTransactionModal({ context, item, classes });
+    // }
+    // if (type === 'verified') {
+    //   return this.verifyModal({ context, item, classes });
+    // }
+    // if (type === 'purchased') {
+    //   return this.buyerItemDetailModal({ context, item, classes });
+    // }
+    // if (type === 'purchase') {
+    //   console.log('sdsdfjklsjfkldjkldsjfkdk');
+    //   return (
+    //     <div>
+    //       {this.purchaseFileModal({ context, item, classes })}
+    //       <PasswordModal
+    //         onRef={ref => {
+    //           this.passwordModal = ref;
+    //         }}
+    //       />
+    //     </div>
+    //   );
+    // }
+    // return <div />;
   }
 }
 

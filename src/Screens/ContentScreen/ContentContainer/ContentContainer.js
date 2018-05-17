@@ -54,7 +54,7 @@ class ContentContainer extends Component {
             searchValue,
             historyBuyer,
             historySeller,
-            historyVerifer,
+            historyVerifier,
           } = context.state;
           return (
             <div className="content-container">
@@ -73,14 +73,14 @@ class ContentContainer extends Component {
                 />
                 <Route
                   path="/purchased"
-                  render={props => <ItemList {...props} items={historyBuyer} type="history" />}
+                  render={props => <ItemList {...props} items={historyBuyer} type="purchased" />}
                 />
-                <Route path="/sold" render={props => <ItemList {...props} items={historySeller} type="history" />} />
+                <Route path="/sold" render={props => <ItemList {...props} items={historySeller} type="sold" />} />
                 <Route
                   path="/verified"
-                  render={props => <ItemList {...props} items={historyVerifer} type="history" />}
+                  render={props => <ItemList {...props} items={historyVerifier} type="verified" />}
                 />
-                <Route path="/sell" render={props => <Sell {...props} items={allItems} />} />
+                <Route path="/upload" render={props => <Sell {...props} items={allItems} type="uploaded" />} />
               </div>
             </div>
           );
