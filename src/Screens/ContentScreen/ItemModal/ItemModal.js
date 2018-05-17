@@ -7,12 +7,15 @@ import { MenuItem } from 'material-ui/Menu';
 import { FormControl } from 'material-ui/Form';
 import { CircularProgress } from 'material-ui/Progress';
 
+import { createWriteStream } from 'streamsaver';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
 import classNames from 'classnames';
 
 import moment from 'moment';
 
 import { _buyItem, _closeTransaction, _verifyItem } from '../../../Components/requests';
-
+import { HOST } from '../../../Components/Remote';
 import PasswordModal from '../../PasswordModal';
 
 const CustomTableCell = withStyles(theme => ({
@@ -86,6 +89,29 @@ class ItemModal extends Component {
       loader: {},
     };
   }
+
+  // DOWNLOAD THE FILE
+  downloadFile = async ({ cid, name, context }) => {
+    this.spinLoader('download');
+    try {
+      const response = await fetch(`${HOST}/seller/download?CID=${cid}`, {
+        headers: new Headers({
+          Authorization: localStorage.getItem('id_token'),
+        }),
+      });
+      const fileStream = createWriteStream(name);
+      const writer = fileStream.getWriter();
+      const reader = response.body.getReader();
+      const pump = () =>
+        reader.read().then(({ value, done }) => (done ? writer.close() : writer.write(value).then(pump)));
+      await pump();
+    } catch (e) {
+      console.log(e);
+      context.showPopup(JSON.stringify(e));
+    } finally {
+      this.stopLoader('download');
+    }
+  };
 
   // PURCHASE ITEM
   buyItem = async ({ item, context }) => {
@@ -231,7 +257,7 @@ class ItemModal extends Component {
   verifyModal = ({ context, item: itemHistory, classes }) => {
     const item = itemHistory.listing;
     const { loader } = this.state;
-
+    console.log({ itemHistory });
     return (
       <Modal open={!!item} onClose={() => context.updateState({ item: null })}>
         <div
@@ -287,11 +313,28 @@ class ItemModal extends Component {
             <Button onClick={() => this.verify(item)}>VERIFY</Button>
           </div> */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-            <Button>DOWNLOAD THE FILE</Button>
-            <Button>COPY IPFS HASH</Button>
+            <div style={{ position: 'relative' }}>
+              <Button
+                disabled={loader.download}
+                onClick={() => this.downloadFile({ cid: item.cid, name: item.name, context })}
+              >
+                DOWNLOAD
+              </Button>
+              {loader.download && <CircularProgress size={24} className={classes.buttonProgress} />}
+            </div>
+            <CopyToClipboard
+              text={item.cid}
+              onCopy={() => {
+                context.showPopup('Copied to clipboard');
+              }}
+            >
+              <Button>Copy ipfs hash</Button>
+            </CopyToClipboard>
             {itemHistory.needs_verification ? (
               <div style={{ position: 'relative' }}>
-                <Button onClick={() => this.verify({ itemHistory, context })}>VERIFY</Button>
+                <Button disabled={loader.verify} onClick={() => this.verify({ itemHistory, context })}>
+                  VERIFY
+                </Button>
                 {loader.verify && <CircularProgress size={24} className={classes.buttonProgress} />}
               </div>
             ) : itemHistory.needs_closure ? (
@@ -424,16 +467,31 @@ class ItemModal extends Component {
             {itemHistory.rewards ? itemHistory.rewards + item.price : item.price} tokens
           </Typography>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'row' }}>
               {itemHistory.needs_verification ? (
                 <Button disabled>WAITING FOR VERIFICATION</Button>
               ) : itemHistory.needs_closure ? (
                 <Button disabled>WAITING FOR SELLER'S AUTHORIZATION</Button>
               ) : (
-                <div>
-                  <Button>DOWNLOAD THE FILE</Button>
-                  <Button>COPY IPFS HASH</Button>
-                </div>
+                <Fragment>
+                  <div style={{ position: 'relative' }}>
+                    <Button
+                      disabled={loader.download}
+                      onClick={() => this.downloadFile({ cid: item.cid, name: item.name, context })}
+                    >
+                      DOWNLOAD
+                    </Button>
+                    {loader.download && <CircularProgress size={24} className={classes.buttonProgress} />}
+                  </div>
+                  <CopyToClipboard
+                    text={item.cid}
+                    onCopy={() => {
+                      context.showPopup('Copied to clipboard');
+                    }}
+                  >
+                    <Button>Copy ipfs hash</Button>
+                  </CopyToClipboard>
+                </Fragment>
               )}
             </div>
           </div>

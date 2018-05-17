@@ -132,7 +132,7 @@ export class MainProvider extends Component {
         const { receiver, sender, verifier } = event.args;
         if (receiver.toLowerCase() === account.toLowerCase()) {
           this.showPopup('You have a purchase in progress');
-          this.addNotification('inProgress');
+          this.addNotification('sold');
           this.updateBalance();
           this.getItems();
         }
@@ -140,7 +140,7 @@ export class MainProvider extends Component {
           console.log('you buying something');
           await this.updateBalance();
           await this.getItems();
-          this.addNotification('inProgress');
+          this.addNotification('purchased');
         }
         // if (verifier.toLowerCase() === account.toLowerCase()) {
         //   console.log('you verifying something');
@@ -175,7 +175,7 @@ export class MainProvider extends Component {
 
   addNotification(type) {
     this.setState({ notifications: { [type]: true } });
-    setTimeout(() => this.setState({ notifications: {} }), 5000);
+    setTimeout(() => this.setState({ notifications: {} }), 15000);
   }
 
   removeNotifications() {
