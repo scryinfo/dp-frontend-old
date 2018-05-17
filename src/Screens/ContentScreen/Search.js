@@ -1,6 +1,7 @@
 import React from 'react';
 import { withStyles } from 'material-ui/styles';
-import { Input } from 'material-ui';
+import { Input, Icon, InputAdornment } from 'material-ui';
+import { Search as SearchIcon } from 'material-ui-icons';
 
 const styles = () => ({});
 
@@ -13,13 +14,19 @@ class Search extends React.Component {
   render() {
     const { classes } = this.props;
     return (
-      <div style={{ marginLeft: '150px' }}>
+      <div style={{ width: '300px' }}>
         <Input
           placeholder="Find items"
           className={classes.input}
           onChange={this.props.onChange}
           value={this.props.value}
           type="search"
+          fullWidth
+          endAdornment={
+            <InputAdornment position="end">
+              <SearchIcon />
+            </InputAdornment>
+          }
         />
       </div>
     );

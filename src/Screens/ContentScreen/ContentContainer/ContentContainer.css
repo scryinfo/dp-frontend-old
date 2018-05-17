@@ -10,8 +10,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  /* justify-content: space-between; */
-  margin-right: 40px;
+  justify-content: space-between;
+  /* margin-right: 40px; */
   position: relative;
 }
 
@@ -24,8 +24,9 @@
 }
 
 .content-search {
-  position: absolute;
-  left: 20%;
+  /* position: absolute; */
+  /* left: 20%; */
+  /* width: 300px; */
 }
 
 .content-search-bar-container {

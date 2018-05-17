@@ -60,9 +60,11 @@ class ContentContainer extends Component {
             <div className="content-container">
               <div className="content-header">
                 <div className="content-title">{currentPage}</div>
-                <div className="content-search">
-                  <Search value={searchValue} onChange={context.onSearch} />
-                </div>
+                {currentPage === 'explore' && (
+                  <div className="content-search">
+                    <Search value={searchValue} onChange={context.onSearch} />
+                  </div>
+                )}
               </div>
               <div className="list-items">
                 <Route
