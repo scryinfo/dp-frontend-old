@@ -1,8 +1,8 @@
 .content-container {
   /* width : 100%; */
   height: 100%;
-  margin-left: 60px;
-  margin-right: 60px;
+  margin-left: 40px;
+  margin-right: 40px;
   margin-top: 35px;
 }
 
@@ -10,8 +10,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  /* justify-content: space-between; */
-  margin-right: 60px;
+  justify-content: space-between;
+  /* margin-right: 40px; */
   position: relative;
 }
 
@@ -24,8 +24,9 @@
 }
 
 .content-search {
-  position: absolute;
-  left: 20%;
+  /* position: absolute; */
+  /* left: 20%; */
+  /* width: 300px; */
 }
 
 .content-search-bar-container {

@@ -12,4 +12,6 @@ body {
   font-family: 'Helvetica Neue', 'Roboto', sans-serif;
   /* font-family: 'Roboto', sans-serif; */
   box-sizing: border-box;
+  /* transform: scale(0.9);
+  transform-origin: 0 0; */
 }

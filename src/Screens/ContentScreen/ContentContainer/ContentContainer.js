@@ -52,14 +52,19 @@ class ContentContainer extends Component {
             itemsVerified,
             currentPage,
             searchValue,
+            historyBuyer,
+            historySeller,
+            historyVerifier,
           } = context.state;
           return (
             <div className="content-container">
               <div className="content-header">
                 <div className="content-title">{currentPage}</div>
-                <div className="content-search">
-                  <Search value={searchValue} onChange={context.onSearch} />
-                </div>
+                {currentPage === 'explore' && (
+                  <div className="content-search">
+                    <Search value={searchValue} onChange={context.onSearch} />
+                  </div>
+                )}
               </div>
               <div className="list-items">
                 <Route
@@ -67,21 +72,15 @@ class ContentContainer extends Component {
                   render={props => <ItemList {...props} items={foundItems.length > 0 ? foundItems : allItems} />}
                 />
                 <Route
-                  path="/inprogress"
-                  render={props => (
-                    <InProgress
-                      {...props}
-                      inProgressBought={inProgressBought}
-                      inProgressSold={inProgressSold}
-                      inProgressVerified={inProgressVerified}
-                    />
-                  )}
+                  path="/purchased"
+                  render={props => <ItemList {...props} items={historyBuyer} type="purchased" />}
                 />
-                <Route path="/purchased" render={props => <ItemList {...props} items={itemsBought} />} />
-                <Route path="/sold" render={props => <ItemList {...props} items={itemsSold} />} />
-                <Route path="/verified" render={props => <ItemList {...props} items={itemsVerified} />} />
-                <Route path="/sell" render={props => <Sell {...props} items={allItems} />} />
-                <Route path="/verify" render={props => <Sell {...props} items={allItems} />} />
+                <Route path="/sold" render={props => <ItemList {...props} items={historySeller} type="sold" />} />
+                <Route
+                  path="/verified"
+                  render={props => <ItemList {...props} items={historyVerifier} type="verified" />}
+                />
+                <Route path="/upload" render={props => <Sell {...props} items={allItems} type="uploaded" />} />
               </div>
             </div>
           );

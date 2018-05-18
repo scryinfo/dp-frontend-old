@@ -36,6 +36,9 @@ export class MainProvider extends Component {
       currentPage: 'explore',
       allItems: [],
       myItems: [],
+      historyBuyer: [],
+      historySeller: [],
+      historyVerifier: [],
       itemsBought: [],
       itemsSold: [],
       itemsVerified: [],
@@ -129,7 +132,7 @@ export class MainProvider extends Component {
         const { receiver, sender, verifier } = event.args;
         if (receiver.toLowerCase() === account.toLowerCase()) {
           this.showPopup('You have a purchase in progress');
-          this.addNotification('inProgress');
+          this.addNotification('sold');
           this.updateBalance();
           this.getItems();
         }
@@ -137,7 +140,7 @@ export class MainProvider extends Component {
           console.log('you buying something');
           await this.updateBalance();
           await this.getItems();
-          this.addNotification('inProgress');
+          this.addNotification('purchased');
         }
         // if (verifier.toLowerCase() === account.toLowerCase()) {
         //   console.log('you verifying something');
@@ -172,7 +175,7 @@ export class MainProvider extends Component {
 
   addNotification(type) {
     this.setState({ notifications: { [type]: true } });
-    setTimeout(() => this.setState({ notifications: {} }), 5000);
+    setTimeout(() => this.setState({ notifications: {} }), 15000);
   }
 
   removeNotifications() {
@@ -210,16 +213,16 @@ export class MainProvider extends Component {
       const { data: historySeller } = await _getItems(address, 'seller');
       const { data: historyVerifier } = await _getItems(address, 'verifier');
 
-      console.log(allItems, myItems);
+      console.log({ allItems, myItems, historyBuyer, historySeller, historyVerifier });
 
       // filter out items that are already purchased
-      allItems = allItems.filter(
-        item =>
-          myItems.filter(myItem => item.id === myItem.id).length === 0 &&
-          historyBuyer.filter(buyerItem => item.id === buyerItem.listing.id).length === 0 &&
-          historySeller.filter(sellerItem => item.id === sellerItem.listing.id).length === 0
-        // && historyVerifier.filter(verifierItem => item.id === verifierItem.listing.id).length === 0
-      );
+      // allItems = allItems.filter(
+      //   item =>
+      //     myItems.filter(myItem => item.id === myItem.id).length === 0 &&
+      //     historyBuyer.filter(buyerItem => item.id === buyerItem.listing.id).length === 0 &&
+      //     historySeller.filter(sellerItem => item.id === sellerItem.listing.id).length === 0
+      //   // && historyVerifier.filter(verifierItem => item.id === verifierItem.listing.id).length === 0
+      // );
 
       // sort all items
       allItems = allItems.sort((a, b) => b.id - a.id);
@@ -237,9 +240,14 @@ export class MainProvider extends Component {
       const inProgressSold = this.getInProgress(historySeller);
       const inProgressVerified = this.getInProgress(historyVerifier);
 
+      console.log({ historyVerifier });
+
       this.setState({
         allItems,
         myItems,
+        historyBuyer,
+        historySeller,
+        historyVerifier,
         itemsBought,
         itemsSold,
         itemsVerified,

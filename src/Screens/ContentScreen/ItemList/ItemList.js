@@ -1,63 +1,47 @@
 import React, { Component, Fragment } from 'react';
 import { withStyles } from 'material-ui/styles';
+import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
+import { Paper, Button, Collapse, Typography, Modal, TextField, Select } from 'material-ui';
+import { InputLabel, InputAdornment } from 'material-ui/Input';
+import { MenuItem } from 'material-ui/Menu';
+import { FormControl } from 'material-ui/Form';
 
-import { createWriteStream } from 'streamsaver';
-
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { HourglassEmpty, HourglassFull, CheckCircle } from 'material-ui-icons';
 
 import classNames from 'classnames';
 
-import Button from 'material-ui/Button';
-
-import Modal from 'material-ui/Modal';
-
-import Typography from 'material-ui/Typography';
-
-import { InputLabel, InputAdornment } from 'material-ui/Input';
-import TextField from 'material-ui/TextField';
-
-import { MenuItem } from 'material-ui/Menu';
-import { FormControl } from 'material-ui/Form';
-import Select from 'material-ui/Select';
-
-import Card, { CardActions, CardContent } from 'material-ui/Card';
-import InfoPopup from '../../InfoPopup';
+import moment from 'moment';
 
 import { _buyItem, _closeTransaction, _verifyItem } from '../../../Components/requests';
-
-import PasswordModal from '../../PasswordModal';
-
-import './ItemList.css';
 import { MainContext } from '../../../Context';
+import ItemModal from '../ItemModal/ItemModal';
 
-import { HOST } from '../../../Components/Remote';
-
-const styles = theme => ({
-  card: {
-    minWidth: 275,
+const CustomTableCell = withStyles(theme => ({
+  head: {
+    backgroundColor: '#162632',
+    color: theme.palette.common.white,
   },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  title: {
-    marginBottom: 16,
+  body: {
     fontSize: 14,
   },
-  pos: {
-    marginBottom: 12,
+}))(TableCell);
+
+const styles = theme => ({
+  root: {
+    width: '100%',
+    marginTop: theme.spacing.unit * 3,
+    overflowX: 'auto',
   },
-  paper: {
-    position: 'absolute',
-    width: theme.spacing.unit * 50,
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing.unit * 4,
+  roo: {
+    width: '5%',
   },
-  select: {
-    maxHeight: '200px',
-    minWidth: '50px',
+  table: {
+    minWidth: 700,
+  },
+  row: {
+    '&:nth-of-type(odd)': {
+      // backgroundColor: theme.palette.background.default,
+    },
   },
 });
 
@@ -65,426 +49,286 @@ class ItemList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      item: null,
-      verifier: '',
-      reward: '',
+      isOpen: false,
     };
   }
 
-  renderItem = item => {
-    const { classes } = this.props;
-    const selectedItem = item.listing || item;
+  componentDidMount() {}
 
-    return (
-      <div className="card-container" key={Math.random()} style={{ width: '300px' }}>
-        <Card className={classes.card}>
-          <CardContent>
-            <Typography
-              variant="headline"
-              component="h2"
-              style={{
-                fontSize: '18px',
-                fontWeight: '500',
-                width: 250,
-                height: '26px',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'no-wrap',
-              }}
-            >
-              {selectedItem.name || 'Name'}
-            </Typography>
-            <Typography className={classes.pos} color="textSecondary">
-              {(selectedItem.owner && selectedItem.owner.name) || 'seller'}
-            </Typography>
-            <Typography component="p">{`${selectedItem.price} tokens`}</Typography>
-          </CardContent>
-          <CardActions>{this.renderButton(item)}</CardActions>
-        </Card>
-      </div>
-    );
-  };
+  formatName = name => (name.length > 22 ? `${name.substring(0, 19)}...` : name);
 
-  renderButton = item => {
-    const { currentPage } = this.context.state;
-
-    if (this.props.type === 'sell') {
-      return (
-        <Button size="small" disabled>
-          Uploaded
-        </Button>
-      );
-    }
-    if (item.needs_closure) {
-      if (this.props.type !== 'sold' && this.props.type !== 'bought' && item.needs_verification) {
-        return (
-          <div>
-            <Button
-              color="primary"
-              size="small"
-              onClick={() => {
-                this.verify(item);
-              }}
-            >
-              Verify
-            </Button>
-            <CopyToClipboard
-              text={item.listing ? item.listing.cid : item.cid}
-              onCopy={() => {
-                this.context.showPopup('Copied to clipboard');
-                // setTimeout(() => this.setState({ status: '' }), 3000);
-              }}
-            >
-              <Button>Copy ipfs hash</Button>
-            </CopyToClipboard>
-            <Button
-              size="small"
-              // color="primary"
-              style={{ fontSize: '0.875rem' }}
-              onClick={() => {
-                if (item.listing) {
-                  this.downloadFile(`${HOST}/seller/download?CID=${item.listing.cid}`, item.listing.name);
-                  return;
-                }
-                this.downloadFile(`${HOST}/seller/download?CID=${item.cid}`, item.name);
-              }}
-            >
-              Download
-            </Button>
-          </div>
-        );
-      }
-      if (this.props.type === 'sold') {
-        if (item.needs_verification) {
-          return (
-            <Button
-              size="small"
-              disabled
-              onClick={() => {
-                this.closeTransaction(item);
-              }}
-            >
-              Waiting for verification
-            </Button>
-          );
-        }
-        return (
-          <Button
-            size="small"
-            onClick={() => {
-              this.closeTransaction(item);
-            }}
-          >
-            Close transaction
-          </Button>
-        );
-      }
-      return (
-        <Button disabled size="small" onClick={() => this.setState({ item })}>
-          Waiting for confirmation
-        </Button>
-      );
-    }
-
-    if (currentPage === 'explore') {
-      return (
-        <Button
-          size="small"
-          onClick={() => {
-            this.setState({ item });
-          }}
-        >
-          See more
-        </Button>
-      );
-    }
-    return (
-      <div>
-        <Button
-          size="small"
-          color="primary"
-          style={{ fontSize: '0.875rem' }}
-          onClick={() => {
-            if (item.listing) {
-              this.downloadFile(`${HOST}/seller/download?CID=${item.listing.cid}`, item.listing.name);
-              return;
-            }
-            this.downloadFile(`${HOST}/seller/download?CID=${item.cid}`, item.name);
-          }}
-        >
-          Download
-        </Button>
-        <CopyToClipboard
-          text={item.listing ? item.listing.cid : item.cid}
-          onCopy={() => {
-            this.context.showPopup('Copied to clipboard');
-            // setTimeout(() => this.setState({ status: '' }), 3000);
-          }}
-        >
-          <Button>Copy ipfs hash</Button>
-        </CopyToClipboard>
-      </div>
-    );
-  };
-
-  async verify(item) {
-    const { username } = this.context.state;
-    if (this.context.state.balance.tokens === 0) {
-      this.context.showPopup('please get some tokens');
-      return;
-    }
-    // const { item } = this.state;
-    try {
-      const password = await this.passwordModal.open();
-      await _verifyItem(item, username, password);
-      this.context.showPopup('verified successfully');
-      this.context.updateState({ currentPage: 'verified' });
-      // this.context.getItems();
-      // this.context.updateBalance();
-      this.setState({ item: null });
-      this.props.history.push('/verified');
-    } catch (e) {
-      console.log(e);
-      if (e.response) {
-        if (e.response.status === 401) {
-          console.log('aaaaaaahhhhhh 40000001111');
-          this.context.showPopup('You was logged out');
-          this.context.logout();
-          return;
-        }
-      }
-      this.context.showPopup(JSON.stringify(e));
-    }
-  }
-
-  async downloadFile(url, name) {
-    try {
-      const response = await fetch(url, {
-        headers: new Headers({
-          Authorization: localStorage.getItem('id_token'),
-        }),
-      });
-      const fileStream = createWriteStream(name);
-      const writer = fileStream.getWriter();
-      const reader = response.body.getReader();
-      const pump = () =>
-        reader.read().then(({ value, done }) => (done ? writer.close() : writer.write(value).then(pump)));
-      await pump();
-    } catch (e) {
-      console.log(e);
-      this.context.showPopup(JSON.stringify(e));
-    }
-  }
-
-  async buyItem(item) {
-    const { username, address } = this.context.state;
-    const { verifier, reward } = this.state;
-    // const { item } = this.state;
-    try {
-      await this.checkForErrors(item);
-      const password = await this.passwordModal.open();
-      await _buyItem(item, username, password, address, verifier, reward);
-      this.context.showPopup('purchased successfully');
-      this.context.updateState({ currentPage: 'in progress' });
-      // this.context.getItems();
-      // this.context.updateBalance();
-      this.setState({ item: null });
-      this.props.history.push('/inprogress');
-    } catch (e) {
-      console.log(e);
-      if (e.response) {
-        if (e.response.status === 401) {
-          this.context.showPopup('You was logged out');
-          this.context.logout();
-          return;
-        }
-      }
-      if (e && e.message) {
-        this.context.showPopup(e.message);
-        return;
-      }
-      this.context.showPopup(JSON.stringify(e));
-    }
-  }
-
-  checkForErrors = item =>
-    new Promise((resolve, reject) => {
-      const { verifier, reward } = this.state;
-      if (verifier && verifier !== 'none') {
-        // check if reward correct
-        if (reward < 1 || reward > 99) {
-          reject('reward should be more than 1% and less than 99%');
-        }
-      }
-      if (this.context.state.balance.tokens < item.price) {
-        reject("you don't have enough tokens");
-      }
-      resolve();
-    });
-
-  async closeTransaction(item) {
-    const { username } = this.context.state;
-    if (this.context.state.balance.tokens === 0) {
-      this.context.showPopup('please get some tokens');
-      return;
-    }
-    try {
-      const password = await this.passwordModal.open();
-      await _closeTransaction(item.id, username, password);
-      this.context.showPopup('transaction closed');
-      this.context.updateState({ currentPage: 'sold' });
-      this.props.history.push('/sold');
-      // this.context.getItems();
-      // this.context.updateBalance();
-    } catch (e) {
-      console.log(e);
-      if (e.response) {
-        if (e.response.status === 401) {
-          console.log('aaaaaaahhhhhh 40000001111');
-          this.context.showPopup('You was logged out');
-          this.context.logout();
-          return;
-        }
-      }
-      if (e && e.response && e.response.data) {
-        const { message } = e.response.data;
-        this.context.showPopup(message);
-        return;
-      }
-      this.context.showPopup(JSON.stringify(e));
-    }
-  }
-
-  formatFileSize(bytes, decimalPoint) {
+  formatFileSize = (bytes, decimalPoint) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1000;
     const dm = decimalPoint || 2;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-  }
+  };
 
-  renderModal = () => {
-    const { classes } = this.props;
-    const { item, verifier, reward } = this.state;
-    const { address } = this.context.state;
-    if (!item) {
-      return <div />;
-    }
+  renderStatus = item => {
+    if (item.needs_verification) return <HourglassEmpty color="primary" />;
+    if (item.needs_closure) return <HourglassFull color="primary" />;
+    return <CheckCircle color="primary" />;
+  };
+
+  allItemsTable = () => {
+    const { classes, items } = this.props;
     return (
-      <Modal
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-        open={!!item}
-        onClose={() => this.setState({ item: null, verifier: '', reward: '' })}
-      >
-        <div
-          style={{
-            top: `50%`,
-            left: `50%`,
-            transform: `translate(-50%, -50%)`,
-          }}
-          className={classes.paper}
-        >
-          <Typography variant="title" id="modal-title" style={{ paddingBottom: '20px' }}>
-            {item.name}
-          </Typography>
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Seller:</span> {item.owner.name}
-          </Typography>
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Price:</span> {item.price}
-          </Typography>
-          <Typography variant="subheading" id="simple-modal-description">
-            {console.log(item.size)}
-            <span style={{ fontWeight: '600' }}>Size:</span> {this.formatFileSize(item.size)}
-          </Typography>
-          <Typography variant="subheading" id="simple-modal-description">
-            <span style={{ fontWeight: '600' }}>Date uploaded:</span> {item.created_at}
-          </Typography>
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              if (!verifier) return;
-              this.buyItem(item);
-            }}
-            style={{
-              marginTop: '10px',
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-            }}
-          >
-            <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="controlled-open-select">Verifier</InputLabel>
-              <Select
-                value={verifier}
-                classes={{ select: classes.select }}
-                onChange={e => this.setState({ verifier: e.target.value })}
-                inputProps={{
-                  name: 'verifier',
-                  id: 'controlled-open-select',
-                }}
-              >
-                <MenuItem value="none">
-                  <em>None</em>
-                </MenuItem>
-                {console.log(address)}
-                {this.context.state.verifiers
-                  .filter(ver => ver.account !== item.owner.account && ver.account !== address)
-                  // .filter(ver => ver.account !== address)
-                  .map(ver => (
-                    <MenuItem key={ver.id} value={ver.account}>
-                      {ver.name}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </FormControl>
-            {!verifier ? null : verifier === 'none' ? (
-              <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
-                Buy
-              </Button>
-            ) : (
-              <Fragment>
-                <TextField
-                  label="Verifier's reward"
-                  id="simple-start-adornment"
-                  type="number"
-                  value={reward}
-                  onChange={e => this.setState({ reward: e.target.value })}
-                  className={classNames(classes.margin, classes.textField)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">%</InputAdornment>,
-                  }}
-                />
-                <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
-                  Buy
-                </Button>
-              </Fragment>
-            )}
-          </form>
-        </div>
-      </Modal>
+      <Paper className={classes.root}>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <CustomTableCell>File name</CustomTableCell>
+              <CustomTableCell numeric>Price</CustomTableCell>
+              <CustomTableCell numeric>File size</CustomTableCell>
+              <CustomTableCell numeric>Seller</CustomTableCell>
+              <CustomTableCell numeric>Date uploaded</CustomTableCell>
+              <CustomTableCell numeric>
+                <div style={{ textAlign: 'center' }}>Action</div>
+              </CustomTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map(item => (
+              <TableRow hover className={classes.row} key={item.id}>
+                <CustomTableCell component="th" scope="row">
+                  {item.name}
+                </CustomTableCell>
+                <CustomTableCell numeric>{item.price}</CustomTableCell>
+                <CustomTableCell numeric>{this.formatFileSize(item.size)}</CustomTableCell>
+                <CustomTableCell numeric>{item.owner.name}</CustomTableCell>
+                <CustomTableCell numeric>{moment(item.created_at).format('l')}</CustomTableCell>
+                <CustomTableCell numeric>
+                  <div style={{ textAlign: 'center' }}>
+                    <Button onClick={() => this.context.updateState({ item, action: 'purchase' })}>Buy</Button>
+                  </div>
+                </CustomTableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
     );
   };
 
+  uploadTable = () => {
+    const { classes, items } = this.props;
+    return (
+      <Paper className={classes.root}>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <CustomTableCell>File name</CustomTableCell>
+              <CustomTableCell numeric>Price</CustomTableCell>
+              <CustomTableCell numeric>File size</CustomTableCell>
+              <CustomTableCell numeric>Date uploaded</CustomTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map(item => (
+              <TableRow hover className={classes.row} key={item.id}>
+                <CustomTableCell component="th" scope="row">
+                  {item.name}
+                </CustomTableCell>
+                <CustomTableCell numeric>{item.price}</CustomTableCell>
+                <CustomTableCell numeric>{this.formatFileSize(item.size)}</CustomTableCell>
+                <CustomTableCell numeric>{moment(item.created_at).format('l')}</CustomTableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    );
+  };
+
+  purchasedTable = () => {
+    const { classes, items } = this.props;
+    return (
+      <Paper className={classes.root}>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <CustomTableCell>File name</CustomTableCell>
+              <CustomTableCell numeric>Price</CustomTableCell>
+              <CustomTableCell numeric>Seller</CustomTableCell>
+              <CustomTableCell numeric>Date purchased</CustomTableCell>
+              <CustomTableCell numeric>
+                <div style={{ textAlign: 'center' }}>Action</div>
+              </CustomTableCell>
+              <CustomTableCell numeric>
+                <div style={{ textAlign: 'center' }}>Status</div>
+              </CustomTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map(item => (
+              <TableRow
+                hover
+                className={classes.row}
+                key={item.id}
+                onClick={() =>
+                  this.setState({
+                    [`isOpen_${item.id}`]:
+                      this.state[`isOpen_${item.id}`] === null ? true : !this.state[`isOpen_${item.id}`],
+                  })
+                }
+              >
+                <CustomTableCell component="th" scope="row" className={classes.roo}>
+                  <div>{item.listing.name}</div>
+                </CustomTableCell>
+                <CustomTableCell numeric>{item.listing.price}</CustomTableCell>
+                <CustomTableCell numeric>{item.listing.owner.name}</CustomTableCell>
+                <CustomTableCell numeric>{moment(item.listing.created_at).format('l')}</CustomTableCell>
+                <CustomTableCell numeric>
+                  <div style={{ textAlign: 'center' }}>
+                    <Button onClick={() => this.context.updateState({ item })}>Details</Button>
+                  </div>
+                </CustomTableCell>
+                <CustomTableCell numeric>
+                  <div style={{ textAlign: 'center' }}>{this.renderStatus(item)}</div>
+                </CustomTableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    );
+  };
+
+  soldTable = () => {
+    const { classes, items } = this.props;
+    return (
+      <Paper className={classes.root}>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <CustomTableCell>File name</CustomTableCell>
+              <CustomTableCell numeric>Price</CustomTableCell>
+              <CustomTableCell numeric>Seller</CustomTableCell>
+              <CustomTableCell numeric>Date purchased</CustomTableCell>
+              <CustomTableCell numeric>
+                <div style={{ textAlign: 'center' }}>Action</div>
+              </CustomTableCell>
+              <CustomTableCell numeric>
+                <div style={{ textAlign: 'center' }}>Status</div>
+              </CustomTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map(item => (
+              <TableRow
+                hover
+                className={classes.row}
+                key={item.id}
+                onClick={() =>
+                  this.setState({
+                    [`isOpen_${item.id}`]:
+                      this.state[`isOpen_${item.id}`] === null ? true : !this.state[`isOpen_${item.id}`],
+                  })
+                }
+              >
+                <CustomTableCell component="th" scope="row" className={classes.roo}>
+                  <div>{item.listing.name}</div>
+                </CustomTableCell>
+                <CustomTableCell numeric>{item.listing.price}</CustomTableCell>
+                <CustomTableCell numeric>{item.listing.owner.name}</CustomTableCell>
+                <CustomTableCell numeric>{moment(item.listing.created_at).format('l')}</CustomTableCell>
+                <CustomTableCell numeric>
+                  <div style={{ textAlign: 'center' }}>
+                    <Button onClick={() => this.context.updateState({ item })}>Details</Button>
+                  </div>
+                </CustomTableCell>
+                <CustomTableCell numeric>
+                  <div style={{ textAlign: 'center' }}>{this.renderStatus(item)}</div>
+                </CustomTableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    );
+  };
+
+  verifiedTable = () => {
+    const { classes, items } = this.props;
+    return (
+      <Paper className={classes.root}>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <CustomTableCell>File name</CustomTableCell>
+              <CustomTableCell numeric>Price</CustomTableCell>
+              <CustomTableCell numeric>Seller</CustomTableCell>
+              <CustomTableCell numeric>Date purchased</CustomTableCell>
+              <CustomTableCell numeric>
+                <div style={{ textAlign: 'center' }}>Action</div>
+              </CustomTableCell>
+              <CustomTableCell numeric>
+                <div style={{ textAlign: 'center' }}>Status</div>
+              </CustomTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map(item => (
+              <TableRow
+                hover
+                className={classes.row}
+                key={item.id}
+                onClick={() =>
+                  this.setState({
+                    [`isOpen_${item.id}`]:
+                      this.state[`isOpen_${item.id}`] === null ? true : !this.state[`isOpen_${item.id}`],
+                  })
+                }
+              >
+                <CustomTableCell component="th" scope="row" className={classes.roo}>
+                  <div>{item.listing.name}</div>
+                </CustomTableCell>
+                <CustomTableCell numeric>{item.listing.price}</CustomTableCell>
+                <CustomTableCell numeric>{item.listing.owner.name}</CustomTableCell>
+                <CustomTableCell numeric>{moment(item.listing.created_at).format('l')}</CustomTableCell>
+                <CustomTableCell numeric>
+                  <div style={{ textAlign: 'center' }}>
+                    <Button onClick={() => this.context.updateState({ item })}>Details</Button>
+                  </div>
+                </CustomTableCell>
+                <CustomTableCell numeric>
+                  <div style={{ textAlign: 'center' }}>{this.renderStatus(item)}</div>
+                </CustomTableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    );
+  };
+
+  renderTable = page => {
+    switch (page) {
+      case 'purchased':
+        return this.purchasedTable();
+      case 'sold':
+        return this.soldTable();
+      case 'verified':
+        return this.soldTable();
+      case 'upload':
+        return this.uploadTable();
+      default:
+        return this.allItemsTable();
+    }
+  };
+
   render() {
-    const { items } = this.props;
+    const { item, action } = this.state;
     return (
       <MainContext.Consumer>
         {context => {
           this.context = context;
           return (
-            <div className="item-list-container">
-              <InfoPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
-              {items.map(item => this.renderItem(item))}
-              {this.renderModal()}
-              <PasswordModal
-                onRef={ref => {
-                  this.passwordModal = ref;
-                }}
-              />
+            <div>
+              {this.renderTable(this.context.state.currentPage)}
+              <ItemModal item={item} action={action} context={this.context} />
             </div>
           );
         }}
@@ -494,3 +338,500 @@ class ItemList extends Component {
 }
 
 export default withStyles(styles)(ItemList);
+
+// import React, { Component, Fragment } from 'react';
+// import { withStyles } from 'material-ui/styles';
+
+// import { createWriteStream } from 'streamsaver';
+
+// import { CopyToClipboard } from 'react-copy-to-clipboard';
+
+// import classNames from 'classnames';
+
+// import Button from 'material-ui/Button';
+
+// import Modal from 'material-ui/Modal';
+
+// import Typography from 'material-ui/Typography';
+
+// import { InputLabel, InputAdornment } from 'material-ui/Input';
+// import TextField from 'material-ui/TextField';
+
+// import { MenuItem } from 'material-ui/Menu';
+// import { FormControl } from 'material-ui/Form';
+// import Select from 'material-ui/Select';
+
+// import Card, { CardActions, CardContent } from 'material-ui/Card';
+// import InfoPopup from '../../InfoPopup';
+
+// import { _buyItem, _closeTransaction, _verifyItem } from '../../../Components/requests';
+
+// import PasswordModal from '../../PasswordModal';
+
+// import './ItemList.css';
+// import { MainContext } from '../../../Context';
+
+// import { HOST } from '../../../Components/Remote';
+
+// const styles = theme => ({
+//   card: {
+//     minWidth: 275,
+//   },
+//   bullet: {
+//     display: 'inline-block',
+//     margin: '0 2px',
+//     transform: 'scale(0.8)',
+//   },
+//   title: {
+//     marginBottom: 16,
+//     fontSize: 14,
+//   },
+//   pos: {
+//     marginBottom: 12,
+//   },
+//   paper: {
+//     position: 'absolute',
+//     width: theme.spacing.unit * 50,
+//     backgroundColor: theme.palette.background.paper,
+//     boxShadow: theme.shadows[5],
+//     padding: theme.spacing.unit * 4,
+//   },
+//   select: {
+//     maxHeight: '200px',
+//     minWidth: '50px',
+//   },
+// });
+
+// class ItemList extends Component {
+//   constructor(props) {
+//     super(props);
+//     this.state = {
+//       item: null,
+//       verifier: '',
+//       reward: '',
+//     };
+//   }
+
+//   renderItem = item => {
+//     const { classes } = this.props;
+//     const selectedItem = item.listing || item;
+
+//     return (
+//       <div className="card-container" key={Math.random()} style={{ width: '300px' }}>
+//         <Card className={classes.card}>
+//           <CardContent>
+//             <Typography
+//               variant="headline"
+//               component="h2"
+//               style={{
+//                 fontSize: '18px',
+//                 fontWeight: '500',
+//                 width: 250,
+//                 height: '26px',
+//                 textOverflow: 'ellipsis',
+//                 overflow: 'hidden',
+//                 whiteSpace: 'no-wrap',
+//               }}
+//             >
+//               {selectedItem.name || 'Name'}
+//             </Typography>
+//             <Typography className={classes.pos} color="textSecondary">
+//               {(selectedItem.owner && selectedItem.owner.name) || 'seller'}
+//             </Typography>
+//             <Typography component="p">{`${selectedItem.price} tokens`}</Typography>
+//           </CardContent>
+//           <CardActions>{this.renderButton(item)}</CardActions>
+//         </Card>
+//       </div>
+//     );
+//   };
+
+//   renderButton = item => {
+//     const { currentPage } = this.context.state;
+
+//     if (this.props.type === 'sell') {
+//       return (
+//         <Button size="small" disabled>
+//           Uploaded
+//         </Button>
+//       );
+//     }
+//     if (item.needs_closure) {
+//       if (this.props.type !== 'sold' && this.props.type !== 'bought' && item.needs_verification) {
+//         return (
+//           <div>
+//             <Button
+//               color="primary"
+//               size="small"
+//               onClick={() => {
+//                 this.verify(item);
+//               }}
+//             >
+//               Verify
+//             </Button>
+//             <CopyToClipboard
+//               text={item.listing ? item.listing.cid : item.cid}
+//               onCopy={() => {
+//                 this.context.showPopup('Copied to clipboard');
+//                 // setTimeout(() => this.setState({ status: '' }), 3000);
+//               }}
+//             >
+//               <Button>Copy ipfs hash</Button>
+//             </CopyToClipboard>
+//             <Button
+//               size="small"
+//               // color="primary"
+//               style={{ fontSize: '0.875rem' }}
+//               onClick={() => {
+//                 if (item.listing) {
+//                   this.downloadFile(`${HOST}/seller/download?CID=${item.listing.cid}`, item.listing.name);
+//                   return;
+//                 }
+//                 this.downloadFile(`${HOST}/seller/download?CID=${item.cid}`, item.name);
+//               }}
+//             >
+//               Download
+//             </Button>
+//           </div>
+//         );
+//       }
+//       if (this.props.type === 'sold') {
+//         if (item.needs_verification) {
+//           return (
+//             <Button
+//               size="small"
+//               disabled
+//               onClick={() => {
+//                 this.closeTransaction(item);
+//               }}
+//             >
+//               Waiting for verification
+//             </Button>
+//           );
+//         }
+//         return (
+//           <Button
+//             size="small"
+//             onClick={() => {
+//               this.closeTransaction(item);
+//             }}
+//           >
+//             Close transaction
+//           </Button>
+//         );
+//       }
+//       return (
+//         <Button disabled size="small" onClick={() => this.setState({ item })}>
+//           Waiting for confirmation
+//         </Button>
+//       );
+//     }
+
+//     if (currentPage === 'explore') {
+//       return (
+//         <Button
+//           size="small"
+//           onClick={() => {
+//             this.setState({ item });
+//           }}
+//         >
+//           See more
+//         </Button>
+//       );
+//     }
+//     return (
+//       <div>
+//         <Button
+//           size="small"
+//           color="primary"
+//           style={{ fontSize: '0.875rem' }}
+//           onClick={() => {
+//             if (item.listing) {
+//               this.downloadFile(`${HOST}/seller/download?CID=${item.listing.cid}`, item.listing.name);
+//               return;
+//             }
+//             this.downloadFile(`${HOST}/seller/download?CID=${item.cid}`, item.name);
+//           }}
+//         >
+//           Download
+//         </Button>
+//         <CopyToClipboard
+//           text={item.listing ? item.listing.cid : item.cid}
+//           onCopy={() => {
+//             this.context.showPopup('Copied to clipboard');
+//             // setTimeout(() => this.setState({ status: '' }), 3000);
+//           }}
+//         >
+//           <Button>Copy ipfs hash</Button>
+//         </CopyToClipboard>
+//       </div>
+//     );
+//   };
+
+//   async verify(item) {
+//     const { username } = this.context.state;
+//     if (this.context.state.balance.tokens === 0) {
+//       this.context.showPopup('please get some tokens');
+//       return;
+//     }
+//     // const { item } = this.state;
+//     try {
+//       const password = await this.passwordModal.open();
+//       await _verifyItem(item, username, password);
+//       this.context.showPopup('verified successfully');
+//       this.context.updateState({ currentPage: 'verified' });
+//       // this.context.getItems();
+//       // this.context.updateBalance();
+//       this.setState({ item: null });
+//       this.props.history.push('/verified');
+//     } catch (e) {
+//       console.log(e);
+//       if (e.response) {
+//         if (e.response.status === 401) {
+//           console.log('aaaaaaahhhhhh 40000001111');
+//           this.context.showPopup('You was logged out');
+//           this.context.logout();
+//           return;
+//         }
+//       }
+//       this.context.showPopup(JSON.stringify(e));
+//     }
+//   }
+
+//   async downloadFile(url, name) {
+//     try {
+//       const response = await fetch(url, {
+//         headers: new Headers({
+//           Authorization: localStorage.getItem('id_token'),
+//         }),
+//       });
+//       const fileStream = createWriteStream(name);
+//       const writer = fileStream.getWriter();
+//       const reader = response.body.getReader();
+//       const pump = () =>
+//         reader.read().then(({ value, done }) => (done ? writer.close() : writer.write(value).then(pump)));
+//       await pump();
+//     } catch (e) {
+//       console.log(e);
+//       this.context.showPopup(JSON.stringify(e));
+//     }
+//   }
+
+//   async buyItem(item) {
+//     const { username, address } = this.context.state;
+//     const { verifier, reward } = this.state;
+//     // const { item } = this.state;
+//     try {
+//       await this.checkForErrors(item);
+//       const password = await this.passwordModal.open();
+//       await _buyItem(item, username, password, address, verifier, reward);
+//       this.context.showPopup('purchased successfully');
+//       this.context.updateState({ currentPage: 'in progress' });
+//       // this.context.getItems();
+//       // this.context.updateBalance();
+//       this.setState({ item: null });
+//       this.props.history.push('/inprogress');
+//     } catch (e) {
+//       console.log(e);
+//       if (e.response) {
+//         if (e.response.status === 401) {
+//           this.context.showPopup('You was logged out');
+//           this.context.logout();
+//           return;
+//         }
+//       }
+//       if (e && e.message) {
+//         this.context.showPopup(e.message);
+//         return;
+//       }
+//       this.context.showPopup(JSON.stringify(e));
+//     }
+//   }
+
+//   checkForErrors = item =>
+//     new Promise((resolve, reject) => {
+//       const { verifier, reward } = this.state;
+//       if (verifier && verifier !== 'none') {
+//         // check if reward correct
+//         if (reward < 1 || reward > 99) {
+//           reject('reward should be more than 1% and less than 99%');
+//         }
+//       }
+//       if (this.context.state.balance.tokens < item.price) {
+//         reject("you don't have enough tokens");
+//       }
+//       resolve();
+//     });
+
+//   async closeTransaction(item) {
+//     const { username } = this.context.state;
+//     if (this.context.state.balance.tokens === 0) {
+//       this.context.showPopup('please get some tokens');
+//       return;
+//     }
+//     try {
+//       const password = await this.passwordModal.open();
+//       await _closeTransaction(item.id, username, password);
+//       this.context.showPopup('transaction closed');
+//       this.context.updateState({ currentPage: 'sold' });
+//       this.props.history.push('/sold');
+//       // this.context.getItems();
+//       // this.context.updateBalance();
+//     } catch (e) {
+//       console.log(e);
+//       if (e.response) {
+//         if (e.response.status === 401) {
+//           console.log('aaaaaaahhhhhh 40000001111');
+//           this.context.showPopup('You was logged out');
+//           this.context.logout();
+//           return;
+//         }
+//       }
+//       if (e && e.response && e.response.data) {
+//         const { message } = e.response.data;
+//         this.context.showPopup(message);
+//         return;
+//       }
+//       this.context.showPopup(JSON.stringify(e));
+//     }
+//   }
+
+//   formatFileSize(bytes, decimalPoint) {
+//     if (bytes === 0) return '0 Bytes';
+//     const k = 1000;
+//     const dm = decimalPoint || 2;
+//     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+//     const i = Math.floor(Math.log(bytes) / Math.log(k));
+//     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+//   }
+
+//   renderModal = () => {
+//     const { classes } = this.props;
+//     const { item, verifier, reward } = this.state;
+//     const { address } = this.context.state;
+//     if (!item) {
+//       return <div />;
+//     }
+//     return (
+//       <Modal
+//         aria-labelledby="simple-modal-title"
+//         aria-describedby="simple-modal-description"
+//         open={!!item}
+//         onClose={() => this.setState({ item: null, verifier: '', reward: '' })}
+//       >
+//         <div
+//           style={{
+//             top: `50%`,
+//             left: `50%`,
+//             transform: `translate(-50%, -50%)`,
+//           }}
+//           className={classes.paper}
+//         >
+//           <Typography variant="title" id="modal-title" style={{ paddingBottom: '20px' }}>
+//             {item.name}
+//           </Typography>
+//           <Typography variant="subheading" id="simple-modal-description">
+//             <span style={{ fontWeight: '600' }}>Seller:</span> {item.owner.name}
+//           </Typography>
+//           <Typography variant="subheading" id="simple-modal-description">
+//             <span style={{ fontWeight: '600' }}>Price:</span> {item.price}
+//           </Typography>
+//           <Typography variant="subheading" id="simple-modal-description">
+//             {console.log(item.size)}
+//             <span style={{ fontWeight: '600' }}>Size:</span> {this.formatFileSize(item.size)}
+//           </Typography>
+//           <Typography variant="subheading" id="simple-modal-description">
+//             <span style={{ fontWeight: '600' }}>Date uploaded:</span> {item.created_at}
+//           </Typography>
+//           <form
+//             onSubmit={e => {
+//               e.preventDefault();
+//               if (!verifier) return;
+//               this.buyItem(item);
+//             }}
+//             style={{
+//               marginTop: '10px',
+//               display: 'flex',
+//               flexDirection: 'row',
+//               alignItems: 'flex-end',
+//               justifyContent: 'space-between',
+//             }}
+//           >
+//             <FormControl className={classes.formControl}>
+//               <InputLabel htmlFor="controlled-open-select">Verifier</InputLabel>
+//               <Select
+//                 value={verifier}
+//                 classes={{ select: classes.select }}
+//                 onChange={e => this.setState({ verifier: e.target.value })}
+//                 inputProps={{
+//                   name: 'verifier',
+//                   id: 'controlled-open-select',
+//                 }}
+//               >
+//                 <MenuItem value="none">
+//                   <em>None</em>
+//                 </MenuItem>
+//                 {console.log(address)}
+//                 {this.context.state.verifiers
+//                   .filter(ver => ver.account !== item.owner.account && ver.account !== address)
+//                   // .filter(ver => ver.account !== address)
+//                   .map(ver => (
+//                     <MenuItem key={ver.id} value={ver.account}>
+//                       {ver.name}
+//                     </MenuItem>
+//                   ))}
+//               </Select>
+//             </FormControl>
+//             {!verifier ? null : verifier === 'none' ? (
+//               <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
+//                 Buy
+//               </Button>
+//             ) : (
+//               <Fragment>
+//                 <TextField
+//                   label="Verifier's reward"
+//                   id="simple-start-adornment"
+//                   type="number"
+//                   value={reward}
+//                   onChange={e => this.setState({ reward: e.target.value })}
+//                   className={classNames(classes.margin, classes.textField)}
+//                   InputProps={{
+//                     startAdornment: <InputAdornment position="start">%</InputAdornment>,
+//                   }}
+//                 />
+//                 <Button color="primary" className={classes.button} onClick={() => this.buyItem(item)}>
+//                   Buy
+//                 </Button>
+//               </Fragment>
+//             )}
+//           </form>
+//         </div>
+//       </Modal>
+//     );
+//   };
+
+//   render() {
+//     const { items } = this.props;
+//     return (
+//       <MainContext.Consumer>
+//         {context => {
+//           this.context = context;
+//           return (
+//             <div className="item-list-container">
+//               <InfoPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
+//               {items.map(item => this.renderItem(item))}
+//               {this.renderModal()}
+//               <PasswordModal
+//                 onRef={ref => {
+//                   this.passwordModal = ref;
+//                 }}
+//               />
+//             </div>
+//           );
+//         }}
+//       </MainContext.Consumer>
+//     );
+//   }
+// }
+
+// export default withStyles(styles)(ItemList);

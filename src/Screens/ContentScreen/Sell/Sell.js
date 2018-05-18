@@ -320,7 +320,7 @@ class Sell extends Component {
               </div>
               <div className="recent-items-container">
                 <div className="content-title" style={{ marginTop: '30px' }}>
-                  Recent Files
+                  Uploaded Files
                 </div>
                 <div>
                   <ItemList items={this.context.state.myItems} type="sell" />
