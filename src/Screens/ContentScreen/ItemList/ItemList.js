@@ -205,7 +205,7 @@ class ItemList extends Component {
             <TableRow>
               <CustomTableCell>File name</CustomTableCell>
               <CustomTableCell numeric>Price</CustomTableCell>
-              <CustomTableCell numeric>Seller</CustomTableCell>
+              <CustomTableCell numeric>Buyer</CustomTableCell>
               <CustomTableCell numeric>Date purchased</CustomTableCell>
               <CustomTableCell numeric>
                 <div style={{ textAlign: 'center' }}>Action</div>
@@ -232,7 +232,7 @@ class ItemList extends Component {
                   <div>{item.listing.name}</div>
                 </CustomTableCell>
                 <CustomTableCell numeric>{item.listing.price}</CustomTableCell>
-                <CustomTableCell numeric>{item.listing.owner.name}</CustomTableCell>
+                <CustomTableCell numeric>{item.buyer.name}</CustomTableCell>
                 <CustomTableCell numeric>{moment(item.listing.created_at).format('l')}</CustomTableCell>
                 <CustomTableCell numeric>
                   <div style={{ textAlign: 'center' }}>
