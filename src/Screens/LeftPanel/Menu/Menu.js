@@ -352,76 +352,6 @@ class Menu extends Component {
                         </div>
                       </ListItemSecondaryAction>
                     </ListItem>
-                    {/* MY ITEMS */}
-                    {/* <ListItem
-                      button
-                      classes={{ root: this.getActiveStyle('my items', context, classes) }}
-                      className={classes.nested}
-                      onClick={() => this.changeRoute({ currentPage: 'my items' })}
-                    >
-                      <ListItemText primary="My Items" classes={{ primary: classes.listText }} />
-                      <ListItemSecondaryAction>
-                        <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
-                          {notifications.inProgress && <Lens color="primary" style={{ height: '10px' }} />}
-                          {itemsBought.length + itemsSold.length + itemsVerified.length}
-                        </div>
-                      </ListItemSecondaryAction>
-                    </ListItem> */}
-                    {/* MY ITEMS
-                    <ListItem button onClick={this.handleClick} classes={{ root: classes.listContainer }}>
-                      <ListItemText primary="My Items" classes={{ primary: classes.listText }} />
-                    </ListItem>
-                    <Collapse in={this.state.open} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding />
-                      <List component="div" disablePadding>
-                        <ListItem
-                          button
-                          classes={{ root: this.getActiveStyle('purchased', context, classes, 'nested') }}
-                          className={classes.nested}
-                          onClick={() => this.changeRoute({ currentPage: 'purchased' })}
-                        >
-                          <ListItemText primary="Purchased" classes={{ primary: classes.listText }} />
-                          <ListItemSecondaryAction>
-                            <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
-                              {notifications.purchased && <Lens color="primary" style={{ height: '10px' }} />}
-                              {itemsBought.length}
-                            </div>
-                          </ListItemSecondaryAction>
-                        </ListItem>
-                      </List>
-                      <List component="div" disablePadding>
-                        <ListItem
-                          button
-                          classes={{ root: this.getActiveStyle('sold', context, classes, 'nested') }}
-                          className={classes.nested}
-                          onClick={() => this.changeRoute({ currentPage: 'sold' })}
-                        >
-                          <ListItemText primary="Sold" classes={{ primary: classes.listText }} />
-                          <ListItemSecondaryAction>
-                            <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
-                              {notifications.sold && <Lens color="primary" style={{ height: '10px' }} />}
-                              {itemsSold.length}
-                            </div>
-                          </ListItemSecondaryAction>
-                        </ListItem>
-                      </List>
-                      <List component="div" disablePadding>
-                        <ListItem
-                          button
-                          classes={{ root: this.getActiveStyle('verified', context, classes, 'nested') }}
-                          className={classes.nested}
-                          onClick={() => this.changeRoute({ currentPage: 'verified' })}
-                        >
-                          <ListItemText primary="Verified" classes={{ primary: classes.listText }} />
-                          <ListItemSecondaryAction>
-                            <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
-                              {notifications.verified && <Lens color="primary" style={{ height: '10px' }} />}
-                              {itemsVerified.length}
-                            </div>
-                          </ListItemSecondaryAction>
-                        </ListItem>
-                      </List>
-                    </Collapse> */}
                     <ListItem
                       button
                       classes={{ root: this.getActiveStyle('upload', context, classes) }}
@@ -434,6 +364,14 @@ class Menu extends Component {
                         </div>
                       </ListItemSecondaryAction>
                     </ListItem>
+                    {/* <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('create category', context, classes) }}
+                      onClick={() => this.changeRoute({ currentPage: 'create category' })}
+                    >
+                      <ListItemText primary="Create Category" classes={{ primary: classes.listText }} />
+                   
+                    </ListItem> */}
                   </List>
                 </div>
 

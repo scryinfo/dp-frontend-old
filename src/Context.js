@@ -234,7 +234,7 @@ export class MainProvider extends Component {
       const itemsBought = this.getClosed(historyBuyer);
       const itemsSold = this.getClosed(historySeller);
       const itemsVerified = this.getClosed(historyVerifier);
-
+      console.log({ itemsSold });
       // Transaction in progress
       const inProgressBought = this.getInProgress(historyBuyer);
       const inProgressSold = this.getInProgress(historySeller);

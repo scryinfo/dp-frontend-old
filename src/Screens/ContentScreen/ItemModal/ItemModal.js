@@ -402,7 +402,10 @@ class ItemModal extends Component {
               {itemHistory.needs_verification ? (
                 <Button disabled>WAITING FOR VERIFICATION</Button>
               ) : (
-                <Button disabled={loader.closeTransaction} onClick={() => this.closeTransaction({ item, context })}>
+                <Button
+                  disabled={loader.closeTransaction}
+                  onClick={() => this.closeTransaction({ itemHistory, context })}
+                >
                   AUTHORIZE THE TRANSACTION
                 </Button>
               )}
