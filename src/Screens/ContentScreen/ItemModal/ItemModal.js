@@ -404,7 +404,7 @@ class ItemModal extends Component {
               ) : (
                 <Button
                   disabled={loader.closeTransaction}
-                  onClick={() => this.closeTransaction({ itemHistory, context })}
+                  onClick={() => this.closeTransaction({ item: itemHistory, context })}
                 >
                   AUTHORIZE THE TRANSACTION
                 </Button>
