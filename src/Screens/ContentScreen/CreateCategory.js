@@ -15,6 +15,10 @@ import {
   Switch,
   IconButton,
   Button,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
 } from '@material-ui/core';
 
 import { SortableContainer, SortableElement, SortableHandle, arrayMove } from 'react-sortable-hoc';
@@ -24,7 +28,15 @@ import Dragger from './dragger.svg';
 
 const host = 'https://139.219.107.164:443';
 
-// export const MainContext = React.createContext();
+const CustomTableCell = withStyles(theme => ({
+  head: {
+    backgroundColor: '#192631',
+    color: theme.palette.common.white,
+  },
+  body: {
+    fontSize: 14,
+  },
+}))(TableCell);
 
 export class CreateCategory extends Component {
   state = {
@@ -38,28 +50,6 @@ export class CreateCategory extends Component {
         IsPrimaryKey: false,
       },
     ],
-  };
-
-  componentDidMount() {
-    this.getCategories();
-  }
-
-  getCategories = async () => {
-    try {
-      const { data } = await axios({
-        url: `${host}/meta/getcategories`,
-        method: 'post',
-        data: {
-          hahhah: 'hahahahha',
-        },
-        headers: {
-          Authorization: `JWT ${localStorage.getItem('id_token')}`,
-        },
-      });
-      console.log(data);
-    } catch (e) {
-      console.log(e);
-    }
   };
 
   addColumn = () => {
@@ -103,8 +93,22 @@ export class CreateCategory extends Component {
           Authorization: `JWT ${localStorage.getItem('id_token')}`,
         },
       });
+      this.props.context.showPopup('Succesfully created category. Check categories section');
+      this.setState({
+        columns: [
+          {
+            name: '',
+            DataType: '',
+            IsUnique: false,
+            IsNull: false,
+            IsPrimaryKey: false,
+          },
+        ],
+      });
+      this.props.context.getItems();
       console.log(res);
     } catch (e) {
+      this.props.context.showPopup('Oops, something went wrong');
       console.log(e);
     }
   };
@@ -113,7 +117,7 @@ export class CreateCategory extends Component {
     const { columns } = this.state;
     const cleanedColumns = columns.map(column => this.reformat(this.boolToString(this.removeFalse(column))));
     const wrapped = {
-      CategoryName: ['Aviation', 'Commercia Flights', 'Airport Info 2'],
+      CategoryName: ['Aviation', 'Commercia Flights', `Airport Info ${Math.random()}`],
       DataStructure: cleanedColumns,
     };
     console.log(JSON.stringify(wrapped, null, 4));
@@ -180,6 +184,21 @@ export class CreateCategory extends Component {
     });
   };
 
+  renderTable = table => {
+    const { classes } = this.props;
+    return (
+      <Paper className={classes.root}>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              {table.map((column, index) => <CustomTableCell key={index}>{column.name}</CustomTableCell>)}
+            </TableRow>
+          </TableHead>
+        </Table>
+      </Paper>
+    );
+  };
+
   renderColumn = ({ column, index, classes }) => (
     <Paper elevation={1}>
       <div className={classes.columnContainer} key={index}>
@@ -222,6 +241,7 @@ export class CreateCategory extends Component {
                 onChange={this.handleChange({ column, index, isSwitch: true })}
                 value="IsNull"
                 name="IsNull"
+                color="primary"
               />
             }
             label="Is Null"
@@ -234,6 +254,7 @@ export class CreateCategory extends Component {
                 onChange={this.handleChange({ column, index, isSwitch: true })}
                 value="IsUnique"
                 name="IsUnique"
+                color="primary"
               />
             }
             label="Is Unique"
@@ -246,6 +267,7 @@ export class CreateCategory extends Component {
                 onChange={this.handleChange({ column, index, isSwitch: true })}
                 value="IsPrimaryKey"
                 name="IsPrimaryKey"
+                color="primary"
               />
             }
             label="Is Primary Key"
@@ -268,12 +290,8 @@ export class CreateCategory extends Component {
     const { columns } = this.state;
 
     return (
-      // <MainContext.Consumer>
-      //   {context => {
-      //     this.context = context;
-      //     const { columns } = context.state;
-      //     return (
-      <div style={{ marginTop: 30 }}>
+      <div style={{ marginTop: 25 }}>
+        <div style={{ marginBottom: 25 }}>{this.renderTable(columns)}</div>
         <div className={classes.addNewButton}>
           <Button className={classes.button} variant="raised" color="primary" onClick={this.addColumn}>
             Add a column
@@ -292,9 +310,6 @@ export class CreateCategory extends Component {
           />
         </form>
       </div>
-      //     );
-      //   }}
-      // </MainContext.Consumer>
     );
   }
 }
@@ -316,7 +331,7 @@ const styles = theme => ({
   },
   columnContainer: {
     // paddingTop: 10,
-    paddingBottom: 10,
+    // paddingBottom: 10,
     width: '100%',
     height: '100%',
     display: 'flex',
@@ -329,6 +344,7 @@ const styles = theme => ({
   },
   paddLeft: {
     paddingLeft: -10,
+    paddingBottom: 10,
   },
   sortableContainer: {
     position: 'relative',

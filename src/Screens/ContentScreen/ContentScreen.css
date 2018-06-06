@@ -2,7 +2,7 @@
   width: calc(100vw - 350px);
   height: 100vh;
   background: white;
-  z-index: 1;
+  z-index: 0;
   margin-left: 350px;
 }
 

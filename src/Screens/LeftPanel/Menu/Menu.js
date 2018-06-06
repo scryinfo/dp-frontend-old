@@ -185,6 +185,7 @@ class Menu extends Component {
             historyBuyer,
             historySeller,
             historyVerifier,
+            tables,
             // itemsBought,
             // itemsSold,
             // itemsVerified,
@@ -354,24 +355,23 @@ class Menu extends Component {
                     </ListItem>
                     <ListItem
                       button
-                      classes={{ root: this.getActiveStyle('upload', context, classes) }}
-                      onClick={() => this.changeRoute({ currentPage: 'upload' })}
+                      classes={{ root: this.getActiveStyle('categories', context, classes) }}
+                      onClick={() => this.changeRoute({ currentPage: 'categories' })}
                     >
-                      <ListItemText primary="Upload your file" classes={{ primary: classes.listText }} />
+                      <ListItemText primary="Categories" classes={{ primary: classes.listText }} />
                       <ListItemSecondaryAction>
                         <div style={{ paddingLeft: '10px', paddingRight: '30px', color: '#ffffff' }}>
-                          {myItems.length}
+                          {tables.length}
                         </div>
                       </ListItemSecondaryAction>
                     </ListItem>
-                    {/* <ListItem
+                    <ListItem
                       button
                       classes={{ root: this.getActiveStyle('create category', context, classes) }}
                       onClick={() => this.changeRoute({ currentPage: 'create category' })}
                     >
                       <ListItemText primary="Create Category" classes={{ primary: classes.listText }} />
-                   
-                    </ListItem> */}
+                    </ListItem>
                   </List>
                 </div>
 

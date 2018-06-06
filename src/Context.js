@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import 'event-source-polyfill/src/eventsource.min.js';
 
 import moment from 'moment';
+import axios from 'axios';
 
 import AuthService from './Auth/AuthService';
 
@@ -33,6 +34,7 @@ export class MainProvider extends Component {
         eth: 0,
       },
       searchValue: '',
+      tables: [],
       currentPage: 'explore',
       allItems: [],
       myItems: [],
@@ -204,6 +206,22 @@ export class MainProvider extends Component {
     }
   }
 
+  getCategories = async () => {
+    try {
+      const { data } = await axios({
+        url: `https://139.219.107.164:443/meta/getcategories`,
+        method: 'post',
+        headers: {
+          Authorization: `JWT ${localStorage.getItem('id_token')}`,
+        },
+      });
+      this.setState({ tables: data });
+      console.log({ data });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   async getItems() {
     const { address } = this.state;
     try {
@@ -212,7 +230,7 @@ export class MainProvider extends Component {
       const { data: historyBuyer } = await _getItems(address, 'buyer');
       const { data: historySeller } = await _getItems(address, 'seller');
       const { data: historyVerifier } = await _getItems(address, 'verifier');
-
+      this.getCategories();
       console.log({ allItems, myItems, historyBuyer, historySeller, historyVerifier });
 
       // filter out items that are already purchased

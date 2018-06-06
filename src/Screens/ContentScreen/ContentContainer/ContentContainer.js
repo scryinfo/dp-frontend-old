@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import './ContentContainer.css';
 import { MainContext } from '../../../Context';
@@ -8,6 +8,7 @@ import Search from '../Search';
 import ItemList from '../ItemList/ItemList';
 import Sell from '../Sell/Sell';
 import CreateCategory from '../CreateCategory';
+import Categories from '../Categories';
 import InProgress from '../InProgress/InProgress';
 
 const styles = {
@@ -82,7 +83,11 @@ class ContentContainer extends Component {
                   render={props => <ItemList {...props} items={historyVerifier} type="verified" />}
                 />
                 <Route path="/upload" render={props => <Sell {...props} items={allItems} type="uploaded" />} />
-                <Route path="/createcategory" render={props => <CreateCategory type="createcategory" />} />
+                <Route
+                  path="/createcategory"
+                  render={props => <CreateCategory type="createcategory" context={context} />}
+                />
+                <Route path="/categories" render={props => <Categories type="categories" context={context} />} />
               </div>
             </div>
           );

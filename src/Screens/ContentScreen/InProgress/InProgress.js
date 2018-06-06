@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import './InProgress.css';
 import ItemList from '../ItemList/ItemList';
