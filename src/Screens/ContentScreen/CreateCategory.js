@@ -1,28 +1,19 @@
 /* eslint-disable react/no-unused-state */
 import React, { Component } from 'react';
 import axios from 'axios';
+import { withStyles } from 'material-ui/styles';
 
-import { withStyles } from '@material-ui/core/styles';
-
-import {
-  MenuItem,
-  TextField,
-  Paper,
-  FormControlLabel,
-  InputLabel,
-  Select,
-  FormControl,
-  Switch,
-  IconButton,
-  Button,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-} from '@material-ui/core';
+import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
+import { Paper, Button, Collapse, Typography, Modal, TextField, Select } from 'material-ui';
+import { InputLabel, InputAdornment } from 'material-ui/Input';
+import { MenuItem } from 'material-ui/Menu';
+import { FormControl, FormControlLabel } from 'material-ui/Form';
+import { CircularProgress } from 'material-ui/Progress';
+import Switch from 'material-ui/Switch';
+import IconButton from 'material-ui/IconButton';
 
 import { SortableContainer, SortableElement, SortableHandle, arrayMove } from 'react-sortable-hoc';
-import { Delete } from '@material-ui/icons';
+import Delete from 'material-ui-icons/Delete';
 
 import Dragger from './dragger.svg';
 
@@ -272,15 +263,12 @@ export class CreateCategory extends Component {
             }
             label="Is Primary Key"
           />
+          <IconButton className={classes.deleteButton} onClick={() => this.deleteColumn(index)} aria-label="Delete">
+            <Delete nativeColor="#EC7F7F" />
+          </IconButton>
         </div>
-        <IconButton
-          className={classes.deleteButton}
-          onClick={() => this.deleteColumn(index)}
-          aria-label="Delete"
-          color="secondary"
-        >
-          <Delete />
-        </IconButton>
+        {/* <div> */}
+        {/* </div> */}
       </div>
     </Paper>
   );
@@ -343,7 +331,8 @@ const styles = theme => ({
     minWidth: 150,
   },
   paddLeft: {
-    paddingLeft: -10,
+    // paddingLeft: -10,
+    width: '100%',
     paddingBottom: 10,
   },
   sortableContainer: {
@@ -358,6 +347,9 @@ const styles = theme => ({
   },
   generateJsonButton: {
     marginLeft: 15,
+  },
+  deleteButton: {
+    paddingLeft: 20,
   },
 });
 

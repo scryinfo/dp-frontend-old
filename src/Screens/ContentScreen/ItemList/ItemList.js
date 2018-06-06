@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from 'material-ui/styles';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
 import { Paper, Button, Collapse, Typography, Modal, TextField, Select } from 'material-ui';
 import { InputLabel, InputAdornment } from 'material-ui/Input';

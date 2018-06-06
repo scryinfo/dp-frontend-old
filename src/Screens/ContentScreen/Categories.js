@@ -2,8 +2,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
-import { withStyles } from '@material-ui/core/styles';
-
+import { withStyles } from 'material-ui/styles';
 import { Table, TableCell, TableHead, TableRow, Paper } from '@material-ui/core';
 
 const CustomTableCell = withStyles(theme => ({

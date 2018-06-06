@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
-import { withStyles } from '@material-ui/core/styles';
-
+import { withStyles } from 'material-ui/styles';
 import './ContentContainer.css';
 import { MainContext } from '../../../Context';
 import Search from '../Search';

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import Slide from 'material-ui/transitions/Slide';
