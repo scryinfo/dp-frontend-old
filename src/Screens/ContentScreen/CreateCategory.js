@@ -17,7 +17,7 @@ import Delete from 'material-ui-icons/Delete';
 
 import Dragger from './dragger.svg';
 
-const host = 'https://139.219.107.164:443';
+const host = 'https://dev.scry.info:443';
 
 const CustomTableCell = withStyles(theme => ({
   head: {
@@ -32,6 +32,9 @@ const CustomTableCell = withStyles(theme => ({
 export class CreateCategory extends Component {
   state = {
     tab: 0,
+    category: 'Aviation',
+    subcategory: 'Commercial flights',
+    subsubcategory: 'Airport Info',
     columns: [
       {
         name: '',
@@ -104,11 +107,16 @@ export class CreateCategory extends Component {
     }
   };
 
+  handleCategoryChange = ({ target: { value, name } }) => {
+    console.log(name, value);
+    this.setState({ [name]: value });
+  };
+
   generateJson = () => {
-    const { columns } = this.state;
+    const { columns, category, subcategory, subsubcategory } = this.state;
     const cleanedColumns = columns.map(column => this.reformat(this.boolToString(this.removeFalse(column))));
     const wrapped = {
-      CategoryName: ['Aviation', 'Commercia Flights', `Airport Info ${Math.random()}`],
+      CategoryName: [category, subcategory, subsubcategory],
       DataStructure: cleanedColumns,
     };
     console.log(JSON.stringify(wrapped, null, 4));
@@ -190,6 +198,61 @@ export class CreateCategory extends Component {
     );
   };
 
+  renderCategoryNameInput = () => {
+    const { classes } = this.props;
+    const { category, subcategory, subsubcategory } = this.state;
+    return (
+      // <Paper>
+      <div className={classes.categoryContainer} style={{ marginTop: -20, marginBottom: 20 }}>
+        {/* <div className={classes.paddLeft}> */}
+        {/* <div style={{ width: '30%' }}> */}
+        <TextField
+          id="category"
+          name="category"
+          label="Category name"
+          // fullWidth
+          value={category}
+          style={{
+            width: '30%',
+          }}
+          className={classes.textField}
+          // value={column.name}
+          onChange={this.handleCategoryChange}
+          margin="normal"
+        />
+        {/* </div> */}
+        <TextField
+          id="subcategory"
+          name="subcategory"
+          label="Subcategory name"
+          style={{
+            width: '30%',
+          }}
+          value={subcategory}
+          className={classes.textField}
+          // value={column.name}
+          onChange={this.handleCategoryChange}
+          margin="normal"
+        />
+        <TextField
+          id="subsubcategory"
+          name="subsubcategory"
+          label="Subsubcategory name"
+          value={subsubcategory}
+          style={{
+            width: '30%',
+          }}
+          className={classes.textField}
+          // value={column.name}
+          onChange={this.handleCategoryChange}
+          margin="normal"
+        />
+        {/* </div> */}
+      </div>
+      // </Paper>
+    );
+  };
+
   renderColumn = ({ column, index, classes }) => (
     <Paper elevation={1}>
       <div className={classes.columnContainer} key={index}>
@@ -222,6 +285,7 @@ export class CreateCategory extends Component {
               <MenuItem value="Float">Float</MenuItem>
               <MenuItem value="Date">Date</MenuItem>
               <MenuItem value="Datetime">Datetime</MenuItem>
+              <MenuItem value="StandartTime">StandartTime</MenuItem>
             </Select>
           </FormControl>
           <FormControlLabel
@@ -280,6 +344,7 @@ export class CreateCategory extends Component {
     return (
       <div style={{ marginTop: 25 }}>
         <div style={{ marginBottom: 25 }}>{this.renderTable(columns)}</div>
+        {this.renderCategoryNameInput()}
         <div className={classes.addNewButton}>
           <Button className={classes.button} variant="raised" color="primary" onClick={this.addColumn}>
             Add a column
@@ -318,6 +383,15 @@ const styles = theme => ({
     width: 200,
   },
   columnContainer: {
+    // paddingTop: 10,
+    // paddingBottom: 10,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+  },
+  categoryContainer: {
     // paddingTop: 10,
     // paddingBottom: 10,
     width: '100%',

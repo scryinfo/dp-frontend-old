@@ -209,7 +209,7 @@ export class MainProvider extends Component {
   getCategories = async () => {
     try {
       const { data } = await axios({
-        url: `https://139.219.107.164:443/meta/getcategories`,
+        url: `https://dev.scry.info:443/meta/getcategories`,
         method: 'post',
         headers: {
           Authorization: `JWT ${localStorage.getItem('id_token')}`,

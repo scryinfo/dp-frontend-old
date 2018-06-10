@@ -3,7 +3,8 @@ import React, { Component } from 'react';
 import axios from 'axios';
 
 import { withStyles } from 'material-ui/styles';
-import { Table, TableCell, TableHead, TableRow, Paper } from '@material-ui/core';
+import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
+import { Paper, Button, Collapse, Typography, Modal, TextField, Select } from 'material-ui';
 
 const CustomTableCell = withStyles(theme => ({
   head: {
