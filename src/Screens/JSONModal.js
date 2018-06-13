@@ -67,10 +67,10 @@ class JSONModal extends Component {
           CategoryName[2]
         }`}</DialogTitle>
         <DialogContent style={{ paddingTop: 0 }}>
-          <DialogContentText style={{ width: '700px', paddingTop: '10px', fontWeight: 'bold' }}>
+          <DialogContentText style={{ width: '550px', paddingTop: '10px', fontWeight: 'bold' }}>
             <b>STRUCTURE</b>
           </DialogContentText>
-          <DialogContentText style={{ width: '700px', paddingTop: '10px', fontWeight: 'bold' }}>
+          <DialogContentText style={{ width: '550px', paddingTop: '10px', fontWeight: 'bold' }}>
             <pre>{JSON.stringify(json, null, 2)}</pre>
           </DialogContentText>
         </DialogContent>
