@@ -33,7 +33,7 @@ export class CreateCategory extends Component {
   state = {
     tab: 0,
     category: 'Aviation',
-    subcategory: 'Commercial flights',
+    subcategory: 'Commercial Flights',
     subsubcategory: 'Airport Info',
     columns: [
       {
@@ -116,7 +116,7 @@ export class CreateCategory extends Component {
     const { columns, category, subcategory, subsubcategory } = this.state;
     const cleanedColumns = columns.map(column => this.reformat(this.boolToString(this.removeFalse(column))));
     const wrapped = {
-      CategoryName: [category, subcategory, subsubcategory],
+      CategoryName: [category || 'Aviation', subcategory || 'Commercial Flights', subsubcategory || 'Airport Info'],
       DataStructure: cleanedColumns,
     };
     console.log(JSON.stringify(wrapped, null, 4));

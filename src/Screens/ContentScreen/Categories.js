@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
+import JSONModal from '../JSONModal';
+
 import { withStyles } from 'material-ui/styles';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
 import { Paper, Button, Collapse, Typography, Modal, TextField, Select } from 'material-ui';
@@ -41,20 +43,60 @@ export class Categories extends Component {
   //   }
   // };
 
-  renderTable = (table, index) => {
+  openJSONModal = async category => {
+    await this.jsonModal.open(category);
+  };
+
+  renderTable = categories => {
     const { classes } = this.props;
 
     return (
-      <Paper key={index} className={classes.root}>
+      <Paper className={classes.root}>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
-              {table.DataStructure.map((column, index) => {
-                console.log(column);
-                return <CustomTableCell key={index}>{Object.keys(column)[0]}</CustomTableCell>;
-              })}
+              <CustomTableCell component="th" scope="row">
+                #
+              </CustomTableCell>
+              <CustomTableCell numeric>Category</CustomTableCell>
+              <CustomTableCell numeric>Subcategory</CustomTableCell>
+              <CustomTableCell numeric>Subsubcategory</CustomTableCell>
+              {/* <CustomTableCell numeric>{item.price}</CustomTableCell>
+                  <CustomTableCell numeric>{this.formatFileSize(item.size)}</CustomTableCell> */}
+
+              <CustomTableCell numeric>
+                <div style={{ textAlign: 'center' }}>
+                  Action
+                  {/* <Button>View JSON</Button> */}
+                </div>
+              </CustomTableCell>
             </TableRow>
           </TableHead>
+          <TableBody>
+            {categories.map((category, index) => {
+              const { DataStructure, CategoryName } = category;
+              return (
+                <TableRow hover className={classes.row} key={index}>
+                  <CustomTableCell component="th" scope="row">
+                    {index + 1}
+                  </CustomTableCell>
+                  {CategoryName.map((categoryName, i) => (
+                    <CustomTableCell key={i} numeric>
+                      {categoryName}
+                    </CustomTableCell>
+                  ))}
+                  {/* <CustomTableCell numeric>{item.price}</CustomTableCell>
+                  <CustomTableCell numeric>{this.formatFileSize(item.size)}</CustomTableCell> */}
+
+                  <CustomTableCell numeric>
+                    <div style={{ textAlign: 'center' }}>
+                      <Button onClick={() => this.openJSONModal(category, null, 2)}>View JSON</Button>
+                    </div>
+                  </CustomTableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
         </Table>
       </Paper>
     );
@@ -62,9 +104,20 @@ export class Categories extends Component {
 
   render() {
     const { classes } = this.props;
+
     console.log(this.props.context);
     const { tables } = this.props.context.state;
-    return <div style={{ marginTop: 30 }}>{tables.map((table, index) => this.renderTable(table, index))}</div>;
+    return (
+      <div style={{ marginTop: 30 }}>
+        {this.renderTable(tables)}
+        <JSONModal
+          onRef={ref => {
+            this.jsonModal = ref;
+          }}
+          context={this.props.context}
+        />
+      </div>
+    );
   }
 }
 
