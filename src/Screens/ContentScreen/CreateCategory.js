@@ -80,8 +80,13 @@ export class CreateCategory extends Component {
   };
 
   onSubmit = async () => {
+    if (!this.state.category || !this.state.subcategory || !this.state.subsubcategory) {
+      this.props.context.showPopup('Category name and subcategories should not be empty!');
+      return;
+    }
     try {
       const wrapped = this.generateJson();
+      console.log();
       const res = await axios.post(`${host}/meta/categories`, wrapped, {
         headers: {
           Authorization: `JWT ${localStorage.getItem('id_token')}`,
@@ -102,6 +107,10 @@ export class CreateCategory extends Component {
       this.props.context.getItems();
       console.log(res);
     } catch (e) {
+      if (e && e.message) {
+        this.props.context.showPopup(e.message);
+        return;
+      }
       this.props.context.showPopup('Oops, something went wrong');
       console.log(e);
     }
@@ -117,6 +126,9 @@ export class CreateCategory extends Component {
     const cleanedColumns = columns
       .filter(el => el.name && el.DataType)
       .map(column => this.reformat(this.boolToString(this.removeFalse(column))));
+    if (cleanedColumns.length < 1) {
+      throw new Error('empty columns!');
+    }
     const wrapped = {
       CategoryName: [category || 'Aviation', subcategory || 'Commercial Flights', subsubcategory || 'Airport Info'],
       DataStructure: cleanedColumns,
