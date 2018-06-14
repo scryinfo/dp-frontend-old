@@ -210,7 +210,7 @@ export class MainProvider extends Component {
     try {
       const { data } = await axios({
         url: `https://dev.scry.info:443/meta/getcategories`,
-        method: 'post',
+        method: 'get',
         headers: {
           Authorization: `JWT ${localStorage.getItem('id_token')}`,
         },
@@ -226,6 +226,7 @@ export class MainProvider extends Component {
     const { address } = this.state;
     try {
       let { data: allItems } = await _getItems();
+      console.log({ allItems });
       let { data: myItems } = await _getItems(address);
       const { data: historyBuyer } = await _getItems(address, 'buyer');
       const { data: historySeller } = await _getItems(address, 'seller');

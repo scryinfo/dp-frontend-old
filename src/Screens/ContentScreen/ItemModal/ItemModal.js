@@ -692,6 +692,8 @@ class ItemModal extends Component {
         return this.verifyModal({ context, item, classes });
       case 'upload':
         return this.uploadedFileModal({ context, item, classes });
+      case 'categories':
+        return this.purchaseFileModal({ context, item, classes });
       default:
         return this.purchaseFileModal({ context, item, classes });
     }
