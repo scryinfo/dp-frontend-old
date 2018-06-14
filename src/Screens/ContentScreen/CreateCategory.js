@@ -32,9 +32,9 @@ const CustomTableCell = withStyles(theme => ({
 export class CreateCategory extends Component {
   state = {
     tab: 0,
-    category: 'Aviation',
-    subcategory: 'Commercial Flights',
-    subsubcategory: 'Airport Info',
+    category: '',
+    subcategory: '',
+    subsubcategory: '',
     columns: [
       {
         name: '',
@@ -114,7 +114,9 @@ export class CreateCategory extends Component {
 
   generateJson = () => {
     const { columns, category, subcategory, subsubcategory } = this.state;
-    const cleanedColumns = columns.map(column => this.reformat(this.boolToString(this.removeFalse(column))));
+    const cleanedColumns = columns
+      .filter(el => el.name && el.DataType)
+      .map(column => this.reformat(this.boolToString(this.removeFalse(column))));
     const wrapped = {
       CategoryName: [category || 'Aviation', subcategory || 'Commercial Flights', subsubcategory || 'Airport Info'],
       DataStructure: cleanedColumns,
@@ -144,6 +146,8 @@ export class CreateCategory extends Component {
     }
     return clonedObj;
   };
+
+  removeEmpty = array => array.filter(el => el.name && el.DataType);
 
   boolToString = obj => {
     const clonedObj = { ...obj };
@@ -285,7 +289,7 @@ export class CreateCategory extends Component {
               <MenuItem value="Float">Float</MenuItem>
               <MenuItem value="Date">Date</MenuItem>
               <MenuItem value="Datetime">Datetime</MenuItem>
-              <MenuItem value="StandartTime">StandartTime</MenuItem>
+              <MenuItem value="StandardTime">StandardTime</MenuItem>
             </Select>
           </FormControl>
           <FormControlLabel
