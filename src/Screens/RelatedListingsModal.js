@@ -151,6 +151,8 @@ class RelatedListingsModal extends Component {
             transform: `translate(-50%, -50%)`,
             minWidth: 750,
             minHeight: 100,
+            maxHeight: '80%',
+            overflow: 'scroll',
           }}
           // className={classes.paper}
         >
