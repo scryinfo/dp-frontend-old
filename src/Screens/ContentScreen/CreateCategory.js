@@ -123,9 +123,10 @@ export class CreateCategory extends Component {
 
   generateJson = () => {
     const { columns, category, subcategory, subsubcategory } = this.state;
-    const cleanedColumns = columns
-      .filter(el => el.name && el.DataType)
-      .map(column => this.reformat(this.boolToString(this.removeFalse(column))));
+    if (columns.some(el => !el.name || !el.DataType)) {
+      throw new Error('column name or data type should not be empty!');
+    }
+    const cleanedColumns = columns.map(column => this.reformat(this.boolToString(this.removeFalse(column))));
     if (cleanedColumns.length < 1) {
       throw new Error('empty columns!');
     }
