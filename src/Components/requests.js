@@ -17,7 +17,7 @@ export const _getBalance = account =>
   });
 
 // Buy an item
-export const _buyItem = async (listing, username, password, buyer, verifier, rewardPercent) => {
+export const _buyItem = async ({ listing, username, password, buyer, verifier, rewardPercent }) => {
   const reward = Math.floor(listing.price / 100 * rewardPercent);
   const createBlock = await openChannel(listing.price, { username, password }, listing.owner.account, reward || 0, 1);
 

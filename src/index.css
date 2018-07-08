@@ -15,3 +15,7 @@ body {
   /* transform: scale(0.9);
   transform-origin: 0 0; */
 }
+
+.sortableHelper {
+   z-index: 10;
+}

@@ -85,7 +85,7 @@ class ItemModal extends Component {
     super(props);
     this.state = {
       verifier: '',
-      reward: '',
+      reward: 0,
       loader: {},
     };
   }
@@ -121,7 +121,7 @@ class ItemModal extends Component {
     try {
       await this.checkForErrors({ item, context });
       const password = await this.passwordModal.open();
-      await _buyItem(item, username, password, address, verifier, reward);
+      await _buyItem({ listing: item, username, password, buyer: address, verifier, rewardPercent: reward });
       context.showPopup('purchased successfully');
       context.updateState({ item: null, action: '' });
     } catch (e) {
@@ -402,7 +402,10 @@ class ItemModal extends Component {
               {itemHistory.needs_verification ? (
                 <Button disabled>WAITING FOR VERIFICATION</Button>
               ) : (
-                <Button disabled={loader.closeTransaction} onClick={() => this.closeTransaction({ item, context })}>
+                <Button
+                  disabled={loader.closeTransaction}
+                  onClick={() => this.closeTransaction({ item: itemHistory, context })}
+                >
                   AUTHORIZE THE TRANSACTION
                 </Button>
               )}
@@ -571,7 +574,7 @@ class ItemModal extends Component {
         open={!!item}
         onClose={() => {
           context.updateState({ item: null, action: '' });
-          this.setState({ verifier: '', reward: '' });
+          this.setState({ verifier: '', reward: 0 });
         }}
       >
         <div
@@ -689,6 +692,8 @@ class ItemModal extends Component {
         return this.verifyModal({ context, item, classes });
       case 'upload':
         return this.uploadedFileModal({ context, item, classes });
+      case 'categories':
+        return this.purchaseFileModal({ context, item, classes });
       default:
         return this.purchaseFileModal({ context, item, classes });
     }

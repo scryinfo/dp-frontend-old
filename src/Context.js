@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import 'event-source-polyfill/src/eventsource.min.js';
 
 import moment from 'moment';
+import axios from 'axios';
 
 import AuthService from './Auth/AuthService';
 
@@ -33,6 +34,7 @@ export class MainProvider extends Component {
         eth: 0,
       },
       searchValue: '',
+      tables: [],
       currentPage: 'explore',
       allItems: [],
       myItems: [],
@@ -204,15 +206,32 @@ export class MainProvider extends Component {
     }
   }
 
+  getCategories = async () => {
+    try {
+      const { data } = await axios({
+        url: `https://dev.scry.info:443/meta/getcategories`,
+        method: 'get',
+        headers: {
+          Authorization: `JWT ${localStorage.getItem('id_token')}`,
+        },
+      });
+      this.setState({ tables: data });
+      console.log({ data });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   async getItems() {
     const { address } = this.state;
     try {
       let { data: allItems } = await _getItems();
+      console.log({ allItems });
       let { data: myItems } = await _getItems(address);
       const { data: historyBuyer } = await _getItems(address, 'buyer');
       const { data: historySeller } = await _getItems(address, 'seller');
       const { data: historyVerifier } = await _getItems(address, 'verifier');
-
+      this.getCategories();
       console.log({ allItems, myItems, historyBuyer, historySeller, historyVerifier });
 
       // filter out items that are already purchased
@@ -234,7 +253,7 @@ export class MainProvider extends Component {
       const itemsBought = this.getClosed(historyBuyer);
       const itemsSold = this.getClosed(historySeller);
       const itemsVerified = this.getClosed(historyVerifier);
-
+      console.log({ itemsSold });
       // Transaction in progress
       const inProgressBought = this.getInProgress(historyBuyer);
       const inProgressSold = this.getInProgress(historySeller);
