@@ -8,6 +8,7 @@ import ItemList from '../ItemList/ItemList';
 import Sell from '../Sell/Sell';
 import CreateCategory from '../CreateCategory';
 import Categories from '../Categories';
+import Listing from '../../Listing';
 import InProgress from '../InProgress/InProgress';
 
 const styles = {
@@ -43,14 +44,8 @@ class ContentContainer extends Component {
         {context => {
           this.context = context;
           const {
-            inProgressBought,
-            inProgressSold,
-            inProgressVerified,
             allItems,
             foundItems,
-            itemsBought,
-            itemsSold,
-            itemsVerified,
             currentPage,
             searchValue,
             historyBuyer,
@@ -59,17 +54,32 @@ class ContentContainer extends Component {
           } = context.state;
           return (
             <div className="content-container">
-              <div className="content-header">
-                <div className="content-title">{currentPage}</div>
-                {currentPage === 'explore' && (
+              {currentPage === 'files' && (
+                <div className="content-header">
+                  <div className="content-title">BUY FILES</div>
                   <div className="content-search">
                     <Search value={searchValue} onChange={context.onSearch} />
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+              {currentPage === 'purchased' && (
+                <div className="content-header">
+                  <div className="content-title">{currentPage}</div>
+                </div>
+              )}
+              {currentPage === 'sold' && (
+                <div className="content-header">
+                  <div className="content-title">{currentPage}</div>
+                </div>
+              )}
+              {currentPage === 'verified' && (
+                <div className="content-header">
+                  <div className="content-title">{currentPage}</div>
+                </div>
+              )}
               <div className="list-items">
                 <Route
-                  path="/explore"
+                  path="/files"
                   render={props => <ItemList {...props} items={foundItems.length > 0 ? foundItems : allItems} />}
                 />
                 <Route
@@ -81,12 +91,13 @@ class ContentContainer extends Component {
                   path="/verified"
                   render={props => <ItemList {...props} items={historyVerifier} type="verified" />}
                 />
-                <Route path="/upload" render={props => <Sell {...props} items={allItems} type="uploaded" />} />
+                <Route path="/myfiles" render={props => <Sell {...props} items={allItems} type="uploaded" />} />
                 <Route
                   path="/createcategory"
                   render={props => <CreateCategory type="createcategory" context={context} />}
                 />
                 <Route path="/categories" render={props => <Categories type="categories" context={context} />} />
+                <Route path="/listing/:id" render={props => <Listing type="listing" context={context} />} />
               </div>
             </div>
           );

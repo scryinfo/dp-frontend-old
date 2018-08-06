@@ -2,11 +2,9 @@ import React, { Component, Fragment } from 'react';
 import { withStyles } from 'material-ui/styles';
 import TextField from 'material-ui/TextField';
 import List, { ListItem, ListItemText, ListItemSecondaryAction } from 'material-ui/List';
-import Collapse from 'material-ui/transitions/Collapse';
 import Fade from 'material-ui/transitions/Fade';
-import Divider from 'material-ui/Divider';
 
-import { Button, Badge } from 'material-ui';
+import { Button } from 'material-ui';
 import { CircularProgress } from 'material-ui/Progress';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import { MenuItem, MenuList } from 'material-ui/Menu';
@@ -40,18 +38,13 @@ import PasswordModal from '../../PasswordModal';
 const Auth = new AuthService();
 
 class Menu extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: true,
-      anchorEl: null,
-      isMnemonicWindowOpen: false,
-      tokensToAdd: '',
-      isSettingsOpen: false,
-    };
-    this.handleInput = this.handleInput.bind(this);
-    this.getTokens = this.getTokens.bind(this);
-  }
+  state = {
+    open: true,
+    anchorEl: null,
+    isMnemonicWindowOpen: false,
+    tokensToAdd: '',
+    isSettingsOpen: false,
+  };
 
   componentDidMount() {
     if (this.context && Auth.loggedIn()) {
@@ -82,17 +75,17 @@ class Menu extends Component {
     this.setState({ open: !this.state.open });
   };
 
-  handleInput(event) {
+  handleInput = event => {
     this.setState({ tokensToAdd: event.target.value });
     event.preventDefault();
-  }
+  };
 
   timeout = time =>
     new Promise(resolve => {
       setTimeout(() => resolve(), time);
     });
 
-  async getTokens(event) {
+  getTokens = async event => {
     event.preventDefault();
     if (this.state.tokensToAdd <= 0) {
       this.context.showPopup('Add 1 or more tokens');
@@ -117,9 +110,9 @@ class Menu extends Component {
       }
       this.context.showPopup('Something went wrong');
     }
-  }
+  };
 
-  async getMnemonic() {
+  getMnemonic = async () => {
     try {
       const password = await this.passwordModal.open();
       const vault = localStorage.getItem(this.context.state.username);
@@ -129,48 +122,44 @@ class Menu extends Component {
       console.log(e);
       this.context.showPopup(JSON.stringify(e));
     }
-  }
+  };
 
-  transition(props) {
-    return <Slide direction="up" {...props} />;
-  }
+  transition = props => <Slide direction="up" {...props} />;
 
-  renderMnemonicWindow() {
-    return (
-      <Dialog
-        open={this.state.isMnemonicWindowOpen}
-        transition={this.transition}
-        keepMounted
-        onClose={() => this.setState({ isMnemonicWindowOpen: false })}
-        aria-labelledby="alert-dialog-slide-title"
-        aria-describedby="alert-dialog-slide-description"
-      >
-        <DialogTitle id="alert-dialog-slide-title">Your mnemonic</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-slide-description">{this.state.mnemonic}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => this.setState({ isMnemonicWindowOpen: false })} color="primary">
-            Close
-          </Button>
-          <CopyToClipboard
-            text={this.state.mnemonic}
-            onCopy={() => {
-              this.setState({ isMnemonicWindowOpen: false, status: 'Copied successfully' });
-              setTimeout(() => this.setState({ status: '' }), 3000);
-            }}
-          >
-            <Button color="primary">Copy</Button>
-          </CopyToClipboard>
-        </DialogActions>
-      </Dialog>
-    );
-  }
+  renderMnemonicWindow = () => (
+    <Dialog
+      open={this.state.isMnemonicWindowOpen}
+      TransitionComponent={this.transition}
+      keepMounted
+      onClose={() => this.setState({ isMnemonicWindowOpen: false })}
+      aria-labelledby="alert-dialog-slide-title"
+      aria-describedby="alert-dialog-slide-description"
+    >
+      <DialogTitle id="alert-dialog-slide-title">Your mnemonic</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-slide-description">{this.state.mnemonic}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => this.setState({ isMnemonicWindowOpen: false })} color="primary">
+          Close
+        </Button>
+        <CopyToClipboard
+          text={this.state.mnemonic}
+          onCopy={() => {
+            this.setState({ isMnemonicWindowOpen: false, status: 'Copied successfully' });
+            setTimeout(() => this.setState({ status: '' }), 3000);
+          }}
+        >
+          <Button color="primary">Copy</Button>
+        </CopyToClipboard>
+      </DialogActions>
+    </Dialog>
+  );
 
-  changeRoute(to) {
+  changeRoute = to => {
     this.context.updateState({ currentPage: to.currentPage, searchValue: '' });
     this.props.history.push(`/${to.currentPage.replace(' ', '')}`);
-  }
+  };
 
   render() {
     const { classes } = this.props;
@@ -179,21 +168,7 @@ class Menu extends Component {
       <MainContext.Consumer>
         {context => {
           this.context = context;
-          const {
-            allItems,
-            myItems,
-            historyBuyer,
-            historySeller,
-            historyVerifier,
-            tables,
-            // itemsBought,
-            // itemsSold,
-            // itemsVerified,
-            // inProgressBought,
-            // inProgressSold,
-            // inProgressVerified,
-            notifications,
-          } = context.state;
+          const { allItems, historyBuyer, historySeller, historyVerifier, tables, notifications } = context.state;
           return (
             <Fragment>
               <InfoPopup message={this.state.status} handleClose={() => this.setState({ status: '' })} />
@@ -271,13 +246,13 @@ class Menu extends Component {
                 {/* List items */}
                 <div className={classes.root}>
                   <List component="nav">
-                    {/* EXPLORE */}
+                    {/* ALL FILES */}
                     <ListItem
                       button
-                      classes={{ root: this.getActiveStyle('explore', context, classes) }}
-                      onClick={() => this.changeRoute({ currentPage: 'explore' })}
+                      classes={{ root: this.getActiveStyle('files', context, classes) }}
+                      onClick={() => this.changeRoute({ currentPage: 'files' })}
                     >
-                      <ListItemText primary="Explore Files" classes={{ primary: classes.listText }} />
+                      <ListItemText primary="Buy Files" classes={{ primary: classes.listText }} />
                       <ListItemSecondaryAction>
                         <div
                           style={{
@@ -371,6 +346,13 @@ class Menu extends Component {
                       onClick={() => this.changeRoute({ currentPage: 'create category' })}
                     >
                       <ListItemText primary="Create Category" classes={{ primary: classes.listText }} />
+                    </ListItem>
+                    <ListItem
+                      button
+                      classes={{ root: this.getActiveStyle('my files', context, classes) }}
+                      onClick={() => this.changeRoute({ currentPage: 'my files' })}
+                    >
+                      <ListItemText primary="My Files" classes={{ primary: classes.listText }} />
                     </ListItem>
                   </List>
                 </div>

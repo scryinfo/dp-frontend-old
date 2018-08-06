@@ -1,6 +1,6 @@
 import decode from 'jwt-decode';
 import axios from 'axios';
-import { HOST } from '../Components/Remote';
+import { API } from '../Components/Remote';
 
 import { logout } from '../Components/requests';
 

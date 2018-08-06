@@ -37,22 +37,19 @@ const StyledAnimatedSwitch = styled(AnimatedSwitch)`
 `;
 
 export default class Login extends Component {
-  constructor() {
-    super();
-    this.state = {
-      pageTransitions: {
-        atEnter: {
-          offset: 100,
-        },
-        atLeave: {
-          offset: glide(-100),
-        },
-        atActive: {
-          offset: glide(0),
-        },
+  state = {
+    pageTransitions: {
+      atEnter: {
+        offset: 100,
       },
-    };
-  }
+      atLeave: {
+        offset: glide(-100),
+      },
+      atActive: {
+        offset: glide(0),
+      },
+    },
+  };
 
   render() {
     return (

@@ -1,0 +1,53 @@
+[
+  {
+    "Aviation": [
+      {
+        "Commercial": [
+          {
+            "Airline": []
+          },
+          {
+            "Airport": []
+          },
+          {
+            "Schedule": [
+              {
+                "Another schedule": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Private": [
+          {
+            "Airline": []
+          },
+          {
+            "Airport": []
+          },
+          {
+            "Schedule": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Not Aviataion": [
+      {
+        "Private": [
+          {
+            "Airline": []
+          },
+          {
+            "Airport": []
+          },
+          {
+            "Schedule": []
+          }
+        ]
+      }
+    ]
+  }
+]

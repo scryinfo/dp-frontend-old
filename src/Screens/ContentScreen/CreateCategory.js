@@ -3,12 +3,11 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { withStyles } from 'material-ui/styles';
 
-import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
-import { Paper, Button, Collapse, Typography, Modal, TextField, Select } from 'material-ui';
-import { InputLabel, InputAdornment } from 'material-ui/Input';
+import Table, { TableCell, TableHead, TableRow } from 'material-ui/Table';
+import { Paper, Button, TextField, Select } from 'material-ui';
+import { InputLabel } from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import { FormControl, FormControlLabel } from 'material-ui/Form';
-import { CircularProgress } from 'material-ui/Progress';
 import Switch from 'material-ui/Switch';
 import IconButton from 'material-ui/IconButton';
 
@@ -17,7 +16,7 @@ import Delete from 'material-ui-icons/Delete';
 
 import Dragger from './dragger.svg';
 
-const host = 'https://dev.scry.info:443';
+import { Publisher } from '../../Components/Remote';
 
 const CustomTableCell = withStyles(theme => ({
   head: {
@@ -64,7 +63,6 @@ export class CreateCategory extends Component {
   };
 
   handleChange = ({ column, index, isSwitch }) => event => {
-    console.log(event.target.checked);
     const clonedColumns = [...this.state.columns];
     const clonedColumn = { ...column };
     clonedColumn[event.target.name] = isSwitch ? event.target.checked : event.target.value;
@@ -86,8 +84,7 @@ export class CreateCategory extends Component {
     }
     try {
       const wrapped = this.generateJson();
-      console.log();
-      const res = await axios.post(`${host}/meta/categories`, wrapped, {
+      const res = await axios.post(`${Publisher}/categories`, wrapped, {
         headers: {
           Authorization: `JWT ${localStorage.getItem('id_token')}`,
         },
@@ -105,7 +102,6 @@ export class CreateCategory extends Component {
         ],
       });
       this.props.context.getItems();
-      console.log(res);
     } catch (e) {
       if (e && e.message) {
         this.props.context.showPopup(e.message);
@@ -117,7 +113,6 @@ export class CreateCategory extends Component {
   };
 
   handleCategoryChange = ({ target: { value, name } }) => {
-    console.log(name, value);
     this.setState({ [name]: value });
   };
 
@@ -134,13 +129,8 @@ export class CreateCategory extends Component {
       CategoryName: [category || 'Aviation', subcategory || 'Commercial Flights', subsubcategory || 'Airport Info'],
       DataStructure: cleanedColumns,
     };
-    console.log(JSON.stringify(wrapped, null, 4));
     return wrapped;
-    // this.setState({ json: JSON.stringify(wrapped, null, 4) }, () => console.log(this.state.json));
-    // console.log(this.state.json);
   };
-
-  // boolToString = ()
 
   reformat = column => {
     const { name, ...rest } = column;
@@ -272,19 +262,21 @@ export class CreateCategory extends Component {
 
   renderColumn = ({ column, index, classes }) => (
     <Paper elevation={1}>
-      <div className={classes.columnContainer} key={index}>
-        <div className={classes.paddLeft}>
-          <this.DragHandle />
+      <div className={classes.columnContainer} key={index} style={{ paddingBottom: 10 }}>
+        {/* <div className={classes.paddLeft}> */}
+        <this.DragHandle />
+        <div style={{ flex: 1 }}>
           <TextField
             id="name"
             name="name"
             label="Name"
             className={classes.textField}
+            style={{ width: '45%', marginRight: '5%' }}
             value={column.name}
             onChange={this.handleChange({ column, index })}
             margin="normal"
           />
-          <FormControl className={classes.formControl}>
+          <FormControl style={{ width: '45%' }}>
             <InputLabel htmlFor="datatype">Datatype</InputLabel>
             <Select
               value={column.DataType}
@@ -305,50 +297,49 @@ export class CreateCategory extends Component {
               <MenuItem value="StandardTime">StandardTime</MenuItem>
             </Select>
           </FormControl>
-          <FormControlLabel
-            className={classes.switch}
-            control={
-              <Switch
-                checked={column.IsNull}
-                onChange={this.handleChange({ column, index, isSwitch: true })}
-                value="IsNull"
-                name="IsNull"
-                color="primary"
-              />
-            }
-            label="Is Null"
-          />
-          <FormControlLabel
-            className={classes.switch}
-            control={
-              <Switch
-                checked={column.IsUnique}
-                onChange={this.handleChange({ column, index, isSwitch: true })}
-                value="IsUnique"
-                name="IsUnique"
-                color="primary"
-              />
-            }
-            label="Is Unique"
-          />
-          <FormControlLabel
-            className={classes.switch}
-            control={
-              <Switch
-                checked={column.IsPrimaryKey}
-                onChange={this.handleChange({ column, index, isSwitch: true })}
-                value="IsPrimaryKey"
-                name="IsPrimaryKey"
-                color="primary"
-              />
-            }
-            label="Is Primary Key"
-          />
-          <IconButton className={classes.deleteButton} onClick={() => this.deleteColumn(index)} aria-label="Delete">
-            <Delete nativeColor="#EC7F7F" />
-          </IconButton>
         </div>
-        {/* <div> */}
+        <FormControlLabel
+          className={classes.switch}
+          control={
+            <Switch
+              checked={column.IsNull}
+              onChange={this.handleChange({ column, index, isSwitch: true })}
+              value="IsNull"
+              name="IsNull"
+              color="primary"
+            />
+          }
+          label="Is Null"
+        />
+        <FormControlLabel
+          className={classes.switch}
+          control={
+            <Switch
+              checked={column.IsUnique}
+              onChange={this.handleChange({ column, index, isSwitch: true })}
+              value="IsUnique"
+              name="IsUnique"
+              color="primary"
+            />
+          }
+          label="Is Unique"
+        />
+        <FormControlLabel
+          className={classes.switch}
+          control={
+            <Switch
+              checked={column.IsPrimaryKey}
+              onChange={this.handleChange({ column, index, isSwitch: true })}
+              value="IsPrimaryKey"
+              name="IsPrimaryKey"
+              color="primary"
+            />
+          }
+          label="Is Primary Key"
+        />
+        <IconButton className={classes.deleteButton} onClick={() => this.deleteColumn(index)} aria-label="Delete">
+          <Delete nativeColor="#EC7F7F" />
+        </IconButton>
         {/* </div> */}
       </div>
     </Paper>
@@ -388,7 +379,8 @@ const styles = theme => ({
   container: {
     display: 'flex',
     flexWrap: 'wrap',
-    width: 1000,
+    width: '100%',
+    minWidth: 1000,
     // marginTop: 20,
   },
   textField: {
@@ -428,7 +420,8 @@ const styles = theme => ({
   },
   sortableContainer: {
     position: 'relative',
-    width: 1000,
+    width: '100%',
+    minWidth: 1000,
   },
   switch: {
     marginLeft: 20,
@@ -440,7 +433,8 @@ const styles = theme => ({
     marginLeft: 15,
   },
   deleteButton: {
-    paddingLeft: 20,
+    marginLeft: 10,
+    marginRight: 20,
   },
 });
 

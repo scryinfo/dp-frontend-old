@@ -186,8 +186,11 @@ class LoginForm extends React.Component {
         const { message } = e.response.data;
         console.log(message);
         this.context.showPopup(message);
+        return;
       }
-      console.log(e);
+      if (e.message) {
+        this.context.showPopup(e.message);
+      }
     }
   }
 
@@ -212,6 +215,9 @@ class LoginForm extends React.Component {
         }
         this.context.showPopup(message);
         console.log(message);
+      }
+      if (e.message) {
+        this.context.showPopup(e.message);
       }
       console.log(e);
     }
@@ -358,7 +364,12 @@ class LoginForm extends React.Component {
               <Tabs
                 value={value}
                 onChange={this.handleChange}
-                indicatorColor="transparent"
+                // indicatorColor="transparent"
+                TabIndicatorProps={{
+                  style: {
+                    backgroundColor: 'transparent',
+                  },
+                }}
                 textColor="inherit"
                 classes={{ root: classes.tabsRoot }}
               >

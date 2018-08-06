@@ -17,11 +17,6 @@ const styles = theme => ({
 });
 
 class InfoPopup extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
   render() {
     const { classes } = this.props;
     return (
@@ -33,7 +28,7 @@ class InfoPopup extends React.Component {
         open={!!this.props.message}
         autoHideDuration={20000}
         onClose={this.props.handleClose}
-        SnackbarContentProps={{
+        ContentProps={{
           className: this.props.classes.infoPopup,
           'aria-describedby': 'message-id',
         }}

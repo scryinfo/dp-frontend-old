@@ -1,3 +1,5 @@
-// export const HOST = 'https://dev.scry.info/scry';
+const dev = true;
 
-export const HOST = 'https://dev.scry.info/scry2';
+export const API = dev ? 'http://localhost:1234' : 'https://dev.scry.info/scry2';
+
+export const Publisher = !dev ? 'http://localhost:2222' : 'https://dev.scry.info:443/meta';

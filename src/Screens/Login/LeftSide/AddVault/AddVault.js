@@ -45,15 +45,12 @@ const styles = () => ({
 });
 
 class AddVault extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false,
-    };
-    this.Auth = new AuthService();
-  }
+  state = {
+    loading: false,
+  };
+  Auth = new AuthService();
 
-  async handleNewVault() {
+  handleNewVault = async () => {
     this.setState({ loading: true });
     if (this.context) {
       const { username } = this.context.state;
@@ -85,9 +82,9 @@ class AddVault extends Component {
         this.context.showPopup(JSON.stringify(e));
       }
     }
-  }
+  };
 
-  async handleImportVault() {
+  handleImportVault = async () => {
     this.setState({ loading: true });
     if (this.context) {
       const { username, address: account } = this.context.state;
@@ -99,8 +96,8 @@ class AddVault extends Component {
         const mnemonic = await this.mnemonicModal.open();
         const importedVault = await importVault(username, password, mnemonic, account);
         const { address } = importedVault;
-        this.context.updateState({ address, currentPage: 'explore' });
-        this.props.history.push('/explore');
+        this.context.updateState({ address, currentPage: 'files' });
+        this.props.history.push('/files');
       } catch (e) {
         this.setState({ loading: false });
         this.passwordModal.close();
@@ -113,9 +110,9 @@ class AddVault extends Component {
         this.context.showPopup(JSON.stringify(e));
       }
     }
-  }
+  };
 
-  async handleImportVaultAndRegister() {
+  handleImportVaultAndRegister = async () => {
     this.setState({ loading: true });
     if (this.context) {
       const { username } = this.context.state;
@@ -149,7 +146,7 @@ class AddVault extends Component {
         this.context.showPopup(JSON.stringify(e));
       }
     }
-  }
+  };
 
   handleLogout = async context => {
     try {
@@ -161,8 +158,8 @@ class AddVault extends Component {
     }
   };
 
-  loaderSpin() {
-    return new Promise(resolve => {
+  loaderSpin = () =>
+    new Promise(resolve => {
       if (!this.state.loading) {
         this.setState(
           {
@@ -179,7 +176,6 @@ class AddVault extends Component {
         );
       }
     });
-  }
 
   render() {
     const { classes } = this.props;

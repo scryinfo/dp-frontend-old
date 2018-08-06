@@ -8,17 +8,12 @@ import Slide from 'material-ui/transitions/Slide';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 class JSONModal extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isOpen: false,
-      json: '',
-      category: [],
-      CategoryName: [],
-    };
-    this.open = this.open.bind(this);
-    // this.close = this.close.bind(this);
-  }
+  state = {
+    isOpen: false,
+    json: '',
+    category: [],
+    CategoryName: [],
+  };
 
   componentDidMount() {
     this.props.onRef(this);
@@ -31,16 +26,7 @@ class JSONModal extends Component {
       this.reject = reject;
     });
 
-  // close = () => {
-  //   this.setState({ isOpen: false, json: '' });
-  //   if (this.reject) {
-  //     this.reject('json not entered');
-  //   }
-  // };
-
-  transition(props) {
-    return <Slide direction="up" {...props} />;
-  }
+  transition = props => <Slide direction="up" {...props} />;
 
   downloadJSON = () => {
     const element = document.createElement('a');
@@ -51,28 +37,35 @@ class JSONModal extends Component {
   };
 
   render() {
-    const { isOpen, json, category, CategoryName } = this.state;
+    const { isOpen, json, CategoryName } = this.state;
     return (
       <Dialog
         disableBackdropClick
         disableEscapeKeyDown
-        transition={this.transition}
+        TransitionComponent={this.transition}
         keepMounted
         open={isOpen}
         // onClose={this.close}
         aria-labelledby="form-dialog-title"
       >
-        {console.log(category)}
-        <DialogTitle id="form-dialog-title">{`${CategoryName[0]} -> ${CategoryName[1]} -> ${
+        <DialogTitle id="form-dialog-title">{`${CategoryName[0]} > ${CategoryName[1]} > ${
           CategoryName[2]
         }`}</DialogTitle>
         <DialogContent style={{ paddingTop: 0 }}>
           <DialogContentText style={{ width: '550px', paddingTop: '10px', fontWeight: 'bold' }}>
             <b>STRUCTURE</b>
           </DialogContentText>
-          <DialogContentText style={{ width: '550px', paddingTop: '10px', fontWeight: 'bold' }}>
+          <div
+            style={{
+              width: '550px',
+              paddingTop: '10px',
+              fontWeight: 'bold',
+              color: 'rgba(0,0,0,0.6)',
+              letterSpacing: 0.6,
+            }}
+          >
             <pre>{JSON.stringify(json, null, 2)}</pre>
-          </DialogContentText>
+          </div>
         </DialogContent>
         <DialogActions>
           <CopyToClipboard
@@ -85,8 +78,6 @@ class JSONModal extends Component {
           </CopyToClipboard>
           <Button
             onClick={() => {
-              // this.resolve(true);
-              // this.setState({ isOpen: false });
               this.downloadJSON();
             }}
             color="primary"

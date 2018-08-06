@@ -9,15 +9,10 @@ import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } 
 import Slide from 'material-ui/transitions/Slide';
 
 class MnemonicModal extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isOpen: false,
-      mnemonic: '',
-    };
-    this.open = this.open.bind(this);
-    this.close = this.close.bind(this);
-  }
+  state = {
+    isOpen: false,
+    mnemonic: '',
+  };
 
   componentDidMount() {
     this.props.onRef(this);
@@ -37,9 +32,7 @@ class MnemonicModal extends Component {
     }
   };
 
-  transition(props) {
-    return <Slide direction="up" {...props} />;
-  }
+  transition = props => <Slide direction="up" {...props} />;
 
   render() {
     const { isOpen, mnemonic } = this.state;
@@ -47,7 +40,7 @@ class MnemonicModal extends Component {
       <Dialog
         disableBackdropClick
         disableEscapeKeyDown
-        transition={this.transition}
+        TransitionComponent={this.transition}
         keepMounted
         open={isOpen}
         onClose={this.close}

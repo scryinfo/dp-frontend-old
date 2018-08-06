@@ -7,15 +7,10 @@ import TextField from 'material-ui/TextField';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 
 class PasswordModal extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isOpen: false,
-      password: '',
-    };
-    this.open = this.open.bind(this);
-    this.close = this.close.bind(this);
-  }
+  state = {
+    isOpen: false,
+    password: '',
+  };
 
   componentDidMount() {
     this.props.onRef(this);

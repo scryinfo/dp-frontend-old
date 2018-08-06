@@ -1,32 +1,23 @@
 import React, { Component, Fragment } from 'react';
 import { withStyles } from 'material-ui/styles';
-import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
-import { Paper, Button, Collapse, Typography, Modal, TextField, Select } from 'material-ui';
+import { Button, Typography, Modal, TextField, Select } from 'material-ui';
 import { InputLabel, InputAdornment } from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import { FormControl } from 'material-ui/Form';
 import { CircularProgress } from 'material-ui/Progress';
 
-import { createWriteStream } from 'streamsaver';
+import axios from 'axios';
+
+import { saveAs } from 'file-saver/FileSaver';
+
+// import { createWriteStream } from 'streamsaver';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import classNames from 'classnames';
 
-import moment from 'moment';
-
-import { _buyItem, _closeTransaction, _verifyItem } from '../../../Components/requests';
-import { HOST } from '../../../Components/Remote';
+import { _buyItem, _closeTransaction, _verifyItem, _downloadFile } from '../../../Components/requests';
+import { API } from '../../../Components/Remote';
 import PasswordModal from '../../PasswordModal';
-
-const CustomTableCell = withStyles(theme => ({
-  head: {
-    backgroundColor: '#162632',
-    color: theme.palette.common.white,
-  },
-  body: {
-    fontSize: 14,
-  },
-}))(TableCell);
 
 const styles = theme => ({
   root: {
@@ -39,11 +30,6 @@ const styles = theme => ({
   },
   table: {
     minWidth: 700,
-  },
-  row: {
-    '&:nth-of-type(odd)': {
-      // backgroundColor: theme.palette.background.default,
-    },
   },
   card: {
     minWidth: 275,
@@ -81,30 +67,20 @@ const styles = theme => ({
 });
 
 class ItemModal extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      verifier: '',
-      reward: 0,
-      loader: {},
-    };
-  }
+  state = {
+    verifier: '',
+    reward: 0,
+    loader: {},
+  };
 
   // DOWNLOAD THE FILE
   downloadFile = async ({ cid, name, context }) => {
     this.spinLoader('download');
     try {
-      const response = await fetch(`${HOST}/seller/download?CID=${cid}`, {
-        headers: new Headers({
-          Authorization: localStorage.getItem('id_token'),
-        }),
-      });
-      const fileStream = createWriteStream(name);
-      const writer = fileStream.getWriter();
-      const reader = response.body.getReader();
-      const pump = () =>
-        reader.read().then(({ value, done }) => (done ? writer.close() : writer.write(value).then(pump)));
-      await pump();
+      const { data: blob } = await _downloadFile(cid);
+      console.log({ blob });
+      context.showPopup('Download has started');
+      saveAs(blob, name);
     } catch (e) {
       console.log(e);
       context.showPopup(JSON.stringify(e));
@@ -121,7 +97,7 @@ class ItemModal extends Component {
     try {
       await this.checkForErrors({ item, context });
       const password = await this.passwordModal.open();
-      await _buyItem({ listing: item, username, password, buyer: address, verifier, rewardPercent: reward });
+      await _buyItem({ listing: item, username, password, buyer: address, verifier, rewardPercent: Number(reward) });
       context.showPopup('purchased successfully');
       context.updateState({ item: null, action: '' });
     } catch (e) {
@@ -169,7 +145,6 @@ class ItemModal extends Component {
   };
 
   renderStatus = item => {
-    console.log({ item });
     if (item.needs_verification) return 'Waiting for verification';
     if (item.need_closure) return "Waiting for seller's authorization";
     return 'Purchased';
@@ -257,7 +232,6 @@ class ItemModal extends Component {
   verifyModal = ({ context, item: itemHistory, classes }) => {
     const item = itemHistory.listing;
     const { loader } = this.state;
-    console.log({ itemHistory });
     return (
       <Modal open={!!item} onClose={() => context.updateState({ item: null })}>
         <div
@@ -305,13 +279,6 @@ class ItemModal extends Component {
           <Typography variant="subheading" id="simple-modal-description">
             <span style={{ fontWeight: '600' }}>Purchase date:</span> {itemHistory.created_at}
           </Typography>
-
-          {/* ACTION BUTTONS */}
-          {/* <div>
-            <Button>DOWNLOAD THE FILE</Button>
-            <Button>COPY IPFS HASH</Button>
-            <Button onClick={() => this.verify(item)}>VERIFY</Button>
-          </div> */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
             <div style={{ position: 'relative' }}>
               <Button
@@ -351,7 +318,6 @@ class ItemModal extends Component {
   closeTransactionModal = ({ context, item: itemHistory, classes }) => {
     const { loader } = this.state;
     const item = itemHistory.listing;
-    console.log(itemHistory);
     return (
       <Modal open={!!item} onClose={() => context.updateState({ item: null, type: '' })}>
         <div
@@ -420,7 +386,6 @@ class ItemModal extends Component {
   buyerItemDetailModal = ({ context, item: itemHistory, classes }) => {
     const item = itemHistory.listing;
     const { loader } = this.state;
-    console.log(itemHistory);
     return (
       <Modal open={!!item} onClose={() => context.updateState({ item: null })}>
         <div
@@ -604,7 +569,7 @@ class ItemModal extends Component {
             onSubmit={e => {
               e.preventDefault();
               if (!verifier) return;
-              this.buyItem(item);
+              this.buyItem({ item, context });
             }}
             style={{
               marginTop: '10px',
@@ -682,7 +647,6 @@ class ItemModal extends Component {
   };
 
   renderModal = ({ page, context, item, classes }) => {
-    console.log({ page });
     switch (page) {
       case 'purchased':
         return this.buyerItemDetailModal({ context, item, classes });
@@ -713,29 +677,6 @@ class ItemModal extends Component {
         />
       </div>
     );
-    // if (type === 'sold') {
-    //   return this.closeTransactionModal({ context, item, classes });
-    // }
-    // if (type === 'verified') {
-    //   return this.verifyModal({ context, item, classes });
-    // }
-    // if (type === 'purchased') {
-    //   return this.buyerItemDetailModal({ context, item, classes });
-    // }
-    // if (type === 'purchase') {
-    //   console.log('sdsdfjklsjfkldjkldsjfkdk');
-    //   return (
-    //     <div>
-    //       {this.purchaseFileModal({ context, item, classes })}
-    //       <PasswordModal
-    //         onRef={ref => {
-    //           this.passwordModal = ref;
-    //         }}
-    //       />
-    //     </div>
-    //   );
-    // }
-    // return <div />;
   }
 }
 

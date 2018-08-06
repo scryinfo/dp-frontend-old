@@ -4,12 +4,13 @@ import 'event-source-polyfill/src/eventsource.min.js';
 
 import moment from 'moment';
 import axios from 'axios';
+import Sockette from 'sockette';
 
 import AuthService from './Auth/AuthService';
 
 import { initSigner } from './Components/signer';
 
-import { HOST } from './Components/Remote';
+import { API, Publisher } from './Components/Remote';
 
 import { getAccount } from './Components/keyRequests';
 
@@ -21,48 +22,45 @@ export const MainContext = React.createContext();
 
 const Auth = new AuthService();
 
-export class MainProvider extends Component {
-  constructor(props) {
-    super(props);
+const ws = new Sockette('ws://localhost:8546', {
+  timeout: 5e3,
+  maxAttempts: 10,
+  onopen: e => console.log('==================== Connected!', e),
+  onmessage: e => console.log('================= Received:', e),
+  onreconnect: e => console.log('================= Reconnecting...', e),
+  onmaximum: e => console.log('=================== Stop Attempting!', e),
+  onclose: e => console.log('==================== Closed!', e),
+  onerror: e => console.log('======================= Error:', e),
+});
 
-    this.state = {
-      status: '',
-      username: null,
-      address: null,
-      balance: {
-        tokens: 0,
-        eth: 0,
-      },
-      searchValue: '',
-      tables: [],
-      currentPage: 'explore',
-      allItems: [],
-      myItems: [],
-      historyBuyer: [],
-      historySeller: [],
-      historyVerifier: [],
-      itemsBought: [],
-      itemsSold: [],
-      itemsVerified: [],
-      inProgressBought: [],
-      inProgressSold: [],
-      inProgressVerified: [],
-      verifiers: [],
-      foundItems: [],
-      notifications: {},
-    };
-    this.setCurrentUser = this.setCurrentUser.bind(this);
-    this.updateState = this.updateState.bind(this);
-    this.updateBalance = this.updateBalance.bind(this);
-    this.getItems = this.getItems.bind(this);
-    this.getVerifiers = this.getVerifiers.bind(this);
-    this.showPopup = this.showPopup.bind(this);
-    this.logout = this.logout.bind(this);
-    this.pageLoaded = this.pageLoaded.bind(this);
-    this.onSearch = this.onSearch.bind(this);
-    this.addNotification = this.addNotification.bind(this);
-    this.removeNotifications = this.removeNotifications.bind(this);
-  }
+export class MainProvider extends Component {
+  state = {
+    status: '',
+    username: null,
+    address: null,
+    balance: {
+      tokens: 0,
+      eth: 0,
+    },
+    searchValue: '',
+    tables: [],
+    currentPage: 'files',
+    allItems: [],
+    myItems: [],
+    historyBuyer: [],
+    historySeller: [],
+    historyVerifier: [],
+    itemsBought: [],
+    itemsSold: [],
+    itemsVerified: [],
+    inProgressBought: [],
+    inProgressSold: [],
+    inProgressVerified: [],
+    verifiers: [],
+    foundItems: [],
+    notifications: {},
+    categories: [],
+  };
 
   componentWillMount() {
     if (!Auth.loggedIn()) {
@@ -85,106 +83,106 @@ export class MainProvider extends Component {
           username: profile.name,
           address: profile.account,
         });
-        this.props.history.push('/explore');
+        this.props.history.push('/files');
       } catch (err) {
         this.logout();
       }
     }
   }
 
-  logout() {
+  logout = () => {
     Auth.logout();
     this.setState({ currentPage: 'login' });
     this.props.history.replace('/login');
-  }
+  };
 
-  async pageLoaded() {
+  pageLoaded = async () => {
     await initSigner();
     this.updateBalance();
     this.getItems();
     this.getVerifiers();
-    this._listenToEvents();
-  }
+    // this._listenToEvents();
+  };
 
-  _listenToEvents() {
-    const { address: account } = this.state;
-    console.log('subscribing');
-    const evtSrc = new window.EventSourcePolyfill(`${HOST}/subscribe?user=${this.state.address}`, {
-      headers: { JWT: localStorage.getItem('id_token'), withCredentials: true },
-    });
-    evtSrc.addEventListener('message', async e => {
-      console.log(e);
-      const event = JSON.parse(e.data);
-      const { event: type } = event;
-      console.log(event);
+  // _listenToEvents = () => {
+  //   const { address: account } = this.state;
+  //   console.log('subscribing');
+  //   const evtSrc = new window.EventSourcePolyfill(`${API}/subscribe?user=${this.state.address}`, {
+  //     headers: { JWT: localStorage.getItem('id_token'), withCredentials: true },
+  //   });
+  //   evtSrc.addEventListener('message', async e => {
+  //     console.log(e);
+  //     const event = JSON.parse(e.data);
+  //     const { event: type } = event;
+  //     console.log(event);
 
-      // TRANSFER
-      if (type === 'Transfer') {
-        const { to, from } = event.args;
-        if (to.toLowerCase() === account.toLowerCase()) {
-          console.log('you got the money');
-        }
-        if (from.toLowerCase() === account.toLowerCase()) {
-          console.log('you sent the money');
-        }
-      }
+  //     // TRANSFER
+  //     if (type === 'Transfer') {
+  //       const { to, from } = event.args;
+  //       if (to.toLowerCase() === account.toLowerCase()) {
+  //         console.log('you got the money');
+  //       }
+  //       if (from.toLowerCase() === account.toLowerCase()) {
+  //         console.log('you sent the money');
+  //       }
+  //     }
 
-      // CHANNEL CREATED
-      if (type === 'ChannelCreated') {
-        const { receiver, sender, verifier } = event.args;
-        if (receiver.toLowerCase() === account.toLowerCase()) {
-          this.showPopup('You have a purchase in progress');
-          this.addNotification('sold');
-          this.updateBalance();
-          this.getItems();
-        }
-        if (sender.toLowerCase() === account.toLowerCase()) {
-          console.log('you buying something');
-          await this.updateBalance();
-          await this.getItems();
-          this.addNotification('purchased');
-        }
-        // if (verifier.toLowerCase() === account.toLowerCase()) {
-        //   console.log('you verifying something');
-        // }
-      }
+  //     // CHANNEL CREATED
+  //     if (type === 'ChannelCreated') {
+  //       const { receiver, sender, verifier } = event.args;
+  //       if (receiver.toLowerCase() === account.toLowerCase()) {
+  //         this.showPopup('You have a purchase in progress');
+  //         this.addNotification('sold');
+  //         this.updateBalance();
+  //         this.getItems();
+  //       }
+  //       if (sender.toLowerCase() === account.toLowerCase()) {
+  //         console.log('you buying something');
+  //         await this.updateBalance();
+  //         await this.getItems();
+  //         this.addNotification('purchased');
+  //       }
+  //       // if (verifier.toLowerCase() === account.toLowerCase()) {
+  //       //   console.log('you verifying something');
+  //       // }
+  //     }
 
-      // CHANNEL CLOSED
-      if (type === 'ChannelSettled') {
-        const { receiver, sender, verifier } = event.args;
-        if (receiver.toLowerCase() === account.toLowerCase()) {
-          // this.showPopup('Sold');
-          this.addNotification('sold');
-        }
-        if (sender.toLowerCase() === account.toLowerCase()) {
-          console.log('you buying something');
-          await this.updateBalance();
-          await this.getItems();
-          this.showPopup('Item purchase complete');
-          this.addNotification('purchased');
-        }
-        if (verifier.toLowerCase() === account.toLowerCase()) {
-          console.log('you verifying something');
-          this.showPopup('Item you verified is complete');
-          this.addNotification('verified');
-          this.updateBalance();
-          this.getItems();
-        }
-      }
-      // this.getVerifiers();
-    });
-  }
+  //     // CHANNEL CLOSED
+  //     if (type === 'ChannelSettled') {
+  //       const { receiver, sender, verifier } = event.args;
+  //       if (receiver.toLowerCase() === account.toLowerCase()) {
+  //         // this.showPopup('Sold');
+  //         this.addNotification('sold');
+  //       }
+  //       if (sender.toLowerCase() === account.toLowerCase()) {
+  //         console.log('you buying something');
+  //         await this.updateBalance();
+  //         await this.getItems();
+  //         this.showPopup('Item purchase complete');
+  //         this.addNotification('purchased');
+  //       }
+  //       if (verifier.toLowerCase() === account.toLowerCase()) {
+  //         console.log('you verifying something');
+  //         this.showPopup('Item you verified is complete');
+  //         this.addNotification('verified');
+  //         this.updateBalance();
+  //         this.getItems();
+  //       }
+  //     }
+  //     // this.getVerifiers();
+  //   });
+  // };
 
-  addNotification(type) {
+  addNotification = type => {
     this.setState({ notifications: { [type]: true } });
     setTimeout(() => this.setState({ notifications: {} }), 15000);
-  }
+  };
 
-  removeNotifications() {
+  removeNotifications = () => {
     this.setState({ notifications: {} });
-  }
+  };
 
-  async getVerifiers() {
+  getVerifiers = async () => {
     try {
       // get list of verifiers
       let { data: verifiers } = await _getVerifiers();
@@ -194,54 +192,59 @@ export class MainProvider extends Component {
     } catch (e) {
       console.log(e);
     }
-  }
+  };
 
-  onSearch({ target: { value } }) {
+  onSearch = ({ target: { value } }) => {
     this.setState({ searchValue: value });
     const { currentPage, allItems } = this.state;
-    if (currentPage === 'explore' && allItems.length > 0) {
+    if (currentPage === 'files' && allItems.length > 0) {
       const foundItems = allItems.filter(item => item.name.toLowerCase().includes(value.toLowerCase()));
       this.setState({ foundItems });
-      console.log(foundItems);
     }
-  }
+  };
 
   getCategories = async () => {
     try {
       const { data } = await axios({
-        url: `https://dev.scry.info:443/meta/getcategories`,
+        url: `${Publisher}/getcategories`,
         method: 'get',
         headers: {
           Authorization: `JWT ${localStorage.getItem('id_token')}`,
         },
       });
       this.setState({ tables: data });
+      this.categoriesForUpload(data);
       console.log({ data });
     } catch (e) {
       console.log(e);
     }
   };
 
-  async getItems() {
+  categoriesForUpload = categories => {
+    const catArr = [
+      {
+        key: 'none',
+        text: 'none',
+        value: null,
+      },
+    ];
+    for (const category of categories) {
+      catArr.push({
+        key: category.id,
+        text: category.name,
+        value: category.name,
+      });
+    }
+    this.setState({ categories: catArr });
+  };
+
+  getItems = async () => {
+    console.log('++++++++++++++++get items called++++++++++++++++++++');
     const { address } = this.state;
     try {
-      let { data: allItems } = await _getItems();
-      console.log({ allItems });
-      let { data: myItems } = await _getItems(address);
-      const { data: historyBuyer } = await _getItems(address, 'buyer');
-      const { data: historySeller } = await _getItems(address, 'seller');
-      const { data: historyVerifier } = await _getItems(address, 'verifier');
+      let [allItems, myItems, historyBuyer, historySeller, historyVerifier] = await _getItems(address);
       this.getCategories();
       console.log({ allItems, myItems, historyBuyer, historySeller, historyVerifier });
-
-      // filter out items that are already purchased
-      // allItems = allItems.filter(
-      //   item =>
-      //     myItems.filter(myItem => item.id === myItem.id).length === 0 &&
-      //     historyBuyer.filter(buyerItem => item.id === buyerItem.listing.id).length === 0 &&
-      //     historySeller.filter(sellerItem => item.id === sellerItem.listing.id).length === 0
-      //   // && historyVerifier.filter(verifierItem => item.id === verifierItem.listing.id).length === 0
-      // );
 
       // sort all items
       allItems = allItems.sort((a, b) => b.id - a.id);
@@ -253,13 +256,10 @@ export class MainProvider extends Component {
       const itemsBought = this.getClosed(historyBuyer);
       const itemsSold = this.getClosed(historySeller);
       const itemsVerified = this.getClosed(historyVerifier);
-      console.log({ itemsSold });
       // Transaction in progress
       const inProgressBought = this.getInProgress(historyBuyer);
       const inProgressSold = this.getInProgress(historySeller);
       const inProgressVerified = this.getInProgress(historyVerifier);
-
-      console.log({ historyVerifier });
 
       this.setState({
         allItems,
@@ -277,13 +277,13 @@ export class MainProvider extends Component {
     } catch (e) {
       console.log(e);
     }
-  }
+  };
 
   getInProgress = list => list.filter(data => data.needs_closure).sort((a, b) => b.created_at - a.created_at);
 
   getClosed = list => list.filter(data => !data.needs_closure).sort((a, b) => b.created_at - a.created_at);
 
-  async setCurrentUser(username, password, address) {
+  setCurrentUser = async (username, password, address) => {
     const getAddress = await getAccount(username, password);
     if (!getAddress) {
       this.setState({ username, vault: true, address, currentPage: 'add vault', password, action: 'login' });
@@ -293,14 +293,14 @@ export class MainProvider extends Component {
     this.setState({
       address: getAddress,
       username,
-      currentPage: 'explore',
+      currentPage: 'files',
       password,
       vault: true,
     });
-    this.props.history.push('/explore');
-  }
+    this.props.history.push('/files');
+  };
 
-  async updateBalance() {
+  updateBalance = async () => {
     const response = await _getBalance(this.state.address);
     this.setState({
       balance: {
@@ -308,13 +308,13 @@ export class MainProvider extends Component {
         eth: response.data.eth,
       },
     });
-  }
+  };
 
-  updateState(newState) {
+  updateState = newState => {
     this.setState(newState);
-  }
+  };
 
-  showPopup(status, progress) {
+  showPopup = (status, progress) => {
     if (progress) {
       this.setState({ status });
       return;
@@ -325,7 +325,7 @@ export class MainProvider extends Component {
         this.setState({ status: '' });
       }
     }, 3000);
-  }
+  };
 
   render() {
     return (

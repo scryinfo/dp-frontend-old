@@ -8,15 +8,10 @@ import Slide from 'material-ui/transitions/Slide';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 class MnemonicModal extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isOpen: false,
-      mnemonic: '',
-    };
-    this.open = this.open.bind(this);
-    // this.close = this.close.bind(this);
-  }
+  state = {
+    isOpen: false,
+    mnemonic: '',
+  };
 
   componentDidMount() {
     this.props.onRef(this);
@@ -29,16 +24,7 @@ class MnemonicModal extends Component {
       this.reject = reject;
     });
 
-  // close = () => {
-  //   this.setState({ isOpen: false, mnemonic: '' });
-  //   if (this.reject) {
-  //     this.reject('mnemonic not entered');
-  //   }
-  // };
-
-  transition(props) {
-    return <Slide direction="up" {...props} />;
-  }
+  transition = props => <Slide direction="up" {...props} />;
 
   render() {
     const { isOpen } = this.state;
@@ -46,7 +32,7 @@ class MnemonicModal extends Component {
       <Dialog
         disableBackdropClick
         disableEscapeKeyDown
-        transition={this.transition}
+        TransitionComponent={this.transition}
         keepMounted
         open={isOpen}
         // onClose={this.close}
