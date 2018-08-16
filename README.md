@@ -18,7 +18,7 @@ yarn start
 yarn build
 ```
 
-It creates /build folder that is ready to be deplyed
+It creates /build folder that is ready to be deployed
 
 
 
