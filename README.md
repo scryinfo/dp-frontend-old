@@ -27,6 +27,21 @@ To produce static files to be served by a webserver in production environment:
 
 Files in /build/ folder are ready to be deployed. On `dev.scry.info` they are served by nginx.
 
+#### Troubleshooting
+
+The startup process has hanged for me because of some dependency resolving in yarn install needed interactive input. This is not visible, because the container doesn't get a full interactive tty when building, and **it seems like the process hangs.** In that case, stop the environment (docker-compose down), get an interactive shell inside the container, skipping the setup part, with `docker-compose run --rm scry-frontend /bin/sh`, and run the setup commands one by one:
+
+```
+yarn config set registry https://registry.npm.taobao.org
+yarn
+yarn start
+```
+
+If this works, exit, and start the container again with `docker-compose up --build` (or with -d for detached mode and check the logs with docker-compose logs).s
+
+There might be some hiccups now after changing the repository to the Chinese one. If you get `npm ERR! Unexpected end of JSON input while parsing near '...gin-transform-literal'`, run `npm cache clean --force` locally and try again.
+
+
 ## install
 
 ```bash
