@@ -12,11 +12,11 @@ services:
     ports:
       - 3000:3000
     networks:
-      - scry_scry
+      - scry_default
     volumes:
       - ./:/home/node/scry-frontend
     command: sh -c "yarn config set registry https://registry.npm.taobao.org && yarn --no-progress --non-interactive && yarn start --no-progress --non-interactive"
 
 networks:
-  scry_scry:
+  scry_default:
     external: true

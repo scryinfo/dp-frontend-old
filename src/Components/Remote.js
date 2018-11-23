@@ -1,4 +1,4 @@
-const dev = false;
+const dev = true;
 
 export const API = dev ? 'http://scry-server:1234' : 'https://dev.scry.info/scry2';
 
