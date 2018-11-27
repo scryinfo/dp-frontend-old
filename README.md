@@ -17,6 +17,8 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
+Frontend listens by default on `http://localhost:3000/`
+
 On any change of source code, yarn will re-compile it and will serve updated version - no need to restart the container.
 
 ### building version for deployment
