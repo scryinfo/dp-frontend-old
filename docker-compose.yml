@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  scry-frontend:
+    image: node:10
+    user: node
+    working_dir: /home/node/scry-frontend
+    restart: always
+    # app currently doesn't take environment variables for configuration
+    # environment:
+    #   ENV: dev
+    ports:
+      - 3000:3000
+    networks:
+      - scry_default
+    volumes:
+      - ./:/home/node/scry-frontend
+    command: sh -c "npm cache clean --force; yarn config set registry https://registry.npm.taobao.org && yarn --no-progress --non-interactive && yarn start --no-progress --non-interactive"
+
+networks:
+  scry_default:
+    external: true
